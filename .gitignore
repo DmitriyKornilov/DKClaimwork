@@ -28,8 +28,11 @@ lib/
 
 # Application specific
 work/
+files/
 *.db
 *.trc
+*.db-shm
+*.db-wal
 exists.sql
 
 # Application bundle for Mac OS
