@@ -1,0 +1,1122 @@
+object LetterStandardForm: TLetterStandardForm
+  Left = 327
+  Height = 800
+  Top = 58
+  Width = 1100
+  ClientHeight = 800
+  ClientWidth = 1100
+  DesignTimePPI = 120
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  Position = poDesktopCenter
+  LCLVersion = '2.2.6.0'
+  object ButtonPanel: TPanel
+    Left = 2
+    Height = 58
+    Top = 736
+    Width = 1096
+    Align = alBottom
+    AutoSize = True
+    BorderSpacing.Left = 2
+    BorderSpacing.Right = 2
+    BorderSpacing.Bottom = 6
+    BevelOuter = bvNone
+    ClientHeight = 58
+    ClientWidth = 1096
+    TabOrder = 0
+    object CancelButton: TSpeedButton
+      AnchorSideTop.Control = DividerBevel1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ButtonPanel
+      AnchorSideRight.Side = asrBottom
+      Cursor = crHandPoint
+      Left = 965
+      Height = 38
+      Top = 20
+      Width = 125
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Right = 6
+      Constraints.MinHeight = 38
+      Constraints.MinWidth = 125
+      Caption = 'Отмена'
+      Glyph.Data = {
+        36100000424D3610000000000000360000002800000020000000200000000100
+        2000000000000010000064000000640000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000007F00001A7C0000D87C0000C57F00
+        000E000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000007900000F7E0000D07F0000FF7F0000FF8000
+        00BB7F0000070000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000007F0000087D0000BE7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000A78000000200000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000007F0000037F0000AA7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7D00009000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000810000937F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7D000079000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00007C00007A7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FE7F0000620000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000007F00
+        00627F0000FE7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FA8000004D00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000008000004C7F00
+        00FA7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000F57F00003A000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007B0000397F0000F47F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000ED8000002A0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000008000002A7F0000EC7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000E17F00
+        001D000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000008100001C7D0000E17F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00D27F0000110000000000000000000000000000000000000000000000000000
+        000000000000000000007F0000117E0000D37F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7D0000C28000000900000000000000000000000000000000000000000000
+        0000000000008100000A7F0000C37F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF800000AE80000003000000000000000000000000000000000000
+        000081000004800000B07F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF80000097800000010000000000000000000000008000
+        00017D00009B800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF7C00007F0000000000000000000000007D00
+        00847F0000FF800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF800000FE8000006500000000000000007E00
+        00E07F0000FF800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF800000FF7F0000C000000000000000007A00
+        00067F000011800000117F0000117F0000117F0000117F0000D77F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B97F00
+        00117F0000117F00001180000011800000117800000400000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000967F0000FE7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FC800000780000
+        0000000000000000000000000000000000000000000000000000
+      }
+      Images = MainForm.ImagesEdit24x24
+      ImageIndex = 4
+      OnClick = CancelButtonClick
+      ParentFont = False
+    end
+    object SaveButton: TSpeedButton
+      AnchorSideTop.Control = CancelButton
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = CancelButton
+      Cursor = crHandPoint
+      Left = 840
+      Height = 38
+      Top = 20
+      Width = 125
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      Constraints.MinHeight = 38
+      Constraints.MinWidth = 125
+      Caption = 'Сохранить'
+      Glyph.Data = {
+        36100000424D3610000000000000360000002800000020000000200000000100
+        2000000000000010000064000000640000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000007F00001A7C0000D87C0000C57F00
+        000E000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000007900000F7E0000D07F0000FF7F0000FF8000
+        00BB7F0000070000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000007F0000087D0000BE7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000A78000000200000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000007F0000037F0000AA7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7D00009000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000810000937F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7D000079000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00007C00007A7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FE7F0000620000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000007F00
+        00627F0000FE7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FA8000004D00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000008000004C7F00
+        00FA7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000F57F00003A000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007B0000397F0000F47F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000ED8000002A0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000008000002A7F0000EC7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000E17F00
+        001D000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000008100001C7D0000E17F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00D27F0000110000000000000000000000000000000000000000000000000000
+        000000000000000000007F0000117E0000D37F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7D0000C28000000900000000000000000000000000000000000000000000
+        0000000000008100000A7F0000C37F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF800000AE80000003000000000000000000000000000000000000
+        000081000004800000B07F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF80000097800000010000000000000000000000008000
+        00017D00009B800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF7C00007F0000000000000000000000007D00
+        00847F0000FF800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF800000FE8000006500000000000000007E00
+        00E07F0000FF800000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF800000FF800000FF7F0000C000000000000000007A00
+        00067F000011800000117F0000117F0000117F0000117F0000D77F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B97F00
+        00117F0000117F00001180000011800000117800000400000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000D47F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000B40000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000007F0000967F0000FE7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F00
+        00FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FF7F0000FC800000780000
+        0000000000000000000000000000000000000000000000000000
+      }
+      Images = MainForm.ImagesEdit24x24
+      ImageIndex = 3
+      OnClick = SaveButtonClick
+      ParentFont = False
+    end
+    object DividerBevel1: TDividerBevel
+      Left = 0
+      Height = 20
+      Top = 0
+      Width = 1096
+      Align = alTop
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
+  object FileNameLabel: TLabel
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ButtonPanel
+    Left = 141
+    Height = 20
+    Top = 708
+    Width = 953
+    Align = alCustom
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    BorderSpacing.Bottom = 8
+    Caption = 'Имя файла'
+    Font.Color = clNavy
+    ParentColor = False
+    ParentFont = False
+    WordWrap = True
+  end
+  object Label12: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = ButtonPanel
+    Left = 8
+    Height = 20
+    Top = 708
+    Width = 77
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 6
+    BorderSpacing.Bottom = 8
+    Caption = 'Имя файла'
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label7: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 6
+    Height = 20
+    Top = 6
+    Width = 279
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 6
+    Caption = 'Включить в письмо электродвигатели'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object VT1: TVirtualStringTree
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label7
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 6
+    Height = 110
+    Top = 34
+    Width = 1088
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.MainColumn = -1
+    TabOrder = 1
+  end
+  object Label4: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = VT1
+    AnchorSideTop.Side = asrBottom
+    Left = 6
+    Height = 20
+    Top = 156
+    Width = 135
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 12
+    Caption = 'Реквизиты письма'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = LetterNumEdit
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 195
+    Width = 101
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Исходящий №'
+    ParentColor = False
+    ParentFont = False
+  end
+  object LetterNumEdit: TEdit
+    AnchorSideLeft.Control = Label13
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Label2
+    Left = 126
+    Height = 28
+    Top = 191
+    Width = 746
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 15
+    BorderSpacing.Right = 18
+    MaxLength = 50
+    OnChange = LetterNumEditChange
+    ParentFont = False
+    TabOrder = 2
+  end
+  object Label2: TLabel
+    AnchorSideTop.Control = DT1
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = DT1
+    Left = 890
+    Height = 20
+    Top = 195
+    Width = 99
+    Anchors = [akTop, akRight]
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 6
+    BorderSpacing.Right = 6
+    Caption = 'дата создания'
+    ParentColor = False
+    ParentFont = False
+  end
+  object DT1: TDateTimePicker
+    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = LetterNumEdit
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 995
+    Height = 28
+    Top = 191
+    Width = 99
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    ParentFont = False
+    TabOrder = 3
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Anchors = [akTop, akRight]
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 44514
+    Time = 0.36772234953969
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+    OnChange = DT1Change
+  end
+  object Label8: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OrganizationComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 231
+    Width = 32
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Куда'
+    ParentColor = False
+    ParentFont = False
+  end
+  object OrganizationComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = LetterNumEdit
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 227
+    Width = 968
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DropDownCount = 15
+    ItemHeight = 20
+    OnChange = OrganizationComboBoxChange
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 4
+  end
+  object Label14: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ReceiverComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 267
+    Width = 36
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Кому'
+    ParentColor = False
+    ParentFont = False
+  end
+  object ReceiverComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = OrganizationComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 263
+    Width = 968
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DropDownCount = 15
+    ItemHeight = 20
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 5
+  end
+  object Label9: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = SenderComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 303
+    Width = 42
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Автор'
+    ParentColor = False
+    ParentFont = False
+  end
+  object SenderComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = ReceiverComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = LetterNumEdit
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 299
+    Width = 746
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    DropDownCount = 15
+    ItemHeight = 20
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 6
+  end
+  object SenderSignCheckBox: TCheckBox
+    AnchorSideLeft.Control = Label2
+    AnchorSideTop.Control = SenderComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 890
+    Height = 24
+    Top = 301
+    Width = 101
+    BorderSpacing.Top = 8
+    Caption = 'факсимиле'
+    Checked = True
+    State = cbChecked
+    TabOrder = 7
+  end
+  object Label11: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = PerformerComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 339
+    Width = 92
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Исполнитель'
+    ParentColor = False
+    ParentFont = False
+  end
+  object PerformerComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = SenderComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 335
+    Width = 968
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DropDownCount = 15
+    ItemHeight = 20
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 8
+  end
+  object Label10: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = SubjectComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 8
+    Height = 20
+    Top = 375
+    Width = 35
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Тема'
+    ParentColor = False
+    ParentFont = False
+  end
+  object SubjectComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = PerformerComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 371
+    Width = 968
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DropDownCount = 15
+    ItemHeight = 20
+    OnChange = SubjectComboBoxChange
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 9
+  end
+  object Label13: TLabel
+    AnchorSideTop.Control = DelegateComboBox
+    AnchorSideTop.Side = asrCenter
+    Left = 10
+    Height = 20
+    Top = 411
+    Width = 104
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Представитель'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object DelegateComboBox: TComboBox
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = SubjectComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = LetterNumEdit
+    AnchorSideRight.Side = asrBottom
+    Left = 126
+    Height = 28
+    Top = 407
+    Width = 746
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    DropDownCount = 15
+    ItemHeight = 20
+    OnChange = DelegateComboBoxChange
+    ParentFont = False
+    Style = csDropDownList
+    TabOrder = 10
+    Visible = False
+  end
+  object Label16: TLabel
+    AnchorSideTop.Control = DT2
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = DT1
+    Left = 885
+    Height = 20
+    Top = 411
+    Width = 104
+    Anchors = [akTop, akRight]
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 6
+    BorderSpacing.Right = 6
+    Caption = 'дата прибытия'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object DT2: TDateTimePicker
+    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = DelegateComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 995
+    Height = 28
+    Top = 407
+    Width = 99
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    ParentFont = False
+    TabOrder = 11
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Anchors = [akTop, akRight]
+    Visible = False
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 44514
+    Time = 0.36772234953969
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+    OnChange = DT2Change
+  end
+  object Label18: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    Left = 8
+    Height = 20
+    Top = 675
+    Width = 121
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'Доверенность №'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object ProxyNumEdit: TEdit
+    AnchorSideLeft.Control = Label18
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    AnchorSideBottom.Control = Label12
+    Left = 135
+    Height = 28
+    Top = 671
+    Width = 100
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 12
+    TabOrder = 12
+    Visible = False
+  end
+  object Label19: TLabel
+    AnchorSideLeft.Control = ProxyNumEdit
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    Left = 247
+    Height = 20
+    Top = 675
+    Width = 78
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'действует с'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object DT4: TDateTimePicker
+    AnchorSideLeft.Control = Label19
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 331
+    Height = 28
+    Top = 671
+    Width = 99
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    ParentFont = False
+    TabOrder = 13
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Visible = False
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 44514
+    Time = 0.36772234953969
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+  end
+  object Label20: TLabel
+    AnchorSideLeft.Control = DT4
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    Left = 436
+    Height = 20
+    Top = 675
+    Width = 18
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    Caption = 'по'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object DT5: TDateTimePicker
+    AnchorSideLeft.Control = Label20
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ProxyButton
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 460
+    Height = 28
+    Top = 671
+    Width = 99
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    ParentFont = False
+    TabOrder = 14
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Visible = False
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 44514
+    Time = 0.36772234953969
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+  end
+  object ProxyButton: TButton
+    AnchorSideLeft.Control = DT5
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = DelegateComboBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = LetterNumEdit
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Label12
+    Cursor = crHandPoint
+    Left = 565
+    Height = 30
+    Top = 670
+    Width = 81
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 12
+    BorderSpacing.Bottom = 8
+    Caption = 'Создать'
+    OnClick = ProxyButtonClick
+    TabOrder = 15
+    Visible = False
+  end
+  object RadioButton1: TRadioButton
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = MileageEdit
+    Left = 126
+    Height = 24
+    Top = 445
+    Width = 105
+    BorderSpacing.Right = 6
+    Caption = 'По пробегу'
+    Checked = True
+    OnClick = RadioButton1Click
+    TabOrder = 16
+    TabStop = True
+    Visible = False
+  end
+  object MileageEdit: TEdit
+    AnchorSideLeft.Control = RadioButton1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = DelegateComboBox
+    AnchorSideTop.Side = asrBottom
+    Left = 237
+    Height = 28
+    Top = 443
+    Width = 100
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 8
+    OnChange = MileageEditChange
+    TabOrder = 17
+    Visible = False
+  end
+  object Label17: TLabel
+    AnchorSideLeft.Control = MileageEdit
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = LetterNumEdit
+    Left = 343
+    Height = 20
+    Top = 447
+    Width = 18
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 1
+    BorderSpacing.Right = 6
+    Caption = 'км'
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object RadioButton2: TRadioButton
+    AnchorSideLeft.Control = Label17
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrCenter
+    Left = 381
+    Height = 24
+    Top = 445
+    Width = 178
+    BorderSpacing.Left = 20
+    Caption = 'По дате изготовления'
+    OnClick = RadioButton2Click
+    TabOrder = 18
+    Visible = False
+  end
+  object RadioButton3: TRadioButton
+    AnchorSideLeft.Control = RadioButton2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrCenter
+    Left = 579
+    Height = 24
+    Top = 445
+    Width = 236
+    BorderSpacing.Left = 20
+    Caption = 'По дате ввода в эксплуатацию'
+    OnClick = RadioButton3Click
+    TabOrder = 19
+    Visible = False
+  end
+  object DT3: TDateTimePicker
+    AnchorSideLeft.Control = RadioButton3
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 821
+    Height = 28
+    Top = 443
+    Width = 99
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    ParentFont = False
+    TabOrder = 20
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Visible = False
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 44514
+    Time = 0.36772234953969
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+    OnClick = DT3Click
+  end
+  object StampCheckBox: TCheckBox
+    AnchorSideLeft.Control = DT1
+    AnchorSideTop.Control = SenderComboBox
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 995
+    Height = 24
+    Top = 301
+    Width = 71
+    BorderSpacing.Top = 8
+    Caption = 'печать'
+    TabOrder = 21
+  end
+  object Label5: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = MileageEdit
+    AnchorSideTop.Side = asrBottom
+    Left = 6
+    Height = 20
+    Top = 483
+    Width = 95
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 12
+    Caption = 'Текст письма'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label15: TLabel
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideTop.Control = Label5
+    AnchorSideTop.Side = asrCenter
+    Left = 126
+    Height = 20
+    Top = 483
+    Width = 483
+    BorderSpacing.Top = 18
+    Caption = '(заполняется без красных строк, абзацы отделяются пустой строкой)'
+    ParentColor = False
+    ParentFont = False
+  end
+  object Memo1: TMemo
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label5
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ProxyNumEdit
+    Left = 6
+    Height = 150
+    Top = 509
+    Width = 1088
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 6
+    BorderSpacing.Right = 6
+    BorderSpacing.Bottom = 12
+    ScrollBars = ssAutoVertical
+    TabOrder = 22
+  end
+  object SaveDialog1: TSaveDialog
+    Filter = 'Документ PDF|*.pdf'
+    Left = 128
+    Top = 536
+  end
+end

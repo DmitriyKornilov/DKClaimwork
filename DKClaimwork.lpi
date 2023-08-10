@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="\"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="DKClaimwork"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="True"/>
+      </XPManifest>
+      <Icon Value="0"/>
+    </General>
+    <BuildModes>
+      <Item Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+    </RunParams>
+    <RequiredPackages>
+      <Item>
+        <PackageName Value="virtualtreeview_package"/>
+      </Item>
+      <Item>
+        <PackageName Value="rxnew"/>
+      </Item>
+      <Item>
+        <PackageName Value="DateTimeCtrls"/>
+      </Item>
+      <Item>
+        <PackageName Value="DKDatabase"/>
+      </Item>
+      <Item>
+        <PackageName Value="DKZoom"/>
+      </Item>
+      <Item>
+        <PackageName Value="DKSpreadSheet"/>
+      </Item>
+      <Item>
+        <PackageName Value="DKUtils"/>
+      </Item>
+      <Item>
+        <PackageName Value="laz_fpspreadsheet_visual"/>
+      </Item>
+      <Item>
+        <PackageName Value="bgracontrols"/>
+      </Item>
+      <Item>
+        <PackageName Value="LazControls"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
+    </RequiredPackages>
+    <Units>
+      <Unit>
+        <Filename Value="DKClaimwork.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="umainform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UMainForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uletters.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ULetters"/>
+      </Unit>
+      <Unit>
+        <Filename Value="usheets.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="USheets"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Uutils"/>
+      </Unit>
+      <Unit>
+        <Filename Value="usqlite.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="USQLite"/>
+      </Unit>
+      <Unit>
+        <Filename Value="umotoreditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MotorEditForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UMotorEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="usendereditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SenderEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="USenderEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ureceivereditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ReceiverEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UReceiverEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uimageeditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ImageEditForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UImageEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="unoticeeditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="NoticeEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UNoticeEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="unoteeditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="NoteEditForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UNoteEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ulettereditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="LetterEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ULetterEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uletterstandardform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="LetterStandardForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ULetterStandardForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="urepairdateseditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RepairDatesEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="URepairDatesEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ulettercustomform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="LetterCustomForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ULetterCustomForm"/>
+      </Unit>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="DKClaimwork"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Linking>
+      <Debugging>
+        <UseHeaptrc Value="True"/>
+        <UseExternalDbgSyms Value="True"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions>
+      <Item>
+        <Name Value="EAbort"/>
+      </Item>
+      <Item>
+        <Name Value="ECodetoolError"/>
+      </Item>
+      <Item>
+        <Name Value="EFOpenError"/>
+      </Item>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

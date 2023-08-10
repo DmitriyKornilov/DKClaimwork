@@ -1,0 +1,149 @@
+object ImageEditForm: TImageEditForm
+  Left = 562
+  Height = 319
+  Top = 225
+  Width = 710
+  ClientHeight = 319
+  ClientWidth = 710
+  DesignTimePPI = 120
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poDesktopCenter
+  LCLVersion = '2.2.6.0'
+  object EditButtonPanel: TPanel
+    Left = 2
+    Height = 44
+    Top = 2
+    Width = 706
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 2
+    BorderSpacing.Right = 2
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    ClientHeight = 40
+    ClientWidth = 702
+    ParentFont = False
+    TabOrder = 0
+    object SaveButton: TSpeedButton
+      Left = 40
+      Height = 40
+      Top = 0
+      Width = 40
+      Align = alLeft
+      Constraints.MinHeight = 40
+      Constraints.MinWidth = 40
+      Enabled = False
+      Images = MainForm.ImagesEdit24x24
+      ImageIndex = 3
+      OnClick = SaveButtonClick
+    end
+    object CancelButton: TSpeedButton
+      Left = 80
+      Height = 40
+      Top = 0
+      Width = 40
+      Align = alLeft
+      Constraints.MinHeight = 40
+      Constraints.MinWidth = 40
+      Enabled = False
+      Images = MainForm.ImagesEdit24x24
+      ImageIndex = 4
+      OnClick = CancelButtonClick
+    end
+    object OpenButton: TSpeedButton
+      Left = 0
+      Height = 40
+      Top = 0
+      Width = 40
+      Align = alLeft
+      Constraints.MinHeight = 40
+      Constraints.MinWidth = 40
+      Images = MainForm.ImagesEdit24x24
+      ImageIndex = 6
+      OnClick = OpenButtonClick
+    end
+    object FileNameLabel: TLabel
+      AnchorSideLeft.Control = CancelButton
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Side = asrBottom
+      Left = 128
+      Height = 20
+      Top = 20
+      Width = 77
+      Align = alCustom
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 15
+      Caption = 'Имя файла'
+      ParentColor = False
+      Visible = False
+    end
+  end
+  object Panel4: TPanel
+    Left = 2
+    Height = 269
+    Top = 48
+    Width = 278
+    Align = alLeft
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 2
+    BorderSpacing.Bottom = 2
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    ClientHeight = 265
+    ClientWidth = 274
+    Color = clWindow
+    ParentColor = False
+    TabOrder = 1
+    object VT1: TVirtualStringTree
+      Left = 0
+      Height = 265
+      Top = 0
+      Width = 274
+      Align = alClient
+      BorderStyle = bsNone
+      DefaultText = 'Node'
+      Header.AutoSizeIndex = 0
+      Header.Columns = <>
+      Header.MainColumn = -1
+      TabOrder = 0
+    end
+  end
+  object Splitter1: TSplitter
+    Left = 280
+    Height = 273
+    Top = 46
+    Width = 6
+    ResizeStyle = rsLine
+  end
+  object Panel3: TPanel
+    Left = 286
+    Height = 269
+    Top = 48
+    Width = 422
+    Align = alClient
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 2
+    BorderSpacing.Right = 2
+    BorderSpacing.Bottom = 2
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    ClientHeight = 265
+    ClientWidth = 418
+    Color = clWindow
+    ParentColor = False
+    TabOrder = 3
+    object Image1: TImage
+      Left = 0
+      Height = 265
+      Top = 0
+      Width = 418
+      Align = alClient
+    end
+  end
+  object OPDialog1: TOpenPictureDialog
+    Left = 32
+    Top = 88
+  end
+end
