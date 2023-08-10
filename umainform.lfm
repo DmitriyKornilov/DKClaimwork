@@ -42,6 +42,7 @@ object MainForm: TMainForm
       Constraints.MinWidth = 40
       Images = ImagesMain24x24
       ImageIndex = 2
+      OnClick = AboutButtonClick
       ShowHint = True
       ParentShowHint = False
     end

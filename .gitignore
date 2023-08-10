@@ -29,6 +29,7 @@ lib/
 # Application specific
 work/
 *.db
+*.trc
 exists.sql
 
 # Application bundle for Mac OS

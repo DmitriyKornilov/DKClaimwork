@@ -16,7 +16,7 @@ uses
 
   UMotorEditForm, USenderEditForm, UReceiverEditForm, UImageEditForm,
   UNoticeEditForm, UNoteEditForm, ULetterEditForm, URepairDatesEditForm,
-  ULetterCustomForm;
+  ULetterCustomForm, UAboutForm;
 
 type
 
@@ -126,6 +126,7 @@ type
     Splitter1: TSplitter;
     ToolPanel: TPanel;
     ZoomPanel: TPanel;
+    procedure AboutButtonClick(Sender: TObject);
     procedure AddMotorButtonClick(Sender: TObject);
     procedure BuilderDelegateMenuItemClick(Sender: TObject);
     procedure BuilderListMenuItemClick(Sender: TObject);
@@ -535,6 +536,18 @@ end;
 procedure TMainForm.AddMotorButtonClick(Sender: TObject);
 begin
   MotorEdit(1);
+end;
+
+procedure TMainForm.AboutButtonClick(Sender: TObject);
+var
+  AboutForm: TAboutForm;
+begin
+  AboutForm:= TAboutForm.Create(MainForm);
+  try
+    AboutForm.ShowModal;
+  finally
+    FreeAndNil(AboutForm);
+  end;
 end;
 
 procedure TMainForm.EditMotorButtonClick(Sender: TObject);

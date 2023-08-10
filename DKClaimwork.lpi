@@ -169,6 +169,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ULetterCustomForm"/>
       </Unit>
+      <Unit>
+        <Filename Value="uaboutform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UAboutForm"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -7,9 +7,7 @@ interface
 uses
   Classes, SysUtils, DateUtils, FileUtil,
 
-  DK_Vector, DK_StrUtils, DK_Dialogs, DK_Const,
-
-  ULetters;
+  DK_Vector, DK_StrUtils, DK_Dialogs, DK_Const;
 
 const
   LETTER_NOTNEED_MARK = '—';
