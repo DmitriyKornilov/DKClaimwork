@@ -185,6 +185,8 @@ type
 
     //весь список
     procedure DataLoad(const AMotorNumLike: String;
+                       const AOrderIndex, AViewIndex: Integer;
+                       const ABeginDate, AEndDate: TDate;
                        out ALogIDs: TIntVector;
                        out AMotorNames: TStrVector;
                        out AMotorNums: TStrVector;
@@ -1796,6 +1798,8 @@ end;
 
 
 procedure TSQLite.DataLoad(const AMotorNumLike: String;
+                       const AOrderIndex, AViewIndex: Integer;
+                       const ABeginDate, AEndDate: TDate;
                        out ALogIDs: TIntVector;
                        out AMotorNames: TStrVector;
                        out AMotorNums: TStrVector;
@@ -1957,25 +1961,46 @@ begin
     'INNER JOIN USERS t6 ON (t1.UserID=t6.UserID) ' +
     'INNER JOIN USERS t7 ON (t2.UserID=t7.UserID) ' +
     'INNER JOIN USERS t8 ON (t3.UserID=t8.UserID) ' +
-    //'LEFT OUTER JOIN LOGRECLAMATION t1 ON (t0.LogID=t1.LogID) ' +
-    //'LEFT OUTER JOIN LOGREPAIR t2 ON (t0.LogID=t2.LogID) ' +
-    //'LEFT OUTER JOIN LOGPRETENSION t3 ON (t0.LogID=t3.LogID) ' +
-    //'INNER JOIN MOTORNAMES t4 ON (t0.MotorNameID=t4.MotorNameID) ' +
-    //'LEFT OUTER JOIN LOCATIONS t5 ON (t1.LocationID=t5.LocationID) ' +
-    //'LEFT OUTER JOIN USERS t6 ON (t1.UserID=t6.UserID) ' +
-    //'LEFT OUTER JOIN USERS t7 ON (t2.UserID=t7.UserID) ' +
-    //'LEFT OUTER JOIN USERS t8 ON (t3.UserID=t8.UserID) ' +
     'WHERE ' +
-      't0.LogID>0 ';
+      '(t0.LogID>0) ';
 
   if not SEmpty(AMotorNumLike) then
-    S:= S +
-      ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) ';
+    S:= S + ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) '
+  else begin
+    case AViewIndex of
+    0: S:= S + ' AND (t1.Status < 2) ';
+    1: S:= S + ' AND (t2.EndDate IS NULL) ';
+    2: S:= S + ' AND (t3.MoneyGetDate IS NULL) ';
+    3: S:= S + ' AND (' +
+                     '(t1.NoticeFromUserDate IS NULL) OR ' +
+                     '(t2.NoticeFromUserDate IS NULL) OR ' +
+                     '(t3.NoticeFromUserDate IS NULL) OR ' +
+                     '(t1.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t2.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t3.NoticeFromUserDate BETWEEN :BD AND :ED)' +
+                     ') ';
+    end;
+  end;
+
+  S:= S + 'ORDER BY ';
+  case AOrderIndex of
+  0: S:= S + 't1.NoticeFromUserDate, t1.NoticeFromUserNum';
+  1: S:= S + 't2.NoticeFromUserDate, t2.NoticeFromUserNum';
+  2: S:= S + 't3.NoticeFromUserDate, t3.NoticeFromUserNum';
+  3: S:= S + 't6.UserTitle';
+  4: S:= S + 't4.MotorName, t0.MotorNum, t0.MotorDate';
+  5: S:= S + 't0.MotorDate, t0.MotorNum';
+  end;
 
   QSetQuery(FQuery);
   QSetSQL(S);
   if not SEmpty(AMotorNumLike) then
-    QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+    QParamStr('NumberLike', SUpper(AMotorNumLike)+'%')
+  else if AViewIndex=3 then
+  begin
+    QParamDT('BD', ABeginDate);
+    QParamDT('ED', AEndDate);
+  end;
 
   QOpen;
   if not QIsEmpty then

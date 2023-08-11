@@ -7,16 +7,16 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus,
   Buttons, StdCtrls, EditBtn, fpspreadsheetgrid, BCButton, DividerBevel,
-  LCLIntf, FileUtil,
+  LCLIntf, FileUtil, DateTimePicker,
 
   DK_LCLStrRus, DK_HeapTrace, DK_Const, DK_Vector, DK_Zoom, DK_CtrlUtils,
-  DK_SheetExporter, DK_StrUtils, DK_Dialogs,
+  DK_SheetExporter, DK_StrUtils, DK_Dialogs, DK_VSTTools, DK_DateUtils,
 
   USQLite, USheets, UUtils,
 
   UMotorEditForm, USenderEditForm, UReceiverEditForm, UImageEditForm,
   UNoticeEditForm, UNoteEditForm, ULetterEditForm, URepairDatesEditForm,
-  ULetterCustomForm, UAboutForm;
+  ULetterCustomForm, UAboutForm, VirtualTrees;
 
 type
 
@@ -26,6 +26,7 @@ type
     AboutButton: TSpeedButton;
     AddMotorButton: TSpeedButton;
     Bevel10: TBevel;
+    Bevel11: TBevel;
     Bevel3: TBevel;
     Bevel4: TBevel;
     Bevel5: TBevel;
@@ -33,9 +34,18 @@ type
     Bevel7: TBevel;
     Bevel8: TBevel;
     Bevel9: TBevel;
+    DT1: TDateTimePicker;
+    DT2: TDateTimePicker;
+    DelMotorButton: TSpeedButton;
+    EditMotorButton: TSpeedButton;
+    EditMotorPanel: TPanel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label17: TLabel;
     LetterButton: TBCButton;
     CopyMenuItem: TMenuItem;
     OpenMenuItem: TMenuItem;
+    PeriodPanel: TPanel;
     Panel3: TPanel;
     PopupMenu2: TPopupMenu;
     ReclamationButton: TBCButton;
@@ -47,7 +57,6 @@ type
     DelFromBuilderButton: TSpeedButton;
     DelFromUserButton: TSpeedButton;
     ShowToUserButton: TSpeedButton;
-    DelMotorButton: TSpeedButton;
     DelNoteButton: TSpeedButton;
     ShowFromBuilderButton: TSpeedButton;
     ShowFromUserButton: TSpeedButton;
@@ -61,12 +70,10 @@ type
     DividerBevel3: TDividerBevel;
     DividerBevel4: TDividerBevel;
     DividerBevel5: TDividerBevel;
-    DividerBevel6: TDividerBevel;
     EditCancelOrGetMoneyButton: TSpeedButton;
     EditReportOrRepDatesOrSendMoneyButton: TSpeedButton;
     EditFromBuilderButton: TSpeedButton;
     EditFromUserButton: TSpeedButton;
-    EditMotorButton: TSpeedButton;
     EditNoteButton: TSpeedButton;
     EditFromBuilderPanel: TPanel;
     EditFromUserPanel: TPanel;
@@ -84,27 +91,20 @@ type
     ImageListMenuItem: TMenuItem;
     ImagesEdit24x24: TImageList;
     ImagesMain24x24: TImageList;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
     Label13: TLabel;
     Label14: TLabel;
-    Label15: TLabel;
-    Label16: TLabel;
-    Label17: TLabel;
-    Label18: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
-    Label21: TLabel;
-    Label22: TLabel;
-    Label23: TLabel;
-    Label24: TLabel;
-    Label25: TLabel;
-    Label26: TLabel;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
     LeftPanel: TPanel;
     LogGrid: TsWorksheetGrid;
     MainPanel: TPanel;
@@ -125,6 +125,8 @@ type
     ShowToBuilderButton: TSpeedButton;
     Splitter1: TSplitter;
     ToolPanel: TPanel;
+    VT1: TVirtualStringTree;
+    VT2: TVirtualStringTree;
     ZoomPanel: TPanel;
     procedure AboutButtonClick(Sender: TObject);
     procedure AddMotorButtonClick(Sender: TObject);
@@ -149,12 +151,15 @@ type
     procedure EditToBuilderButtonClick(Sender: TObject);
     procedure EditToUserButtonClick(Sender: TObject);
     procedure ExitButtonClick(Sender: TObject);
+    procedure ExportButtonClick(Sender: TObject);
     procedure ImageListMenuItemClick(Sender: TObject);
     procedure LetterButtonClick(Sender: TObject);
     procedure OpenMenuItemClick(Sender: TObject);
     procedure PerformerListMenuItemClick(Sender: TObject);
     procedure ReceiverListMenuItemClick(Sender: TObject);
     procedure RefreshButtonClick(Sender: TObject);
+    procedure SearchNumEditButtonClick(Sender: TObject);
+    procedure SearchNumEditChange(Sender: TObject);
     procedure SenderListMenuItemClick(Sender: TObject);
     procedure ShowCancelButtonClick(Sender: TObject);
     procedure ShowFromBuilderButtonClick(Sender: TObject);
@@ -172,11 +177,14 @@ type
     procedure RepairButtonClick(Sender: TObject);
     procedure SettingsButtonClick(Sender: TObject);
   private
+    VSTOrderList: TVSTStringList;
+    VSTViewList: TVSTStringList;
     LogTable: TLogTable;
     ZoomPercent: Integer;
     KeepLogID: Integer;
     Category: Byte;
     SelectedLetterType: Byte;
+    CanDataLoad: Boolean;
 
     LogIDs: TIntVector;
     MotorNames: TStrVector;
@@ -313,6 +321,12 @@ type
 
     procedure NoteEdit;
     procedure NoteDelete;
+
+    procedure OrderListCreate;
+    procedure OrderItemSelect;
+
+    procedure ViewListCreate;
+    procedure ViewItemSelect;
   public
 
   end;
@@ -328,11 +342,15 @@ implementation
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  CanDataLoad:= False;
   HeapTraceOutputFile('trace.trc');
 
   //for normal form maximizing
   Height:= 300;
   Width:= 500;
+
+  DT1.Date:= FirstDayInYear(Date);
+  DT2.Date:= Date;
 
   SQLite:= TSQLite.Create;
   SQLite.SetColors(DefaultSelectionBGColor, clWindowText);
@@ -344,22 +362,34 @@ begin
   LogTable:= TLogTable.Create(LogGrid, @DataSelect);
   LogTable.IsEmptyDraw:= True;
   LogTable.Draw;
+
   ZoomPercent:= 100;
   CreateZoomControls(50, 150, ZoomPercent, ZoomPanel, @DataDraw, True);
 
-  DataLoad;
+  OrderListCreate;
+  ViewListCreate;
   CategorySelect(1);
+  CanDataLoad:= True;
+  DataLoad;
+
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(LogTable);
   FreeAndNil(SQLite);
+  FreeAndNil(VSTOrderList);
+  FreeAndNil(VSTViewList);
 end;
 
 procedure TMainForm.ExitButtonClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.ExportButtonClick(Sender: TObject);
+begin
+  LogTable.Save('Выполнено!');
 end;
 
 procedure TMainForm.MotorListMenuItemClick(Sender: TObject);
@@ -400,6 +430,16 @@ end;
 procedure TMainForm.RefreshButtonClick(Sender: TObject);
 begin
   SQLite.Reconnect;
+  DataLoad;
+end;
+
+procedure TMainForm.SearchNumEditButtonClick(Sender: TObject);
+begin
+  SearchNumEdit.Text:= EmptyStr;
+end;
+
+procedure TMainForm.SearchNumEditChange(Sender: TObject);
+begin
   DataLoad;
 end;
 
@@ -816,27 +856,20 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       for i:= 5 to 13 do
         LogTable.ColumnVisible[i]:= AVisible;
       if not AVisible then Exit;
-      Label6.Caption:= 'Уведомление о';
-      Label7.Caption:= 'неисправности';
-      Label8.Caption:= 'от Потребителя';
-      Label9.Caption:= 'Уведомление о';
-      Label10.Caption:= 'неисправности';
-      Label11.Caption:= 'Производителю';
-      Label12.Caption:= 'Решение';
-      Label13.Caption:= 'Производителя';
-      Label14.Caption:= 'о выезде';
-      Label15.Caption:= 'Ответ';
-      Label16.Caption:= 'Потребителю';
-      Label17.Caption:= 'о выезде';
-      Label18.Caption:= 'Акт осмотра';
-      Label19.Caption:= 'электро-';
-      Label20.Caption:= 'двигателя';
-      Label21.Caption:= 'Отзыв';
-      Label22.Caption:= 'рекламации';
-      Label23.Caption:= 'Потребителем';
-      Label24.Caption:= 'Примечание';
-      Label25.Caption:= 'по ходу';
-      Label26.Caption:= 'расследования';
+      Label1.Caption:= 'Уведомление о неисправности';
+      Label2.Caption:= 'от Потребителя';
+      Label3.Caption:= 'Уведомление о неисправности';
+      Label4.Caption:= 'Производителю';
+      Label5.Caption:= 'Решение Производителя';
+      Label6.Caption:= 'о выезде представителя';
+      Label7.Caption:= 'Ответ Потребителю';
+      Label8.Caption:= 'о выезде представителя';
+      Label9.Caption:= 'Акт осмотра';
+      Label10.Caption:= 'электродвигателя';
+      Label11.Caption:= 'Отзыв рекламации';
+      Label12.Caption:= 'Потребителем';
+      Label13.Caption:= 'Примечание';
+      Label14.Caption:= 'по ходу расследования';
     end;
 
     procedure RepairVisible(const AVisible: Boolean);
@@ -848,24 +881,20 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
-      Label6.Caption:= 'Запрос о';
-      Label7.Caption:= 'ремонте';
-      Label8.Caption:= 'от Потребителя';
-      Label9.Caption:= 'Запрос о';
-      Label10.Caption:= 'ремонте';
-      Label11.Caption:= 'Производителю';
-      Label12.Caption:= 'Ответ на';
-      Label13.Caption:= 'запрос';
-      Label14.Caption:= 'от Производителя';
-      Label15.Caption:= 'Ответ на';
-      Label16.Caption:= 'запрос';
-      Label17.Caption:= 'Потребителю';
-      Label18.Caption:= 'Даты ремонта';
-      Label19.Caption:= 'электро-';
-      Label20.Caption:= 'двигателя';
-      Label24.Caption:= 'Примечание';
-      Label25.Caption:= 'по ходу';
-      Label26.Caption:= 'ремонта';
+      Label1.Caption:= 'Запрос о ремонте';
+      Label2.Caption:= 'от Потребителя';
+      Label3.Caption:= 'Запрос о ремонте';
+      Label4.Caption:= 'Производителю';
+      Label5.Caption:= 'Ответ на запрос';
+      Label6.Caption:= 'от Производителя';
+      Label7.Caption:= 'Ответ на запрос';
+      Label8.Caption:= 'Потребителю';
+      Label9.Caption:= 'Даты ремонта';
+      Label10.Caption:= 'электродвигателя';
+      Label11.Caption:= 'Отзыв рекламации';
+      Label12.Caption:= 'Потребителем';
+      Label13.Caption:= 'Примечание';
+      Label14.Caption:= 'по ходу ремонта';
     end;
 
     procedure PretensionVisible(const AVisible: Boolean);
@@ -877,37 +906,31 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
-      Label6.Caption:= 'Претензия';
-      Label7.Caption:= 'на возмещение';
-      Label8.Caption:= 'от Потребителя';
-      Label9.Caption:= 'Уведомление о';
-      Label10.Caption:= 'претензии';
-      Label11.Caption:= 'Производителю';
-      Label12.Caption:= 'Ответ на';
-      Label13.Caption:= 'претензию';
-      Label14.Caption:= 'от Производителя';
-      Label15.Caption:= 'Ответ на';
-      Label16.Caption:= 'претензию';
-      Label17.Caption:= 'Потребителю';
-      Label18.Caption:= 'Возмещение';
-      Label19.Caption:= 'затрат';
-      Label20.Caption:= 'Потребителю';
-      Label21.Caption:= 'Возмещение';
-      Label22.Caption:= 'затрат';
-      Label23.Caption:= 'Производителем';
-      Label24.Caption:= 'Примечание';
-      Label25.Caption:= 'по возмещению';
-      Label26.Caption:= 'затрат';
+      Label1.Caption:= 'Претензия на возмещение';
+      Label2.Caption:= 'затрат от Потребителя';
+      Label3.Caption:= 'Уведомление о претензии';
+      Label4.Caption:= 'Производителю';
+      Label5.Caption:= 'Ответ на претензию';
+      Label6.Caption:= 'от Производителя';
+      Label7.Caption:= 'Ответ на претензию';
+      Label8.Caption:= 'Потребителю';
+      Label9.Caption:= 'Возмещение затрат';
+      Label10.Caption:= 'Потребителю';
+      Label11.Caption:= 'Возмещение затрат';
+      Label12.Caption:= 'Производителем';
+      Label13.Caption:= 'Примечание';
+      Label14.Caption:= 'по возмещению затрат';
     end;
   begin
     if ACategory=Category then Exit;
     Category:= ACategory;
     EditCancelOrGetMoneyPanel.Visible:= (ACategory=1) or (ACategory=3);
 
-
     ReclamationVisible(ACategory=1);  //рекламации
     RepairVisible(ACategory=2);  //гарантийный ремонт
     PretensionVisible(ACategory=3);   //гарантийный ремонт
+
+
 
     ButtonsEnable;
 end;
@@ -916,8 +939,12 @@ procedure TMainForm.DataLoad;
 var
   MotorNumLike: String;
 begin
+  if not CanDataLoad then Exit;
+
   MotorNumLike:= STrim(SearchNumEdit.Text);
   SQLite.DataLoad(MotorNumLike,
+              VSTOrderList.SelectedIndex, VSTViewList.SelectedIndex,
+              DT1.Date, DT2.Date,
               LogIDs, MotorNames, MotorNums, MotorDates,
               ReclamationUserNames, ReclamationUserTitles,
               ReclamationLocationNames, ReclamationLocationTitles,
@@ -1004,8 +1031,8 @@ begin
                   PretensionMoneyGetDatesStrs, PretensionMoneyGetValuesStrs,
                   PretensionNotes);
   KeepLogIDRestore;
-  ButtonsEnable;
 
+  ButtonsEnable;
 end;
 
 procedure TMainForm.DataSelect;
@@ -1445,6 +1472,51 @@ procedure TMainForm.NoteDelete;
 begin
   if not Confirm('Удалить примечание?') then Exit;
   SQLite.NoteDelete(LogIDs[LogTable.SelectedIndex], Category);
+  DataLoad;
+end;
+
+procedure TMainForm.OrderListCreate;
+var
+  S: String;
+  V: TStrVector;
+begin
+  S:= 'Упорядочить список электродвигателей по:';
+  V:= VCreateStr([
+    'дате/номеру уведомления о неисправности',
+    'дате/номеру запроса о гарантийном ремонте',
+    'дате/номеру претензии на возмещение затрат',
+    'наименованию Потребителя',
+    'наименованию/номеру электродвигателя',
+    'дате изготовления электродвигателя'
+  ]);
+  VSTOrderList:= TVSTStringList.Create(VT1, S, @OrderItemSelect);
+  VSTOrderList.Update(V);
+end;
+
+procedure TMainForm.OrderItemSelect;
+begin
+  DataLoad;
+end;
+
+procedure TMainForm.ViewListCreate;
+var
+  S: String;
+  V: TStrVector;
+begin
+  S:= 'Включить в список электродвигатели:';
+  V:= VCreateStr([
+    'с незавершенной рекламационной работой',
+    'с незавершенным гарантийным ремонтом',
+    'с незавершенной претензионной работой',
+    'все электродвигатели'
+  ]);
+  VSTViewList:= TVSTStringList.Create(VT2, S, @ViewItemSelect);
+  VSTViewList.Update(V);
+end;
+
+procedure TMainForm.ViewItemSelect;
+begin
+  PeriodPanel.Visible:= VSTViewList.SelectedIndex=3;
   DataLoad;
 end;
 

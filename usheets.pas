@@ -57,6 +57,7 @@ implementation
 constructor TLogTable.Create(const AGrid: TsWorksheetGrid; const AOnSelect: TSheetSelectEvent);
 const
   MAIN_COLUMN_WIDTH = 105;
+  NOTE_COLUMN_WIDTH = 180;
 begin
   inherited Create(AGrid);
   OnSelect:= AOnSelect;
@@ -78,7 +79,7 @@ begin
   AddColumn(LETTER_NAMES[3], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[4], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[5], MAIN_COLUMN_WIDTH);
-  AddColumn('Примечание по ходу расследования', 200, haLeft);
+  AddColumn('Примечание по ходу расследования', NOTE_COLUMN_WIDTH, haLeft);
   AddColumn('Статус рекламации', 80);
   //гарантийный ремонт
   AddColumn('Потребитель2', 100);
@@ -88,7 +89,7 @@ begin
   AddColumn(LETTER_NAMES[9], MAIN_COLUMN_WIDTH);
   AddColumn('Дата прибытия в ремонт', 70);
   AddColumn('Дата отправки из ремонта', 70);
-  AddColumn('Примечание по ходу ремонта', 200, haLeft);
+  AddColumn('Примечание по ходу ремонта', NOTE_COLUMN_WIDTH, haLeft);
   //возмещение затрат
   AddColumn('Потребитель3', 100);
   AddColumn(LETTER_NAMES[10], MAIN_COLUMN_WIDTH);
@@ -97,17 +98,17 @@ begin
   AddColumn(LETTER_NAMES[12], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[13], MAIN_COLUMN_WIDTH);
   AddColumn('Дата возмещения Потребителю', 80);
-  AddColumn('Сумма возмещения Потребителю', 100);
+  AddColumn('Сумма возмещения Потребителю', 80);
   AddColumn('Дата возмещения Производителем', 80);
-  AddColumn('Сумма возмещения Производителем', 100);
-  AddColumn('Примечание по возмещению затрат', 200, haLeft);
+  AddColumn('Сумма возмещения Производителем', 80);
+  AddColumn('Примечание по возмещению затрат', NOTE_COLUMN_WIDTH, haLeft);
 
   //общие данные
   AddToHeader(1, 1, 2, 1, '№ п/п');
   AddToHeader(1, 2, 1, 4,  'Электродвигатель');
   AddToHeader(2, 2, 'Наименование');
   AddToHeader(2, 3, 'Номер');
-  AddToHeader(2, 4, 'Дата ПСИ');
+  AddToHeader(2, 4, 'Дата');
   AddToHeader(1, 5, 2, 5, 'Предприятие');
   AddToHeader(1, 6, 2, 6, 'Потребитель');
   //рекламации
