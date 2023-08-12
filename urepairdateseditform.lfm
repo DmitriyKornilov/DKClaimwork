@@ -8,7 +8,7 @@ object RepairDatesEditForm: TRepairDatesEditForm
   ClientWidth = 292
   DesignTimePPI = 120
   OnShow = FormShow
-  Position = poDesktopCenter
+  Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object ButtonPanel: TPanel
     Left = 2
@@ -339,19 +339,20 @@ object RepairDatesEditForm: TRepairDatesEditForm
     end
   end
   object DT1: TDateTimePicker
-    AnchorSideLeft.Control = CheckBox1
+    AnchorSideLeft.Control = BeginCheckBox
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = Owner
-    Left = 168
+    AnchorSideTop.Control = NotNeedCheckBox
+    AnchorSideTop.Side = asrBottom
+    Left = 167
     Height = 28
-    Top = 15
+    Top = 47
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
     TabOrder = 1
-    BorderSpacing.Left = 15
+    BorderSpacing.Left = 12
     BorderSpacing.Top = 15
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -367,33 +368,21 @@ object RepairDatesEditForm: TRepairDatesEditForm
     HideDateTimeParts = []
     MonthNames = 'Long'
   end
-  object Label1: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = DT1
-    AnchorSideTop.Side = asrCenter
-    Left = 8
-    Height = 20
-    Top = 19
-    Width = 125
-    BorderSpacing.Left = 8
-    Caption = 'Прибыл в ремонт'
-    ParentColor = False
-  end
   object DT2: TDateTimePicker
-    AnchorSideLeft.Control = CheckBox1
+    AnchorSideLeft.Control = BeginCheckBox
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = DT1
     AnchorSideTop.Side = asrBottom
-    Left = 168
+    Left = 167
     Height = 28
-    Top = 58
+    Top = 90
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
     TabOrder = 2
-    BorderSpacing.Left = 15
+    BorderSpacing.Left = 12
     BorderSpacing.Top = 15
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -409,17 +398,46 @@ object RepairDatesEditForm: TRepairDatesEditForm
     HideDateTimeParts = []
     MonthNames = 'Long'
   end
-  object CheckBox1: TCheckBox
+  object EndCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = DT2
     AnchorSideTop.Side = asrCenter
     Left = 8
     Height = 24
-    Top = 60
-    Width = 145
+    Top = 92
+    Width = 143
     BorderSpacing.Left = 8
-    Caption = 'Убыл из ремонта'
-    OnChange = CheckBox1Change
+    Caption = 'убыл из ремонта'
+    OnChange = EndCheckBoxChange
     TabOrder = 3
+  end
+  object NotNeedCheckBox: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 24
+    Top = 8
+    Width = 190
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    Caption = 'не требуется (отказано)'
+    OnChange = NotNeedCheckBoxChange
+    TabOrder = 4
+  end
+  object BeginCheckBox: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = DT1
+    AnchorSideTop.Side = asrCenter
+    Left = 8
+    Height = 24
+    Top = 49
+    Width = 147
+    BorderSpacing.Left = 8
+    Caption = 'прибыл в ремонт'
+    OnChange = BeginCheckBoxChange
+    TabOrder = 5
   end
 end

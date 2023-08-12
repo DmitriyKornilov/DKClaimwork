@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus,
   Buttons, StdCtrls, EditBtn, fpspreadsheetgrid, BCButton, DividerBevel,
-  LCLIntf, FileUtil, DateTimePicker,
+  LCLIntf, FileUtil, DateTimePicker, VirtualTrees,
 
   DK_LCLStrRus, DK_HeapTrace, DK_Const, DK_Vector, DK_Zoom, DK_CtrlUtils,
   DK_SheetExporter, DK_StrUtils, DK_Dialogs, DK_VSTTools, DK_DateUtils,
@@ -16,7 +16,7 @@ uses
 
   UMotorEditForm, USenderEditForm, UReceiverEditForm, UImageEditForm,
   UNoticeEditForm, UNoteEditForm, ULetterEditForm, URepairDatesEditForm,
-  ULetterCustomForm, UAboutForm, VirtualTrees;
+  ULetterCustomForm, UAboutForm, UMoneyDatesEditForm;
 
 type
 
@@ -48,11 +48,12 @@ type
     PeriodPanel: TPanel;
     Panel3: TPanel;
     PopupMenu2: TPopupMenu;
+    StatisticButton: TBCButton;
     ReclamationButton: TBCButton;
-    DelCancelOrGetMoneyButton: TSpeedButton;
+    DelCancelButton: TSpeedButton;
     SaveDialog1: TSaveDialog;
     ShowCancelButton: TSpeedButton;
-    DelReportOrRepDatesOrSendMoneyButton: TSpeedButton;
+    DelReportOrRepDatesOrMoneyDatesButton: TSpeedButton;
     ShowReportButton: TSpeedButton;
     DelFromBuilderButton: TSpeedButton;
     DelFromUserButton: TSpeedButton;
@@ -70,15 +71,15 @@ type
     DividerBevel3: TDividerBevel;
     DividerBevel4: TDividerBevel;
     DividerBevel5: TDividerBevel;
-    EditCancelOrGetMoneyButton: TSpeedButton;
-    EditReportOrRepDatesOrSendMoneyButton: TSpeedButton;
+    EditCancelButton: TSpeedButton;
+    EditReportOrRepDatesOrMoneyDatesButton: TSpeedButton;
     EditFromBuilderButton: TSpeedButton;
     EditFromUserButton: TSpeedButton;
     EditNoteButton: TSpeedButton;
     EditFromBuilderPanel: TPanel;
     EditFromUserPanel: TPanel;
     EditNotePanel: TPanel;
-    EditCancelOrGetMoneyPanel: TPanel;
+    EditCancelPanel: TPanel;
     EditReportOrRepDatesOrSendMoneyPanel: TPanel;
     EditToBuilderPanel: TPanel;
     EditToUserPanel: TPanel;
@@ -133,21 +134,21 @@ type
     procedure BuilderDelegateMenuItemClick(Sender: TObject);
     procedure BuilderListMenuItemClick(Sender: TObject);
     procedure CopyMenuItemClick(Sender: TObject);
-    procedure DelCancelOrGetMoneyButtonClick(Sender: TObject);
+    procedure DelCancelButtonClick(Sender: TObject);
     procedure DelegateListMenuItemClick(Sender: TObject);
     procedure DelFromBuilderButtonClick(Sender: TObject);
     procedure DelFromUserButtonClick(Sender: TObject);
     procedure DelMotorButtonClick(Sender: TObject);
     procedure DelNoteButtonClick(Sender: TObject);
-    procedure DelReportOrRepDatesOrSendMoneyButtonClick(Sender: TObject);
+    procedure DelReportOrRepDatesOrMoneyDatesButtonClick(Sender: TObject);
     procedure DelToBuilderButtonClick(Sender: TObject);
     procedure DelToUserButtonClick(Sender: TObject);
-    procedure EditCancelOrGetMoneyButtonClick(Sender: TObject);
+    procedure EditCancelButtonClick(Sender: TObject);
     procedure EditFromBuilderButtonClick(Sender: TObject);
     procedure EditFromUserButtonClick(Sender: TObject);
     procedure EditMotorButtonClick(Sender: TObject);
     procedure EditNoteButtonClick(Sender: TObject);
-    procedure EditReportOrRepDatesOrSendMoneyButtonClick(Sender: TObject);
+    procedure EditReportOrRepDatesOrMoneyDatesButtonClick(Sender: TObject);
     procedure EditToBuilderButtonClick(Sender: TObject);
     procedure EditToUserButtonClick(Sender: TObject);
     procedure ExitButtonClick(Sender: TObject);
@@ -223,6 +224,7 @@ type
     RepairBeginDates: TDateVector;
     RepairEndDates: TDateVector;
     RepairNotes: TStrVector;
+    RepairStatuses: TIntVector;
 
     PretensionUserNames: TStrVector;
     PretensionUserTitles: TStrVector;
@@ -240,6 +242,7 @@ type
     PretensionMoneyGetDates: TDateVector;
     PretensionMoneyGetValues: TInt64Vector;
     PretensionNotes: TStrVector;
+    PretensionStatuses: TIntVector;
 
     MotorDateStrs: TStrVector;
     ReclamationUserStrs: TStrVector;
@@ -259,6 +262,7 @@ type
     RepairAnswerToUserStrs: TStrVector;
     RepairBeginDatesStrs: TStrVector;
     RepairEndDatesStrs: TStrVector;
+    RepairStatusStrs: TStrVector;
 
     PretensionUserStrs: TStrVector;
     PretensionNoticeFromUserStrs: TStrVector;
@@ -270,6 +274,7 @@ type
     PretensionMoneySendValuesStrs: TStrVector;
     PretensionMoneyGetDatesStrs: TStrVector;
     PretensionMoneyGetValuesStrs: TStrVector;
+    PretensionStatusStrs: TStrVector;
 
     procedure MotorListEdit;
     procedure LocationListEdit;
@@ -318,6 +323,9 @@ type
 
     procedure RepairDatesEdit;
     procedure RepairDatesDelete;
+
+    procedure MoneyDatesEdit;
+    procedure MoneyDatesDelete;
 
     procedure NoteEdit;
     procedure NoteDelete;
@@ -520,13 +528,9 @@ begin
   PDFCopy(SelectedLetterType);
 end;
 
-procedure TMainForm.DelCancelOrGetMoneyButtonClick(Sender: TObject);
+procedure TMainForm.DelCancelButtonClick(Sender: TObject);
 begin
-  case Category of
-  1: CancelDelete;
-  2: ;
-  3: ;
-  end;
+ CancelDelete;
 end;
 
 procedure TMainForm.DelegateListMenuItemClick(Sender: TObject);
@@ -612,12 +616,12 @@ begin
   NoteEdit;
 end;
 
-procedure TMainForm.EditReportOrRepDatesOrSendMoneyButtonClick(Sender: TObject);
+procedure TMainForm.EditReportOrRepDatesOrMoneyDatesButtonClick(Sender: TObject);
 begin
   case Category of
   1: LetterEdit(4 {акт осмотра});
   2: RepairDatesEdit;
-  3: ;
+  3: MoneyDatesEdit;
   end;
 end;
 
@@ -650,12 +654,12 @@ begin
   NoteDelete;
 end;
 
-procedure TMainForm.DelReportOrRepDatesOrSendMoneyButtonClick(Sender: TObject);
+procedure TMainForm.DelReportOrRepDatesOrMoneyDatesButtonClick(Sender: TObject);
 begin
   case Category of
   1: ReportDelete;
   2: RepairDatesDelete;
-  3: ;
+  3: MoneyDatesDelete;
   end;
 end;
 
@@ -683,13 +687,9 @@ begin
   LetterDelete(LetterType);
 end;
 
-procedure TMainForm.EditCancelOrGetMoneyButtonClick(Sender: TObject);
+procedure TMainForm.EditCancelButtonClick(Sender: TObject);
 begin
-  case Category of
-  1: LetterEdit(5) {отзыв рекл.};
-  2: ;
-  3: ;
-  end;
+  LetterEdit(5) {отзыв рекл.};
 end;
 
 procedure TMainForm.EditFromBuilderButtonClick(Sender: TObject);
@@ -853,7 +853,8 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       ReclamationButton.Down:= AVisible;
       ShowReportButton.Visible:= AVisible;
       ShowCancelButton.Visible:= AVisible;
-      for i:= 5 to 13 do
+      EditCancelPanel.Visible:= AVisible;
+      for i:= 5 to 14 do
         LogTable.ColumnVisible[i]:= AVisible;
       if not AVisible then Exit;
       Label1.Caption:= 'Уведомление о неисправности';
@@ -877,7 +878,7 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       i: Integer;
     begin
       RepairButton.Down:= AVisible;
-      for i:= 15 to 22 do
+      for i:= 15 to 23 do
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
@@ -889,10 +890,8 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       Label6.Caption:= 'от Производителя';
       Label7.Caption:= 'Ответ на запрос';
       Label8.Caption:= 'Потребителю';
-      Label9.Caption:= 'Даты ремонта';
+      Label9.Caption:= 'Гарантийный ремонт';
       Label10.Caption:= 'электродвигателя';
-      Label11.Caption:= 'Отзыв рекламации';
-      Label12.Caption:= 'Потребителем';
       Label13.Caption:= 'Примечание';
       Label14.Caption:= 'по ходу ремонта';
     end;
@@ -902,7 +901,7 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       i: Integer;
     begin
       PretensionButton.Down:= AVisible;
-      for i:= 23 to 33 do
+      for i:= 24 to 35 do
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
@@ -915,22 +914,17 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       Label7.Caption:= 'Ответ на претензию';
       Label8.Caption:= 'Потребителю';
       Label9.Caption:= 'Возмещение затрат';
-      Label10.Caption:= 'Потребителю';
-      Label11.Caption:= 'Возмещение затрат';
-      Label12.Caption:= 'Производителем';
+      Label10.Caption:= 'по претензии';
       Label13.Caption:= 'Примечание';
       Label14.Caption:= 'по возмещению затрат';
     end;
   begin
     if ACategory=Category then Exit;
     Category:= ACategory;
-    EditCancelOrGetMoneyPanel.Visible:= (ACategory=1) or (ACategory=3);
 
     ReclamationVisible(ACategory=1);  //рекламации
     RepairVisible(ACategory=2);  //гарантийный ремонт
     PretensionVisible(ACategory=3);   //гарантийный ремонт
-
-
 
     ButtonsEnable;
 end;
@@ -960,7 +954,8 @@ begin
               RepairNoticeToBuilderDates, RepairNoticeToBuilderNums,
               RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums,
               RepairAnswerToUserDates, RepairAnswerToUserNums,
-              RepairBeginDates, RepairEndDates, RepairNotes,
+              RepairBeginDates, RepairEndDates,
+              RepairNotes, RepairStatuses,
               PretensionUserNames, PretensionUserTitles,
               PretensionNoticeFromUserDates, PretensionNoticeFromUserNums,
               PretensionMoneyValues,
@@ -969,7 +964,7 @@ begin
               PretensionAnswerToUserDates, PretensionAnswerToUserNums,
               PretensionMoneySendDates, PretensionMoneySendValues,
               PretensionMoneyGetDates, PretensionMoneyGetValues,
-              PretensionNotes);
+              PretensionNotes, PretensionStatuses);
 
   MotorDateStrs:= MotorDatesToStr(MotorDates);
   ReclamationUserStrs:= VCut(ReclamationUserTitles); //VCut(ReclamationUserNames);
@@ -992,7 +987,10 @@ begin
   RepairAnswerFromBuilderStrs:= LetterFullNames(RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums);
   RepairAnswerToUserStrs:= LetterFullNames(RepairAnswerToUserDates, RepairAnswerToUserNums);
   RepairBeginDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairBeginDates, True);
+  VChangeIf(RepairBeginDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
   RepairEndDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairEndDates, True);
+  VChangeIf(RepairEndDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
+  RepairStatusStrs:= RepairStatusIntToStr(RepairStatuses);
 
   PretensionUserStrs:= VCut(PretensionUserTitles); // VCut(PretensionUserNames);
   VChangeIf(PretensionUserStrs, '<?>', EmptyStr);
@@ -1002,9 +1000,14 @@ begin
   PretensionAnswerFromBuilderStrs:= LetterFullNames(PretensionAnswerFromBuilderDates, PretensionAnswerFromBuilderNums);
   PretensionAnswerToUserStrs:= LetterFullNames(PretensionAnswerToUserDates, PretensionAnswerToUserNums);
   PretensionMoneySendDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneySendDates, True);
+  VChangeIf(PretensionMoneySendDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
   PretensionMoneySendValuesStrs:= VPriceIntToStr(PretensionMoneySendValues, True, True);
+  VChangeIf(PretensionMoneySendValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
   PretensionMoneyGetDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneyGetDates, True);
+  VChangeIf(PretensionMoneyGetDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
   PretensionMoneyGetValuesStrs:= VPriceIntToStr(PretensionMoneyGetValues, True, True);
+  VChangeIf(PretensionMoneyGetValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
+  PretensionStatusStrs:= PretensionStatusIntToStr(PretensionStatuses);
 
   KeepLogIDStore;
   LogTable.Update(MotorNames, MotorNums, MotorDateStrs,
@@ -1021,7 +1024,8 @@ begin
                   RepairNoticeToBuilderStrs,
                   RepairAnswerFromBuilderStrs,
                   RepairAnswerToUserStrs,
-                  RepairBeginDatesStrs, RepairEndDatesStrs, RepairNotes,
+                  RepairBeginDatesStrs, RepairEndDatesStrs,
+                  RepairNotes, RepairStatusStrs,
                   PretensionUserStrs,
                   PretensionNoticeFromUserStrs, PretensionMoneyValueStrs,
                   PretensionNoticeToBuilderStrs,
@@ -1029,7 +1033,7 @@ begin
                   PretensionAnswerToUserStrs,
                   PretensionMoneySendDatesStrs, PretensionMoneySendValuesStrs,
                   PretensionMoneyGetDatesStrs, PretensionMoneyGetValuesStrs,
-                  PretensionNotes);
+                  PretensionNotes, PretensionStatusStrs);
   KeepLogIDRestore;
 
   ButtonsEnable;
@@ -1095,9 +1099,9 @@ begin
     SetEnbld(1, IsPrevDocExists, EditToBuilderButton, DelToBuilderButton, ShowToBuilderButton);
     SetEnbld(2, IsPrevDocExists, EditFromBuilderButton, DelFromBuilderButton, ShowFromBuilderButton);
     SetEnbld(3, IsPrevDocExists, EditToUserButton, DelToUserButton, ShowToUserButton);
-    SetEnbld(4, IsPrevDocExists, EditReportOrRepDatesOrSendMoneyButton, DelReportOrRepDatesOrSendMoneyButton, ShowReportButton);
+    SetEnbld(4, IsPrevDocExists, EditReportOrRepDatesOrMoneyDatesButton, DelReportOrRepDatesOrMoneyDatesButton, ShowReportButton);
     IsPrevDocExists:= IsNoticeExists;
-    SetEnbld(5, IsPrevDocExists, EditCancelOrGetMoneyButton, DelCancelOrGetMoneyButton, ShowCancelButton);
+    SetEnbld(5, IsPrevDocExists, EditCancelButton, DelCancelButton, ShowCancelButton);
   end
   else if Category = 2 then
   begin
@@ -1106,12 +1110,12 @@ begin
     SetEnbld(7, IsPrevDocExists, EditToBuilderButton, DelToBuilderButton, ShowToBuilderButton);
     SetEnbld(8, IsPrevDocExists, EditFromBuilderButton, DelFromBuilderButton, ShowFromBuilderButton);
     SetEnbld(9, IsPrevDocExists, EditToUserButton, DelToUserButton, ShowToUserButton);
-    bb:= IsNoticeExists;
-    EditReportOrRepDatesOrSendMoneyButton.Enabled:= bb;
+    bb:= IsPrevDocExists;
+    EditReportOrRepDatesOrMoneyDatesButton.Enabled:= bb;
     bb:= bb and (not VIsNil(RepairBeginDates)) and (not VIsNil(RepairEndDates));
     bb:= bb and ((RepairBeginDates[LogTable.SelectedIndex]>0) or
                  (RepairEndDates[LogTable.SelectedIndex]>0));
-    DelReportOrRepDatesOrSendMoneyButton.Enabled:= bb;
+    DelReportOrRepDatesOrMoneyDatesButton.Enabled:= bb;
   end
   else if Category = 3 then
   begin
@@ -1121,17 +1125,15 @@ begin
     SetEnbld(12, IsPrevDocExists, EditFromBuilderButton, DelFromBuilderButton, ShowFromBuilderButton);
     SetEnbld(13, IsPrevDocExists, EditToUserButton, DelToUserButton, ShowToUserButton);
 
-    bb:= IsNoticeExists;
-    EditReportOrRepDatesOrSendMoneyButton.Enabled:= bb;
-    bb:= (not VIsNil(PretensionMoneySendDates)) and LogTable.IsSelected;
-    bb:= bb and (PretensionMoneySendDates[LogTable.SelectedIndex]>0);
-    DelReportOrRepDatesOrSendMoneyButton.Enabled:= bb;
-
-    bb:= IsNoticeExists;
-    EditCancelOrGetMoneyButton.Enabled:= bb;
-    bb:= (not VIsNil(PretensionMoneyGetDates)) and LogTable.IsSelected;
-    bb:= bb and (PretensionMoneyGetDates[LogTable.SelectedIndex]>0);
-    DelCancelOrGetMoneyButton.Enabled:= bb;
+    bb:= IsPrevDocExists;
+    EditReportOrRepDatesOrMoneyDatesButton.Enabled:= bb;
+    bb:= LogTable.IsSelected;
+    bb:= bb and
+         ((not VIsNil(PretensionMoneySendDates)) and
+          (PretensionMoneySendDates[LogTable.SelectedIndex]>0)) or
+         ((not VIsNil(PretensionMoneyGetDates)) and
+          (PretensionMoneyGetDates[LogTable.SelectedIndex]>0));
+    DelReportOrRepDatesOrMoneyDatesButton.Enabled:= bb;
   end;
 
   SetNoteButtonsEnbld;
@@ -1450,6 +1452,27 @@ procedure TMainForm.RepairDatesDelete;
 begin
   if not Confirm('Удалить даты ремонта?') then Exit;
   SQLite.RepairDatesDelete(LogIDs[LogTable.SelectedIndex]);
+  DataLoad;
+end;
+
+procedure TMainForm.MoneyDatesEdit;
+var
+  MoneyDatesEditForm: TMoneyDatesEditForm;
+begin
+  MoneyDatesEditForm:= TMoneyDatesEditForm.Create(MainForm);
+  try
+    MoneyDatesEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
+    if MoneyDatesEditForm.ShowModal=mrOk then
+      DataLoad;
+  finally
+    FreeAndNil(MoneyDatesEditForm);
+  end;
+end;
+
+procedure TMainForm.MoneyDatesDelete;
+begin
+  if not Confirm('Удалить данные по возмещению?') then Exit;
+  SQLite.PretensionMoneyDelete(LogIDs[LogTable.SelectedIndex]);
   DataLoad;
 end;
 

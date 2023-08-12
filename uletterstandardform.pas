@@ -96,6 +96,7 @@ type
     LocationID, UserID: Integer;
     LocationName, LocationTitle, UserTitle: String;
     MoneyValue: Int64;
+    UserNameR: String;
 
     //список аналогичных писем
     LogIDs: TIntVector;
@@ -390,15 +391,21 @@ begin
   LocationID:= 0;
   UserID:= 0;
   MoneyValue:= 0;
+  SQLite.ReclamationInfoLoad(LogID, UserID, LocationID);
   case Category of
-  1: SQLite.ReclamationInfoLoad(LogID, UserID, LocationID);
+  //1: SQLite.ReclamationInfoLoad(LogID, UserID, LocationID);
   2: SQLite.RepairInfoLoad(LogID, UserID);
   3: SQLite.PretensionInfoLoad(LogID, UserID, MoneyValue);
   end;
 
+  UserNameR:= SQLite.UserNameRLoad(UserID);
+
   LocationName:= EmptyStr;
-  if LocationID>0 then
-    LocationName:= SQLite.LocationNameLoad(LocationID);
+  //if LocationID>0 then
+  LocationName:= SQLite.LocationNameLoad(LocationID);
+  if Category<>1 then
+    LocationID:= 0;
+
   SQLite.MotorNoticeAnswerLoad(LogID, LetterType,
                                MotorName, MotorNum, MotorDate,
                                NoticeNum, NoticeDate, AnswerNum, AnswerDate,
@@ -407,7 +414,8 @@ end;
 
 procedure TLetterStandardForm.LettersInfoLoad;
 begin
-  SQLite.MotorNoticeAnswerLoad(LogID, LocationID, UserID, LetterType,
+  if Category<>3 then  //для претензии не нужны данные по аналогичным письмам
+    SQLite.MotorNoticeAnswerLoad(LogID, LocationID, UserID, LetterType,
                          LogIDs, MotorNames, MotorNums, MotorDates,
                          NoticeNums, NoticeDates, AnswerNums, AnswerDates,
                          LocationTitles, UserTitles, MoneyValues);
@@ -577,7 +585,18 @@ begin
     ])
   else if LetterType=9 then
     V:= VCreateStr([
-      LETTER_SUBJECTS[7]
+      LETTER_SUBJECTS[7],
+      LETTER_SUBJECTS[8],
+      LETTER_SUBJECTS[6] //об истечении срока гарантии
+    ])
+  else if LetterType=11 then
+    V:= VCreateStr([
+      LETTER_SUBJECTS[9]
+    ])
+  else if LetterType=13 then
+    V:= VCreateStr([
+      LETTER_SUBJECTS[10],
+      LETTER_SUBJECTS[11]
     ]);
 
   VToStrings(V, SubjectComboBox.Items);
@@ -696,6 +715,7 @@ begin
   Notices:= LettersUniqueFullName(SaveNoticeDates, SaveNoticeNums, IsSeveralNotices);
   Motors:= MotorsFullName(SaveMotorNames, SaveMotorNums);
   IsSeveralMotors:= Length(SaveMotorNames)>1;
+  LettersUniqueFullName(SaveAnswerDates, SaveAnswerNums, IsSeveralAnswers);
 
   if (DelegateComboBox.Visible) and (not VIsNil(DelegateNameIs)) then
   begin
@@ -716,10 +736,10 @@ begin
 
   Txt:= nil;
   if SubjectComboBox.Text=LETTER_SUBJECTS[0] then
-    Txt:= Letter0ReclamationToBuilder(LocationName, Motors,
+    Txt:= Letter0ReclamationToBuilder(LocationName, Motors, UserNameR,
             IsSeveralMotors, IsSeveralNotices)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[1] then
-    Txt:= Letter1ReclamationToBuilder(LocationName, Motors,
+    Txt:= Letter1ReclamationToBuilder(LocationName, Motors, UserNameR,
             IsSeveralMotors, IsSeveralNotices)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[2] then
     Txt:= Letter2ReclamationToUser(Notices, Motors,
@@ -739,14 +759,19 @@ begin
     Txt:= Letter6ReclamationWarranty(LocationName, Notices, MotorName, MotorNum,
             WarrantyBuildDate, WarrantyMileage, WarrantyUseDate, WarrantyType)
   else if (SubjectComboBox.Text=LETTER_SUBJECTS[7]) and (LetterType=7) then
-    Txt:= Letter7RepairToBuilder(Motors,
+    Txt:= Letter7RepairToBuilder(Motors, UserNameR,
             IsSeveralMotors, IsSeveralNotices)
   else if (SubjectComboBox.Text=LETTER_SUBJECTS[7]) and (LetterType=9) then
-  begin
-    LettersUniqueFullName(SaveAnswerDates, SaveAnswerNums, IsSeveralAnswers);
     Txt:= Letter7RepairToUser(Notices, Motors,
-            IsSeveralMotors, IsSeveralNotices, IsSeveralAnswers);
-  end;
+            IsSeveralMotors, IsSeveralNotices, IsSeveralAnswers)
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[8] then
+    Txt:= Letter8RepairToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[9] then
+    Txt:= Letter9PretensionToBuilder(Motors, UserNameR, MoneyValue)
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[10] then
+    Txt:= Letter10PretensionToUser(Notices, Motors, MoneyValue)
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[11] then
+    Txt:= Letter11PretensionToUser(Notices, Motors);
 
   LetterTextToStrings(Txt, Memo1.Lines);
 end;

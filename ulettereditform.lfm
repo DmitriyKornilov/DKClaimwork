@@ -9,7 +9,7 @@ object LetterEditForm: TLetterEditForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
-  Position = poDesktopCenter
+  Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object LetterNameLabel: TLabel
     AnchorSideLeft.Control = Owner

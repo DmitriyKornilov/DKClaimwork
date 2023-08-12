@@ -9,7 +9,7 @@ object ReceiverEditForm: TReceiverEditForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  Position = poDesktopCenter
+  Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
@@ -155,10 +155,10 @@ object ReceiverEditForm: TReceiverEditForm
             Left = 8
             Height = 20
             Top = 79
-            Width = 284
+            Width = 433
             BorderSpacing.Left = 8
             BorderSpacing.Top = 15
-            Caption = 'Имя Отчество (в именительном падеже)'
+            Caption = 'Уважаемый(ая) + Имя Отчество (в именительном падеже) + !'
             ParentColor = False
           end
           object Label2: TLabel
@@ -168,10 +168,10 @@ object ReceiverEditForm: TReceiverEditForm
             Left = 8
             Height = 20
             Top = 150
-            Width = 234
+            Width = 402
             BorderSpacing.Left = 8
             BorderSpacing.Top = 15
-            Caption = 'Должность (в дательном падеже)'
+            Caption = 'Должность (в дательном падеже) - разделить по строкам'
             ParentColor = False
           end
           object Label3: TLabel

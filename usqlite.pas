@@ -30,7 +30,8 @@ type
                                    const AKeyValueNotZero: Boolean = True);
     function LocationNameLoad(const ALocationID: Integer): String;
     function LocationTitleLoad(const ALocationID: Integer): String;
-    function UserNameLoad(const AUserID: Integer): String;
+    function UserNameILoad(const AUserID: Integer): String;
+    function UserNameRLoad(const AUserID: Integer): String;
     function UserTitleLoad(const AUserID: Integer): String;
 
     //список двигателей в работе
@@ -69,8 +70,8 @@ type
     procedure RepairNoticeUpdate(const ALogID, AUserID: Integer;
                                   const ANoticeNum: String;
                                   const ANoticeDate: TDate);
-    procedure RepairDatesLoad(const ALogID: Integer; out ABeginDate, AEndDate: TDate);
-    procedure RepairDatesUpdate(const ALogID: Integer; const ABeginDate, AEndDate: TDate);
+    procedure RepairDatesLoad(const ALogID: Integer; out AStatus: Integer; out ABeginDate, AEndDate: TDate);
+    procedure RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
     procedure RepairDatesDelete(const ALogID: Integer);
 
 
@@ -82,6 +83,13 @@ type
                                      const AMoneyValue: Int64;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
+    procedure PretensionMoneyLoad(const ALogID: Integer; out AStatus: Integer;
+                                 out AMoneySendValue: Int64; out AMoneySendDate: TDate;
+                                 out AMoneyGetValue: Int64; out AMoneyGetDate: TDate);
+    procedure PretensionMoneyUpdate(const ALogID, AStatus: Integer;
+                                   const AMoneySendValue: Int64; const AMoneySendDate: TDate;
+                                   const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
+    procedure PretensionMoneyDelete(const ALogID: Integer);
 
     //двигатели и письма для ответа
     procedure MotorNoticeAnswerLoad(const ALogID, ALocationID, AUserID: Integer;
@@ -222,6 +230,7 @@ type
                        out ARepairBeginDates: TDateVector;
                        out ARepairEndDates: TDateVector;
                        out ARepairNotes: TStrVector;
+                       out ARepairStatuses: TIntVector;
                        out APretensionUserNames: TStrVector;
                        out APretensionUserTitles: TStrVector;
                        out APretensionNoticeFromUserDates: TDateVector;
@@ -237,7 +246,9 @@ type
                        out APretensionMoneySendValues: TInt64Vector;
                        out APretensionMoneyGetDates: TDateVector;
                        out APretensionMoneyGetValues: TInt64Vector;
-                       out APretensionNotes: TStrVector);
+                       out APretensionNotes: TStrVector;
+                       out APretensionStatuses: TIntVector
+                       );
   end;
 
 var
@@ -435,9 +446,14 @@ begin
   Result:= ValueStrInt32ID('LOCATIONS', 'LocationTitle', 'LocationID', ALocationID);
 end;
 
-function TSQLite.UserNameLoad(const AUserID: Integer): String;
+function TSQLite.UserNameILoad(const AUserID: Integer): String;
 begin
-  Result:= ValueStrInt32ID('USERS', 'UserName', 'UserID', AUserID);
+  Result:= ValueStrInt32ID('USERS', 'UserNameI', 'UserID', AUserID);
+end;
+
+function TSQLite.UserNameRLoad(const AUserID: Integer): String;
+begin
+  Result:= ValueStrInt32ID('USERS', 'UserNameR', 'UserID', AUserID);
 end;
 
 function TSQLite.UserTitleLoad(const AUserID: Integer): String;
@@ -556,7 +572,7 @@ begin
       'UPDATE ' +
         'LOGREPAIR ' +
       'SET ' +
-        'UserID = :UserID, ' +
+        'UserID = :UserID, Status = 1, ' +   {1 - в работе}
         'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -580,7 +596,7 @@ begin
       'UPDATE ' +
         'LOGREPAIR ' +
       'SET ' +
-        'UserID = 0, ' +
+        'UserID = 0, Status = 0, ' +  {0 - не указано}
         'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -593,14 +609,15 @@ begin
   end;
 end;
 
-procedure TSQLite.RepairDatesLoad(const ALogID: Integer; out ABeginDate, AEndDate: TDate);
+procedure TSQLite.RepairDatesLoad(const ALogID: Integer;  out AStatus: Integer; out ABeginDate, AEndDate: TDate);
 begin
   ABeginDate:= 0;
   AEndDate:= 0;
+  AStatus:= 0;
   QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'BeginDate, EndDate ' +
+      'BeginDate, EndDate, Status ' +
     'FROM ' +
       'LOGREPAIR ' +
     'WHERE ' +
@@ -611,27 +628,30 @@ begin
   if not QIsEmpty then
   begin
     QFirst;
+    AStatus:= QFieldInt('Status');
     ABeginDate:= QFieldDT('BeginDate');
     AEndDate:= QFieldDT('EndDate');
   end;
   QClose;
 end;
 
-procedure TSQLite.RepairDatesUpdate(const ALogID: Integer; const ABeginDate, AEndDate: TDate);
+procedure TSQLite.RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
 var
   S: String;
 begin
-  if ABeginDate<=0 then Exit;
-
   S:=
     'UPDATE ' +
       'LOGREPAIR ' +
     'SET ' +
-      'BeginDate = :BeginDate ';
-  if AEndDate>0 then
-    S:= S + ', EndDate = :EndDate '
+      'Status = :Status, ';
+  if ABeginDate = 0 then
+    S:= S + 'BeginDate = NULL, '
   else
-    S:= S + ', EndDate = NULL ';
+    S:= S + 'BeginDate = :BeginDate, ';
+  if AEndDate = 0 then
+    S:= S + 'EndDate = NULL '
+  else
+    S:= S + 'EndDate = :EndDate ';
   S:= S +
     'WHERE ' +
         'LogID = :LogID';
@@ -640,7 +660,9 @@ begin
   try
     QSetSQL(S);
     QParamInt('LogID', ALogID);
-    QParamDT('BeginDate', ABeginDate);
+    QParamInt('Status', AStatus);
+    if ABeginDate>0 then
+      QParamDT('BeginDate', ABeginDate);
     if AEndDate>0 then
       QParamDT('EndDate', AEndDate);
     QExec;
@@ -651,23 +673,12 @@ begin
 end;
 
 procedure TSQLite.RepairDatesDelete(const ALogID: Integer);
+var
+  UserID, Status: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGREPAIR ' +
-      'SET ' +
-        'BeginDate = NULL, EndDate = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
+  RepairInfoLoad(ALogID, UserID);
+  Status:= Ord(UserID>0);
+  RepairDatesUpdate(ALogID, Status, 0, 0);
 end;
 
 procedure TSQLite.PretensionInfoLoad(const ALogID: Integer;
@@ -703,7 +714,7 @@ begin
       'UPDATE ' +
         'LOGPRETENSION ' +
       'SET ' +
-        'UserID = 0, MoneyValue = NULL, ' +
+        'UserID = 0, MoneyValue = NULL, Status = 0, ' +  {0 - не указано}
         'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -727,7 +738,7 @@ begin
       'UPDATE ' +
         'LOGPRETENSION ' +
       'SET ' +
-        'UserID = :UserID, MoneyValue = :MoneyValue, ' +
+        'UserID = :UserID, MoneyValue = :MoneyValue, Status = 1, ' +   {1 - в работе}
         'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -742,6 +753,102 @@ begin
   except
     QRollback;
   end;
+end;
+
+procedure TSQLite.PretensionMoneyLoad(const ALogID: Integer; out AStatus: Integer;
+                                         out AMoneySendValue: Int64; out AMoneySendDate: TDate;
+                                         out AMoneyGetValue: Int64; out AMoneyGetDate: TDate);
+begin
+  AMoneySendValue:= 0;
+  AMoneySendDate:= 0;
+  AMoneyGetValue:= 0;
+  AMoneyGetDate:= 0;
+  AStatus:= 0;
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      'MoneySendDate, MoneySendValue, MoneyGetDate, MoneyGetValue, Status ' +
+    'FROM ' +
+      'LOGPRETENSION ' +
+    'WHERE ' +
+        'LogID = :LogID'
+  );
+  QParamInt('LogID', ALogID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    AStatus:= QFieldInt('Status');
+    AMoneySendDate:= QFieldDT('MoneySendDate');
+    AMoneySendValue:= QFieldInt64('MoneySendValue');
+    AMoneyGetDate:= QFieldDT('MoneyGetDate');
+    AMoneyGetValue:= QFieldInt64('MoneyGetValue');
+  end;
+  QClose;
+end;
+
+procedure TSQLite.PretensionMoneyUpdate(const ALogID, AStatus: Integer;
+             const AMoneySendValue: Int64; const AMoneySendDate: TDate;
+             const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
+var
+  S: String;
+begin
+  S:=
+    'UPDATE ' +
+      'LOGPRETENSION ' +
+    'SET ' +
+      'Status = :Status, ';
+
+  if AMoneySendDate = 0 then
+    S:= S + 'MoneySendDate = NULL, '
+  else
+    S:= S + 'MoneySendDate = :MoneySendDate, ';
+  if AMoneySendValue = 0 then
+    S:= S + 'MoneySendValue = NULL, '
+  else
+    S:= S + 'MoneySendValue = :MoneySendValue, ';
+
+  if AMoneyGetDate = 0 then
+    S:= S + 'MoneyGetDate = NULL, '
+  else
+    S:= S + 'MoneyGetDate = :MoneyGetDate, ';
+  if AMoneyGetValue = 0 then
+    S:= S + 'MoneyGetValue = NULL '
+  else
+    S:= S + 'MoneyGetValue = :MoneyGetValue ';
+
+  S:= S +
+    'WHERE ' +
+        'LogID = :LogID';
+
+  QSetQuery(FQuery);
+  try
+    QSetSQL(S);
+    QParamInt('LogID', ALogID);
+    QParamInt('Status', AStatus);
+    if AMoneySendDate>0 then
+      QParamDT('MoneySendDate', AMoneySendDate);
+    if AMoneySendValue > 0 then
+      QParamInt64('MoneySendValue', AMoneySendValue);
+    if AMoneyGetDate>0 then
+      QParamDT('MoneyGetDate', AMoneyGetDate);
+    if AMoneyGetValue > 0 then
+      QParamInt64('MoneyGetValue', AMoneyGetValue);
+    QExec;
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.PretensionMoneyDelete(const ALogID: Integer);
+var
+  UserID, Status: Integer;
+  MoneyValue: Int64;
+begin
+  PretensionInfoLoad(ALogID, UserID, MoneyValue);
+  Status:= Ord(UserID>0);
+  PretensionMoneyUpdate(ALogID, Status, 0, 0, 0, 0);
 end;
 
 procedure TSQLite.MotorNoticeAnswerLoad(const ALogID, ALocationID, AUserID: Integer;
@@ -1835,6 +1942,7 @@ procedure TSQLite.DataLoad(const AMotorNumLike: String;
                        out ARepairBeginDates: TDateVector;
                        out ARepairEndDates: TDateVector;
                        out ARepairNotes: TStrVector;
+                       out ARepairStatuses: TIntVector;
                        out APretensionUserNames: TStrVector;
                        out APretensionUserTitles: TStrVector;
                        out APretensionNoticeFromUserDates: TDateVector;
@@ -1850,7 +1958,9 @@ procedure TSQLite.DataLoad(const AMotorNumLike: String;
                        out APretensionMoneySendValues: TInt64Vector;
                        out APretensionMoneyGetDates: TDateVector;
                        out APretensionMoneyGetValues: TInt64Vector;
-                       out APretensionNotes: TStrVector);
+                       out APretensionNotes: TStrVector;
+                       out APretensionStatuses: TIntVector
+                       );
 var
   S: String;
 begin
@@ -1891,6 +2001,7 @@ begin
   ARepairBeginDates:= nil;
   ARepairEndDates:= nil;
   ARepairNotes:= nil;
+  ARepairStatuses:= nil;
 
   APretensionUserNames:= nil;
   APretensionUserTitles:= nil;
@@ -1908,6 +2019,7 @@ begin
   APretensionMoneyGetDates:= nil;
   APretensionMoneyGetValues:= nil;
   APretensionNotes:= nil;
+  APretensionStatuses:= nil;
 
   S:=
     'SELECT ' +
@@ -1922,7 +2034,8 @@ begin
       't1.AnswerToUserDate      AS ReclamationAnswerToUserDate, ' +
       't1.AnswerToUserNum       AS ReclamationAnswerToUserNum, ' +
       't1.Note                  AS ReclamationNote, ' +
-      't1.CancelDate, t1.CancelNum, t1.ReportDate, t1.ReportNum, t1.Status,  ' +
+      't1.Status                AS ReclamationStatus, ' +
+      't1.CancelDate, t1.CancelNum, t1.ReportDate, t1.ReportNum, ' +
 
       't2.NoticeFromUserDate    AS RepairNoticeFromUserDate, '  +
       't2.NoticeFromUserNum     AS RepairNoticeFromUserNum, ' +
@@ -1933,6 +2046,7 @@ begin
       't2.AnswerToUserDate      AS RepairAnswerToUserDate, ' +
       't2.AnswerToUserNum       AS RepairAnswerToUserNum, ' +
       't2.Note                  AS RepairNote, ' +
+      't2.Status                AS RepairStatus, ' +
       't2.BeginDate, t2.EndDate, ' +
 
       't3.NoticeFromUserDate    AS PretensionNoticeFromUserDate, '  +
@@ -1944,6 +2058,7 @@ begin
       't3.AnswerToUserDate      AS PretensionAnswerToUserDate, ' +
       't3.AnswerToUserNum       AS PretensionAnswerToUserNum, ' +
       't3.Note                  AS PretensionNote, ' +
+      't3.Status                AS PretensionStatus, ' +
       't3.MoneyValue, t3.MoneySendDate, t3.MoneySendValue, t3.MoneyGetDate, t3.MoneyGetValue,  ' +
 
       't4.MotorName, ' +
@@ -1969,8 +2084,8 @@ begin
   else begin
     case AViewIndex of
     0: S:= S + ' AND (t1.Status < 2) ';
-    1: S:= S + ' AND (t2.EndDate IS NULL) ';
-    2: S:= S + ' AND (t3.MoneyGetDate IS NULL) ';
+    1: S:= S + ' AND (t2.Status < 2) ';
+    2: S:= S + ' AND (t3.Status < 2) ';
     3: S:= S + ' AND (' +
                      '(t1.NoticeFromUserDate IS NULL) OR ' +
                      '(t2.NoticeFromUserDate IS NULL) OR ' +
@@ -2030,7 +2145,7 @@ begin
       VAppend(AReclamationReportDates, QFieldDT('ReportDate'));
       VAppend(AReclamationReportNums, QFieldStr('ReportNum'));
       VAppend(AReclamationNotes, QFieldStr('ReclamationNote'));
-      VAppend(AReclamationStatuses, QFieldInt('Status'));
+      VAppend(AReclamationStatuses, QFieldInt('ReclamationStatus'));
 
       VAppend(ARepairUserNames, QFieldStr('RepairUserName'));
       VAppend(ARepairUserTitles, QFieldStr('RepairUserTitle'));
@@ -2045,6 +2160,7 @@ begin
       VAppend(ARepairBeginDates, QFieldDT('BeginDate'));
       VAppend(ARepairEndDates, QFieldDT('EndDate'));
       VAppend(ARepairNotes, QFieldStr('RepairNote'));
+      VAppend(ARepairStatuses, QFieldInt('RepairStatus'));
 
       VAppend(APretensionUserNames, QFieldStr('PretensionUserName'));
       VAppend(APretensionUserTitles, QFieldStr('PretensionUserTitle'));
@@ -2062,6 +2178,7 @@ begin
       VAppend(APretensionMoneyGetDates, QFieldDT('MoneyGetDate'));
       VAppend(APretensionMoneyGetValues, QFieldInt64('MoneyGetValue'));
       VAppend(APretensionNotes, QFieldStr('PretensionNote'));
+      VAppend(APretensionStatuses, QFieldInt('PretensionStatus'));
 
       QNext;
     end;

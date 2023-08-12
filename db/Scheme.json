@@ -1087,6 +1087,7 @@
       "MoneySendValue",
       "MoneyGetDate",
       "MoneyGetValue",
+      "Status",
       "Note"
     ],
     "ID" : {
@@ -1305,7 +1306,7 @@
       }
     },
     "AnswerFromBuilderNum" : {
-      "FieldType" : "DATETIME",
+      "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : false,
@@ -1353,7 +1354,7 @@
       }
     },
     "AnswerToUserNum" : {
-      "FieldType" : "DATETIME",
+      "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : false,
@@ -1456,6 +1457,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Сумма возмещения от производителя"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "Status" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "0",
+      "Description" : [
+        "Статус претензионной работы: 0 - не указан, 1 - в работе, 2 - завершена, 3 - отказ"
       ],
       "ExistingValues" : [
       ],
@@ -1975,6 +2000,7 @@
       "AnswerToUserNum",
       "BeginDate",
       "EndDate",
+      "Status",
       "Note"
     ],
     "ID" : {
@@ -2272,6 +2298,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Дата отправки двигателя из ремонта"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "Status" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "0",
+      "Description" : [
+        "Статус гарантийного ремонта: 0 - не указан, 1 - в работе, 2 - завершен, 3 - отказ"
       ],
       "ExistingValues" : [
       ],

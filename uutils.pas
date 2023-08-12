@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, DateUtils, FileUtil,
 
-  DK_Vector, DK_StrUtils, DK_Dialogs, DK_Const;
+  DK_Vector, DK_StrUtils, DK_Dialogs, DK_Const, DK_PriceUtils;
 
 const
   LETTER_NOTNEED_MARK = '—';
@@ -41,7 +41,12 @@ const
    { 5} 'О расследовании в СЛД Петроввальское',
    { 6} 'Об истечении срока гарантии',
 
-   { 7} 'О гарантийном ремонте'
+   { 7} 'О гарантийном ремонте',
+   { 8} 'Об отказе в гарантийном ремонте',
+
+   { 9} 'О согласовании затрат по претензии',
+   {10} 'О возмещении затрат',
+   {11} 'Об отказе в компенсации затрат'
   );
 
   //Тип организации 0 - все, 1 - потребители, 2 - производители
@@ -56,6 +61,14 @@ const
   //статус рекламации
   function ReclamationStatusIntToStr(const AStatus: Integer): String;
   function ReclamationStatusIntToStr(const AStatuses: TIntVector): TStrVector;
+
+  //статус ремонта
+  function RepairStatusIntToStr(const AStatus: Integer): String;
+  function RepairStatusIntToStr(const AStatuses: TIntVector): TStrVector;
+
+  //статус претензии
+  function PretensionStatusIntToStr(const AStatus: Integer): String;
+  function PretensionStatusIntToStr(const AStatuses: TIntVector): TStrVector;
 
 
   //имена писем
@@ -144,9 +157,9 @@ const
   procedure LetterTextToStrings(const V:TStrVector; const AStrings: TStrings);
 
   //тексты писем по темам
-  function Letter0ReclamationToBuilder(const ALocationName, AMotorsFullName: String;
+  function Letter0ReclamationToBuilder(const ALocationName, AMotorsFullName, AUserName: String;
                                        const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
-  function Letter1ReclamationToBuilder(const ALocationName, AMotorsFullName: String;
+  function Letter1ReclamationToBuilder(const ALocationName, AMotorsFullName, AUserName: String;
                                        const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
   function Letter2ReclamationToUser(const ANoticesFullName, AMotorsFullName: String;
                                     const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
@@ -163,10 +176,18 @@ const
                                          AWarrantyMileage, AWarrantyUseDate: String;
                                     const AWarrantyType: Byte): TStrVector;
 
-  function Letter7RepairToBuilder(const AMotorsFullName: String;
+  function Letter7RepairToBuilder(const AMotorsFullName, AUserName: String;
                                   const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
   function Letter7RepairToUser(const ANoticesFullName, AMotorsFullName: String;
                              const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
+  function Letter8RepairToUser(const ANoticesFullName, AMotorsFullName: String;
+                             const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
+
+  function Letter9PretensionToBuilder(const AMotorsFullName, AUserName: String;
+                                  const AMoneyValue: Int64): TStrVector;
+  function Letter10PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
+                                  const AMoneyValue: Int64): TStrVector;
+  function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
 
 var
   ApplicationDirectoryName: String;
@@ -221,17 +242,18 @@ begin
   end;
 end;
 
-function Letter0ReclamationToBuilder(const ALocationName, AMotorsFullName: String;
+function Letter0ReclamationToBuilder(const ALocationName, AMotorsFullName, AUserName: String;
                                     const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S: String;
 begin
   S:= 'В связи с ';
   if AIsSeveralNotices then
-    S:= S + 'поступившими уведомлениями (копии писем прилагаю) '
+    S:= S + 'поступившими уведомлениями (копии писем '
   else
-    S:= S + 'поступившим уведомлением (копию письма прилагаю) ';
-  S:= S + 'прошу Вас командировать представителя изготовителя в ';
+    S:= S + 'поступившим уведомлением (копию письма ';
+  S:= S + AUserName;
+  S:= S + ' прилагаю) прошу Вас командировать представителя изготовителя в ';
   S:= S + ALocationName + ' на расследование ';
   if AIsSeveralMotors then
     S:= S + 'рекламационных случаев электродвигателей '
@@ -242,7 +264,7 @@ begin
   Result:= VCreateStr([S]);
 end;
 
-function Letter1ReclamationToBuilder(const ALocationName, AMotorsFullName: String;
+function Letter1ReclamationToBuilder(const ALocationName, AMotorsFullName, AUserName: String;
                                      const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S1, S2: String;
@@ -254,9 +276,11 @@ begin
     S1:= S1 + ' вышел из строя гарантийный электродвигатель ';
   S1:= S1 + AMotorsFullName + '. ';
   if AIsSeveralNotices then
-    S1:= S1 + 'Копии писем прилагаю. '
+    S1:= S1 + '(копии писем '
   else
-    S1:= S1 + 'Копию письма прилагаю. ';
+    S1:= S1 + '(копию письма ';
+  S1:= S1 + AUserName;
+  S1:= S1 + ' прилагаю).';
 
   if AIsSeveralMotors then
     S2:= 'Расследование рекламационных случаев '
@@ -408,22 +432,18 @@ begin
 end;
 
 
-function Letter7RepairToBuilder(const AMotorsFullName: String;
+function Letter7RepairToBuilder(const AMotorsFullName, AUserName: String;
                                 const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S: String;
 begin
   S:= 'В связи с ';
   if AIsSeveralNotices then
-    S:= S + 'поступившими обращениями '
+    S:= S + 'поступившими уведомлениями (копии писем '
   else
-    S:= S + 'поступившим обращением ';
-  //S:= S + AUserNameR;
-  if AIsSeveralNotices then
-    S:= S + ' (копии писем прилагаю) '
-  else
-    S:= S + ' (копию письма прилагаю) ';
-  S:= S + 'прошу Вас согласовать отправку в гарантийный ремонт  ';
+    S:= S + 'поступившим уведомлением (копию письма ';
+  S:= S + AUserName;
+  S:= S + ' прилагаю) прошу Вас согласовать отправку в гарантийный ремонт ';
   if AIsSeveralMotors then
     S:= S + 'электродвигателей '
   else
@@ -464,6 +484,82 @@ begin
        'хранения и транспортировки гарантийного товара.';
   S2:= 'Заводом-изготовителем будет проведено комплексное обследование и в случае ' +
        'подтверждения причины неисправности, указанной в акте осмотра – гарантийный ремонт.';
+
+  Result:= VCreateStr([S1, S2]);
+end;
+
+function Letter8RepairToUser(const ANoticesFullName, AMotorsFullName: String;
+               const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
+var
+  S1, S2: String;
+begin
+  if AIsSeveralNotices then
+    S1:= 'На Ваши письма №№ '
+  else
+    S1:= 'На Ваше письмо № ';
+  S1:= S1 + ANoticesFullName;
+  S1:= S1 + ' сообщаю, что ';
+  S1:= S1 + '<ОПИСАНИЕ ПРИЧИН ОТКАЗА В ГАРАНТИЙНОМ РЕМОНТЕ>';
+
+  S2:= 'Мы вынуждены отказать в гарантийном ремонте ';
+  if AIsSeveralMotors then
+    S2:= S2 + 'электродвигателей '
+  else
+    S2:= S2 + 'электродвигателя ';
+  S2:= S2 + AMotorsFullName + '. ';
+
+  Result:= VCreateStr([S1, S2]);
+end;
+
+function Letter9PretensionToBuilder(const AMotorsFullName, AUserName: String;
+                                  const AMoneyValue: Int64): TStrVector;
+var
+  S: String;
+begin
+  S:= 'В связи с поступившей претензией о возмещении затрат по ' +
+      '<ТРАНСПОРТИРОВКЕ/РЕМОНТУ/ДЕМОНТАЖУ/ДР.>' +
+      ' гарантийного электродвигателя ';
+  S:= S + AMotorsFullName;
+  S:= S + ' (копию  письма ';
+  S:= S + AUserName;
+  S:= S + ' прилагаю) прошу Вас согласовать компенсацию затрат в размере ';
+  S:= S + PriceIntToStr(AMoneyValue, True);
+  S:= S + ' руб.';
+
+  Result:= VCreateStr([S]);
+end;
+
+function Letter10PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
+                                  const AMoneyValue: Int64): TStrVector;
+var
+  S: String;
+begin
+  S:= 'На Ваше письмо № ';
+  S:= S + ANoticesFullName;
+  S:= S + ' сообщаю, что возражений по претензии на сумму ';
+  S:= S + PriceIntToStr(AMoneyValue, True);
+  S:= S + ' руб.  не имеем. Для оплаты затрат, связанных с ' +
+      ' гарантийным электродвигателем ';
+  S:= S + AMotorsFullName;
+  S:= S + ', прошу Вас направить в наш адрес счет и документ для отражения ' +
+      'в бухгалтерском учете.';
+
+  Result:= VCreateStr([S]);
+end;
+
+function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
+var
+  S1, S2: String;
+begin
+  S1:= 'На Ваше письмо № ';
+  S1:= S1 + ANoticesFullName;
+  S1:= S1 + ' сообщаю, что в документах, которые представлены для обоснования затрат по ' +
+       '<ТРАНСПОРТИРОВКЕ/РЕМОНТУ/ДЕМОНТАЖУ/ДР.>' +
+       ' гарантийного электродвигателя ';
+  S1:= S1 + AMotorsFullName + ', ';
+  S1:= S1 + '<НЕСООТВЕТСТВИЯ В ДОКУМЕНТАХ>' + '.';
+
+  S2:= 'Мы вынуждены отказать в компенсации понесенных затрат.';
 
   Result:= VCreateStr([S1, S2]);
 end;
@@ -550,6 +646,46 @@ begin
   VDim(Result{%H-}, Length(AStatuses));
   for i:= 0 to High(Result) do
     Result[i]:= ReclamationStatusIntToStr(AStatuses[i]);
+end;
+
+function RepairStatusIntToStr(const AStatus: Integer): String;
+begin
+  Result:= EmptyStr;
+  case AStatus of
+  0: Result:= EmptyStr;
+  1: Result:= 'В процессе';
+  2: Result:= 'Завершен';
+  3: Result:= 'Отказано';
+  end;
+end;
+
+function RepairStatusIntToStr(const AStatuses: TIntVector): TStrVector;
+var
+  i: Integer;
+begin
+  VDim(Result{%H-}, Length(AStatuses));
+  for i:= 0 to High(Result) do
+    Result[i]:= RepairStatusIntToStr(AStatuses[i]);
+end;
+
+function PretensionStatusIntToStr(const AStatus: Integer): String;
+begin
+  Result:= EmptyStr;
+  case AStatus of
+  0: Result:= EmptyStr;
+  1: Result:= 'В процессе';
+  2: Result:= 'Завершена';
+  3: Result:= 'Отказано';
+  end;
+end;
+
+function PretensionStatusIntToStr(const AStatuses: TIntVector): TStrVector;
+var
+  i: Integer;
+begin
+  VDim(Result{%H-}, Length(AStatuses));
+  for i:= 0 to High(Result) do
+    Result[i]:= PretensionStatusIntToStr(AStatuses[i]);
 end;
 
 function LetterFullName(const ADate: TDate; const ANum: String;

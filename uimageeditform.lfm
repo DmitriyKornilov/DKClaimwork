@@ -8,7 +8,7 @@ object ImageEditForm: TImageEditForm
   DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  Position = poDesktopCenter
+  Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object EditButtonPanel: TPanel
     Left = 2

@@ -39,7 +39,7 @@ type
                            ARepairAnswerToUserStrs,
                            ARepairBeginDatesStrs,
                            ARepairEndDatesStrs,
-                           ARepairNotes,
+                           ARepairNotes, ARepairStatuses,
                            APretensionUsers,
                            APretensionNoticeFromUserStrs, APretensionMoneyValueStrs,
                            APretensionNoticeToBuilderStrs,
@@ -47,7 +47,7 @@ type
                            APretensionAnswerToUserStrs,
                            APretensionMoneySendDatesStrs, APretensionMoneySendValuesStrs,
                            APretensionMoneyGetDatesStrs, APretensionMoneyGetValuesStrs,
-                           APretensionNotes: TStrVector);
+                           APretensionNotes, APretensionStatuses: TStrVector);
   end;
 
 implementation
@@ -58,6 +58,7 @@ constructor TLogTable.Create(const AGrid: TsWorksheetGrid; const AOnSelect: TShe
 const
   MAIN_COLUMN_WIDTH = 105;
   NOTE_COLUMN_WIDTH = 180;
+  STATUS_COLUMN_WIDTH = 90;
 begin
   inherited Create(AGrid);
   OnSelect:= AOnSelect;
@@ -80,7 +81,7 @@ begin
   AddColumn(LETTER_NAMES[4], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[5], MAIN_COLUMN_WIDTH);
   AddColumn('Примечание по ходу расследования', NOTE_COLUMN_WIDTH, haLeft);
-  AddColumn('Статус рекламации', 80);
+  AddColumn('Статус1', STATUS_COLUMN_WIDTH);
   //гарантийный ремонт
   AddColumn('Потребитель2', 100);
   AddColumn(LETTER_NAMES[6], MAIN_COLUMN_WIDTH);
@@ -90,18 +91,20 @@ begin
   AddColumn('Дата прибытия в ремонт', 70);
   AddColumn('Дата отправки из ремонта', 70);
   AddColumn('Примечание по ходу ремонта', NOTE_COLUMN_WIDTH, haLeft);
+  AddColumn('Статус2', STATUS_COLUMN_WIDTH);
   //возмещение затрат
   AddColumn('Потребитель3', 100);
   AddColumn(LETTER_NAMES[10], MAIN_COLUMN_WIDTH);
-  AddColumn('Сумма к возмещению', 100);
+  AddColumn('Сумма к возмещению', 80);
   AddColumn(LETTER_NAMES[11], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[12], MAIN_COLUMN_WIDTH);
   AddColumn(LETTER_NAMES[13], MAIN_COLUMN_WIDTH);
-  AddColumn('Дата возмещения Потребителю', 80);
+  AddColumn('Дата возмещения Потребителю', 70);
   AddColumn('Сумма возмещения Потребителю', 80);
-  AddColumn('Дата возмещения Производителем', 80);
+  AddColumn('Дата возмещения Производителем', 70);
   AddColumn('Сумма возмещения Производителем', 80);
   AddColumn('Примечание по возмещению затрат', NOTE_COLUMN_WIDTH, haLeft);
+  AddColumn('Статус3', STATUS_COLUMN_WIDTH);
 
   //общие данные
   AddToHeader(1, 1, 2, 1, '№ п/п');
@@ -115,7 +118,7 @@ begin
   AddToHeader(1, 7, 2, 7,    LETTER_NAMES[0]);
   AddToHeader(1, 8, 2, 8,    LETTER_NAMES[1]);
   AddToHeader(1, 9, 2, 9,    LETTER_NAMES[2]);
-  AddToHeader(1, 10, 2, 10,    LETTER_NAMES[3]);
+  AddToHeader(1, 10, 2, 10,  LETTER_NAMES[3]);
   AddToHeader(1, 11, 2, 11,  LETTER_NAMES[4]);
   AddToHeader(1, 12, 2, 12,  LETTER_NAMES[5]);
   AddToHeader(1, 13, 2, 13, 'Примечание по ходу расследования');
@@ -129,20 +132,22 @@ begin
   AddToHeader(1, 20, 2, 20, 'Дата прибытия в ремонт');
   AddToHeader(1, 21, 2, 21, 'Дата отправки из ремонта');
   AddToHeader(1, 22, 2, 22, 'Примечание по ходу ремонта');
+  AddToHeader(1, 23, 2, 23, 'Статус ремонта');
   //возмещение затрат
-  AddToHeader(1, 23, 2, 23, 'Потребитель');
-  AddToHeader(1, 24, 2, 24, LETTER_NAMES[10]);
-  AddToHeader(1, 25, 2, 25, 'Сумма к возмещению');
-  AddToHeader(1, 26, 2, 26, LETTER_NAMES[11]);
-  AddToHeader(1, 27, 2, 27, LETTER_NAMES[12]);
-  AddToHeader(1, 28, 2, 28, LETTER_NAMES[13]);
-  AddToHeader(1, 29, 1, 30, 'Возмещение Потребителю');
-  AddToHeader(2, 29, 'Дата');
-  AddToHeader(2, 30, 'Сумма');
-  AddToHeader(1, 31, 1, 32, 'Возмещение Производителем');
-  AddToHeader(2, 31, 'Дата');
-  AddToHeader(2, 32, 'Сумма');
-  AddToHeader(1, 33, 2, 33, 'Примечание по возмещению затрат');
+  AddToHeader(1, 24, 2, 24, 'Потребитель');
+  AddToHeader(1, 25, 2, 25, LETTER_NAMES[10]);
+  AddToHeader(1, 26, 2, 26, 'Сумма к возмещению');
+  AddToHeader(1, 27, 2, 27, LETTER_NAMES[11]);
+  AddToHeader(1, 28, 2, 28, LETTER_NAMES[12]);
+  AddToHeader(1, 29, 2, 29, LETTER_NAMES[13]);
+  AddToHeader(1, 30, 1, 31, 'Компенсировано Потребителю');
+  AddToHeader(2, 30, 'Дата');
+  AddToHeader(2, 31, 'Сумма');
+  AddToHeader(1, 32, 1, 33, 'Возмещено Производителем');
+  AddToHeader(2, 32, 'Дата');
+  AddToHeader(2, 33, 'Сумма');
+  AddToHeader(1, 34, 2, 34, 'Примечание по возмещению затрат');
+  AddToHeader(1, 35, 2, 35, 'Статус претензионной работы');
 end;
 
 procedure TLogTable.Update(const AMotorNames, AMotorNums, AMotorDates,
@@ -161,7 +166,7 @@ procedure TLogTable.Update(const AMotorNames, AMotorNums, AMotorDates,
                            ARepairAnswerToUserStrs,
                            ARepairBeginDatesStrs,
                            ARepairEndDatesStrs,
-                           ARepairNotes,
+                           ARepairNotes, ARepairStatuses,
                            APretensionUsers,
                            APretensionNoticeFromUserStrs, APretensionMoneyValueStrs,
                            APretensionNoticeToBuilderStrs,
@@ -169,7 +174,7 @@ procedure TLogTable.Update(const AMotorNames, AMotorNums, AMotorDates,
                            APretensionAnswerToUserStrs,
                            APretensionMoneySendDatesStrs, APretensionMoneySendValuesStrs,
                            APretensionMoneyGetDatesStrs, APretensionMoneyGetValuesStrs,
-                           APretensionNotes: TStrVector
+                           APretensionNotes, APretensionStatuses: TStrVector
                            );
 begin
   //общие данные
@@ -187,7 +192,7 @@ begin
   SetColumnString(LETTER_NAMES[4], AReclamationReportStrs);
   SetColumnString(LETTER_NAMES[5], AReclamationCancelStrs);
   SetColumnString('Примечание по ходу расследования', AReclamationNotes);
-  SetColumnString('Статус рекламации', AReclamationStatuses);
+  SetColumnString('Статус1', AReclamationStatuses);
   //гарантийный ремонт
   SetColumnString('Потребитель2', ARepairUsers);
   SetColumnString(LETTER_NAMES[6], ARepairNoticeFromUserStrs);
@@ -197,6 +202,7 @@ begin
   SetColumnString('Дата прибытия в ремонт', ARepairBeginDatesStrs);
   SetColumnString('Дата отправки из ремонта', ARepairEndDatesStrs);
   SetColumnString('Примечание по ходу ремонта', ARepairNotes);
+  SetColumnString('Статус2', ARepairStatuses);
   //возмещение затрат
   SetColumnString('Потребитель3', APretensionUsers);
   SetColumnString(LETTER_NAMES[10], APretensionNoticeFromUserStrs);
@@ -209,6 +215,7 @@ begin
   SetColumnString('Дата возмещения Производителем', APretensionMoneyGetDatesStrs);
   SetColumnString('Сумма возмещения Производителем', APretensionMoneyGetValuesStrs);
   SetColumnString('Примечание по возмещению затрат', APretensionNotes);
+  SetColumnString('Статус3', APretensionStatuses);
 
   Draw;
 end;

@@ -201,7 +201,7 @@ begin
     VAppend(V, AReceiverName);
     Letter.WriteDestination(V);
 
-    Letter.WriteAppeal('Уважаемый ' +  AReceiverAppeal + '!');
+    Letter.WriteAppeal(AReceiverAppeal);
     Letter.WriteBody(ABody);
 
     V:= VStrToVector(ASenderPost, STRING_VECTOR_DELIMITER);
