@@ -32,6 +32,7 @@ type
     LetterNameLabel: TLabel;
     LetterNumEdit: TEdit;
     LetterStandardCreateButton: TButton;
+    NotChangeFileCheckBox: TCheckBox;
     NotNeedCheckBox: TCheckBox;
     OpenButton: TSpeedButton;
     OpenDialog1: TOpenDialog;
@@ -43,19 +44,24 @@ type
     procedure FormShow(Sender: TObject);
     procedure LetterCustomCreateButtonClick(Sender: TObject);
     procedure LetterStandardCreateButtonClick(Sender: TObject);
+    procedure NotChangeFileCheckBoxChange(Sender: TObject);
     procedure NotNeedCheckBoxChange(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
   private
     CanFormClose: Boolean;
     LogIDs: TIntVector;
+    MotorReturn: Boolean;
     procedure DataLoad;
     procedure DocFileOpen;
     procedure DocFileNameSet(const AFileName: String);
     procedure LetterStandardFormOpen;
     procedure LetterCustomFormOpen;
-    function StatusGet: Integer;
-    procedure StatusSet(const AStatus: Integer);
+
+    function ReclamationStatusGet: Integer;
+    procedure ReclamationStatusSet(const AStatus: Integer);
+    function RepairStatusGet: Integer;
+    procedure RepairStatusSet(const AStatus: Integer);
   public
     Category: Byte;
     LetterType: Byte;
@@ -73,6 +79,8 @@ implementation
 
 procedure TLetterEditForm.NotNeedCheckBoxChange(Sender: TObject);
 begin
+  if NotNeedCheckBox.Checked then
+    FileNameEdit.Clear;
   Label1.Enabled:= not NotNeedCheckBox.Checked;
   LetterNumEdit.Enabled:= Label1.Enabled;
   Label2.Enabled:= Label1.Enabled;
@@ -99,19 +107,23 @@ begin
 
   if NotNeedCheckBox.Checked then //документ не требуется
   begin
+    //удаляем файл, если есть
+    if not NotChangeFileCheckBox.Checked then
+    begin
+      SQLite.MotorLoad(LogID, k, MotorName, MotorNum, MotorDate);
+      SQLite.LetterLoad(LogID, LetterType, OldLetterNum, OldLetterDate);
+      DocumentDelete(LetterType, OldLetterDate, OldLetterNum,
+                     MotorDate, MotorName, MotorNum);
+    end;
+    //записываем в базу
     if LetterType=5 then {Отзыв рекламации}
       SQLite.ReclamationCancelNotNeed(LogID)
     else if LetterType=4 then {Акт осмотра двигателя}
-      SQLite.ReclamationReportNotNeed(LogID, StatusGet)
+      SQLite.ReclamationReportNotNeed(LogID, ReclamationStatusGet)
     else
       SQLite.LetterNotNeed(LogID, LetterType);
-    //удаляем файл, если есть
-    SQLite.MotorLoad(LogID, k, MotorName, MotorNum, MotorDate);
-    SQLite.LetterLoad(LogID, LetterType, OldLetterNum, OldLetterDate);
-    DocumentDelete(LetterType, OldLetterDate, OldLetterNum,
-                   MotorDate, MotorName, MotorNum);
   end
-  else begin  //запись документа
+  else begin  //документ требуется - запись документа
     LetterNum:= STrim(LetterNumEdit.Text);
     if SEmpty(LetterNum) and (LetterType=4 {Акт осмотра двигателя}) then
       LetterNum:= 'б/н';
@@ -120,53 +132,88 @@ begin
       ShowInfo('Не указан номер!');
       Exit;
     end;
-
     LetterDate:= DT1.Date;
 
-    SrcFileName:= STrim(FileNameEdit.Text);
-    if VIsNil(LogIDs) then //письмо только для одного двигателя
+    if MotorReturn then //возврат двигателя на этапе расследования рекламации
     begin
-      SQLite.MotorLoad(LogID, k, MotorName, MotorNum, MotorDate);
-      SQLite.LetterLoad(LogID, LetterType, OldLetterNum, OldLetterDate);
-      DocumentSave(LetterType, SrcFileName, MotorDate, MotorName, MotorNum,
-                   OldLetterDate, OldLetterNum, LetterDate, LetterNum);
-    end
-    else begin
+      //удаляем все файлы по согласованию гарантийного ремонта (не требуются)
       for i:= 0 to High(LogIDs) do
       begin
         SQLite.MotorLoad(LogIDs[i], k, MotorName, MotorNum, MotorDate);
-        SQLite.LetterLoad(LogIDs[i], LetterType, OldLetterNum, OldLetterDate);
-        DocumentSave(LetterType, SrcFileName, MotorDate, MotorName, MotorNum,
-                   OldLetterDate, OldLetterNum, LetterDate, LetterNum);
+        for k:= 6 to 9 do
+        begin
+          SQLite.LetterLoad(LogIDs[i], k, OldLetterNum, OldLetterDate);
+          DocumentDelete(k, OldLetterDate, OldLetterNum, MotorDate, MotorName, MotorNum);
+        end;
       end;
-    end;
-
-    if LetterType=5 then {Отзыв рекламации}
-      SQLite.ReclamationCancelUpdate(LogID, LetterNum, LetterDate)
-    else if LetterType=4 then {Акт осмотра двигателя}
-      SQLite.ReclamationReportUpdate(LogID, LetterNum, LetterDate, StatusGet)
-    else begin
-      if VIsNil(LogIDs) then
-        SQLite.LetterUpdate(LogID, LetterType, LetterNum, LetterDate)
+      //записываем в базу данные по возврату
+      SQLite.MotorsReturn(LogIDs, LetterNum, LetterDate);
+    end
+    else begin // другие письма
+      //пересохраняем файлы писем, если нужно
+      if not NotChangeFileCheckBox.Checked then
+      begin
+        SrcFileName:= STrim(FileNameEdit.Text);
+        for i:= 0 to High(LogIDs) do
+        begin
+          SQLite.MotorLoad(LogIDs[i], k, MotorName, MotorNum, MotorDate);
+          SQLite.LetterLoad(LogIDs[i], LetterType, OldLetterNum, OldLetterDate);
+          DocumentSave(LetterType, SrcFileName, MotorDate, MotorName, MotorNum,
+                     OldLetterDate, OldLetterNum, LetterDate, LetterNum);
+        end;
+      end;
+      //записываем в базу данные
+      if LetterType=5 then {Отзыв рекламации}
+        SQLite.ReclamationCancelUpdate(LogID, LetterNum, LetterDate)
+      else if LetterType=4 then {Акт осмотра двигателя}
+        SQLite.ReclamationReportUpdate(LogID, LetterNum, LetterDate, ReclamationStatusGet)
+      else if LetterType=9 then {Ответ на запрос о ремонте Потребителю}
+        SQLite.RepairAnswersToUserUpdate(LogIDs, LetterNum, LetterDate, RepairStatusGet)
       else
         SQLite.LettersUpdate(LogIDs, LetterType, LetterNum, LetterDate);
     end;
   end;
 
-
   CanFormClose:= True;
   ModalResult:= mrOK;
 end;
 
-function TLetterEditForm.StatusGet: Integer;
+function TLetterEditForm.ReclamationStatusGet: Integer;
 begin
-  Result:= StatusComboBox.ItemIndex + 2;
+  if StatusComboBox.ItemIndex = 0 then
+    Result:= 2
+  else
+    Result:= 3;
 end;
 
-procedure TLetterEditForm.StatusSet(const AStatus: Integer);
+procedure TLetterEditForm.ReclamationStatusSet(const AStatus: Integer);
 begin
-  if (AStatus=2) or (AStatus=3) then
-    StatusComboBox.ItemIndex:= AStatus-2;
+  StatusComboBox.Clear;
+  StatusComboBox.Items.Add('принята');
+  StatusComboBox.Items.Add('отклонена');
+  if AStatus=3 then
+    StatusComboBox.ItemIndex:= 1
+  else
+    StatusComboBox.ItemIndex:= 0;
+end;
+
+function TLetterEditForm.RepairStatusGet: Integer;
+begin
+  if StatusComboBox.ItemIndex = 0 then
+    Result:= 2
+  else
+    Result:= 5;
+end;
+
+procedure TLetterEditForm.RepairStatusSet(const AStatus: Integer);
+begin
+  StatusComboBox.Clear;
+  StatusComboBox.Items.Add('согласовано');
+  StatusComboBox.Items.Add('отказано');
+  if AStatus=5 then
+    StatusComboBox.ItemIndex:= 1
+  else
+    StatusComboBox.ItemIndex:= 0;
 end;
 
 procedure TLetterEditForm.DataLoad;
@@ -175,10 +222,13 @@ var
   LetterDate: TDate;
   Status: Integer;
 begin
-  Height:= 350;
+  Height:= 450;
 
   Caption:= LETTER_NAMES[LetterType];
   LetterNameLabel.Caption:= LETTER_NAMES[LetterType];
+
+  LogIDs:= nil;
+  VAppend(LogIDs, LogID);
 
   SQLite.LetterLoad(LogID, LetterType, LetterNum, LetterDate);
   if LetterNum<>LETTER_NOTNEED_MARK then
@@ -186,13 +236,24 @@ begin
   if LetterDate>0 then
     DT1.Date:= LetterDate;
 
-  //combobox статуса рекламации
-  if LetterType=4 then {Акт осмотра двигателя}
+  //combobox статуса рекламации и ремонта
+  if (LetterType=4) or    {Акт осмотра двигателя}
+     (LetterType=9) then  {Ответ о ремонте потребителю}
   begin
     Label3.Visible:= True;
     StatusCombobox.Visible:= True;
-    Status:= SQLite.ReclamationStatusLoad(LogID);
-    StatusSet(Status);
+    if (LetterType=4) then
+    begin
+      Label3.Caption:= 'Статус рекламации';
+      Status:= SQLite.ReclamationStatusLoad(LogID);
+      ReclamationStatusSet(Status);
+    end;
+    if (LetterType=9) then
+    begin
+      Label3.Caption:= 'Статус согласования';
+      Status:= SQLite.RepairStatusLoad(LogID);
+      RepairStatusSet(Status);
+    end;
   end;
 
   //видимость кнопок создания документа
@@ -233,6 +294,7 @@ begin
     LetterStandardForm.LetterNumEdit.Text:= LetterNumEdit.Text;
     LetterStandardForm.DT1.Date:= DT1.Date;
     LogIDs:= nil;
+    MotorReturn:= False;
     if LetterStandardForm.ShowModal=mrOK then
     begin
       NotNeedCheckBox.Checked:= False;
@@ -240,7 +302,10 @@ begin
       DT1.Date:= LetterStandardForm.DT1.Date;
       LogIDs:= VCut(LetterStandardForm.SaveLogIDs);
       DocFileNameSet(LetterStandardForm.FileNameLabel.Caption);
-    end;
+      MotorReturn:= SSame(LetterStandardForm.SubjectComboBox.Text, LETTER_SUBJECTS[7]);
+    end
+    else
+      VAppend(LogIDs, LogID);
   finally
     FreeAndNil(LetterStandardForm);
   end;
@@ -264,7 +329,9 @@ begin
       LetterNumEdit.Text:= STrim(LetterCustomForm.LetterNumEdit.Text);
       DT1.Date:= LetterCustomForm.DT1.Date;
       DocFileNameSet(LetterCustomForm.FileNameLabel.Caption);
-    end;
+    end
+    else
+      VAppend(LogIDs, LogID);
   finally
     FreeAndNil(LetterCustomForm);
   end;
@@ -274,6 +341,7 @@ procedure TLetterEditForm.FormCreate(Sender: TObject);
 begin
   CanFormClose:= True;
   LogIDs:= nil;
+  MotorReturn:= False;
   DT1.Date:= Date;
 end;
 
@@ -290,6 +358,14 @@ end;
 procedure TLetterEditForm.LetterStandardCreateButtonClick(Sender: TObject);
 begin
   LetterStandardFormOpen;
+end;
+
+procedure TLetterEditForm.NotChangeFileCheckBoxChange(Sender: TObject);
+begin
+  if NotChangeFileCheckBox.Checked then
+    FileNameEdit.Clear;
+  FileNameEdit.Enabled:= not NotChangeFileCheckBox.Checked;
+  OpenButton.Enabled:= FileNameEdit.Enabled;
 end;
 
 procedure TLetterEditForm.CancelButtonClick(Sender: TObject);

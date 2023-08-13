@@ -70,10 +70,10 @@ type
     procedure RepairNoticeUpdate(const ALogID, AUserID: Integer;
                                   const ANoticeNum: String;
                                   const ANoticeDate: TDate);
-    procedure RepairDatesLoad(const ALogID: Integer; out AStatus: Integer; out ABeginDate, AEndDate: TDate);
+    procedure RepairDatesLoad(const ALogID: Integer; out ABeginDate, AEndDate: TDate);
     procedure RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
     procedure RepairDatesDelete(const ALogID: Integer);
-
+    function RepairStatusLoad(const ALogID: Integer): Integer;
 
 
     //претензии
@@ -126,6 +126,16 @@ type
                            const ALetterDate: TDate;
                            const AStatus: Integer);
     procedure ReclamationReportDelete(const ALogID: Integer);
+
+    //возврат двигателя на этапе расследования рекламации
+    procedure MotorsReturn(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate);
+    //письма по ремонту
+    procedure RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
 
     //письма общие
     procedure LetterLoad(const ALogID: Integer; const ALetterType: Byte;
@@ -608,15 +618,14 @@ begin
   end;
 end;
 
-procedure TSQLite.RepairDatesLoad(const ALogID: Integer;  out AStatus: Integer; out ABeginDate, AEndDate: TDate);
+procedure TSQLite.RepairDatesLoad(const ALogID: Integer;  out ABeginDate, AEndDate: TDate);
 begin
   ABeginDate:= 0;
   AEndDate:= 0;
-  AStatus:= 0;
   QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'BeginDate, EndDate, Status ' +
+      'BeginDate, EndDate ' +
     'FROM ' +
       'LOGREPAIR ' +
     'WHERE ' +
@@ -627,7 +636,6 @@ begin
   if not QIsEmpty then
   begin
     QFirst;
-    AStatus:= QFieldInt('Status');
     ABeginDate:= QFieldDT('BeginDate');
     AEndDate:= QFieldDT('EndDate');
   end;
@@ -676,8 +684,13 @@ var
   UserID, Status: Integer;
 begin
   RepairInfoLoad(ALogID, UserID);
-  Status:= Ord(UserID>0);
+  Status:= 2*Ord(UserID>0); {если задан потребитель, то 2 - согласовано, если не задан - то 0 - не указано}
   RepairDatesUpdate(ALogID, Status, 0, 0);
+end;
+
+function TSQLite.RepairStatusLoad(const ALogID: Integer): Integer;
+begin
+  Result:= ValueInt32Int32ID('LOGREPAIR', 'Status', 'LogID', ALogID);
 end;
 
 procedure TSQLite.PretensionInfoLoad(const ALogID: Integer;
@@ -1405,6 +1418,101 @@ begin
   end;
 end;
 
+procedure TSQLite.MotorsReturn(const ALogIDs: TIntVector;
+  const ALetterNum: String; const ALetterDate: TDate);
+var
+  i, UserID, LocationID: Integer;
+begin
+  //получаем UserID - он у всех одинаковый
+  ReclamationInfoLoad(ALogIDs[0], UserID, LocationID);
+
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'UPDATE ' +
+        'LOGRECLAMATION ' +
+      'SET ' +
+        'Status = 2, ' +  {2 - принята}
+        'AnswerToUserNum = :NumValue, ' +
+        'AnswerToUserDate = :DateValue ' +
+      'WHERE ' +
+        'LogID = :LogID'
+    );
+    QParamStr('NumValue', ALetterNum);
+    QParamDT('DateValue', ALetterDate);
+    for i:= 0 to High(ALogIDs) do
+    begin
+      QParamInt('LogID', ALogIDs[i]);
+      QExec;
+    end;
+
+    QSetSQL(
+      'UPDATE ' +
+        'LOGREPAIR ' +
+      'SET ' +
+        'UserID = :UserID, ' +
+        'Status = 2, ' +  {2 - в пути}
+        'NoticeFromUserDate = NULL, ' +
+        'NoticeFromUserNum = :NumValue, ' +
+        'NoticeToBuilderDate = NULL, ' +
+        'NoticeToBuilderNum = :NumValue, ' +
+        'AnswerFromBuilderDate = NULL, ' +
+        'AnswerFromBuilderNum = :NumValue, ' +
+        'AnswerToUserDate = NULL, ' +
+        'AnswerToUserNum = :NumValue, ' +
+        'Note = :Note ' +
+      'WHERE ' +
+        'LogID = :LogID'
+    );
+    QParamInt('UserID', UserID);
+    QParamStr('NumValue', LETTER_NOTNEED_MARK);
+    QParamStr('Note', 'Производителем принято решение о возврате на этапе расследования');
+    for i:= 0 to High(ALogIDs) do
+    begin
+      QParamInt('LogID', ALogIDs[i]);
+      QExec;
+    end;
+
+    QCommit;
+  except
+    QRollback;
+  end;
+
+end;
+
+procedure TSQLite.RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
+var
+  i: Integer;
+begin
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'UPDATE ' +
+        'LOGRECLAMATION ' +
+      'SET ' +
+        'Status = :Status, ' +
+        'AnswerToUserNum = :NumValue, ' +
+        'AnswerToUserDate = :DateValue ' +
+      'WHERE ' +
+        'LogID = :LogID'
+    );
+    QParamInt('Status', AStatus);
+    QParamStr('NumValue', ALetterNum);
+    QParamDT('DateValue', ALetterDate);
+    for i:= 0 to High(ALogIDs) do
+    begin
+      QParamInt('LogID', ALogIDs[i]);
+      QExec;
+    end;
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
 procedure TSQLite.ImageListLoad(out AImageIDs: TIntVector; out AImageNames: TStrVector);
 begin
   AImageIDs:= nil;
@@ -2084,15 +2192,20 @@ begin
     case AViewIndex of
     0: S:= S + ' AND (t1.Status < 2) ';                      //в процессе рекламационной работы
     1: S:= S + ' AND (t1.Status = 2) AND (t2.Status < 2) ';  //ожидающие согласования отправки в ремонт
-    2: S:= S + ' AND (t2.Status = 2) ';                      //в процессе гарантийного ремонта
-    3: S:= S + ' AND (t3.Status = 1) ';                      //с незавершенной претензионной работой
-    4: S:= S + ' AND (' +                                    //все электродвигатели за период
+    2: S:= S + ' AND (t2.Status = 2) ';                      //на этапе транспортировки в ремонт
+    3: S:= S + ' AND (t2.Status = 3) ';                      //в процессе гарантийного ремонта
+    4: S:= S + ' AND (t3.Status = 1) ';                      //с незавершенной претензионной работой
+    5: S:= S + ' AND (' +                                    //все электродвигатели за период
                      '(t1.NoticeFromUserDate IS NULL) OR ' +
                      '(t2.NoticeFromUserDate IS NULL) OR ' +
                      '(t3.NoticeFromUserDate IS NULL) OR ' +
+                     '(t2.BeginDate IS NULL) OR ' +
+                     '(t2.EndDate   IS NULL) OR ' +
                      '(t1.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
                      '(t2.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t3.NoticeFromUserDate BETWEEN :BD AND :ED)' +
+                     '(t3.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t2.BeginDate BETWEEN :BD AND :ED) OR ' +
+                     '(t2.EndDate   BETWEEN :BD AND :ED)' +
                      ') ';
     end;
   end;
@@ -2111,7 +2224,7 @@ begin
   QSetSQL(S);
   if not SEmpty(AMotorNumLike) then
     QParamStr('NumberLike', SUpper(AMotorNumLike)+'%')
-  else if AViewIndex=4 then
+  else if AViewIndex=5 then
   begin
     QParamDT('BD', ABeginDate);
     QParamDT('ED', AEndDate);

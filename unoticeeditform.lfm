@@ -1,9 +1,9 @@
 object NoticeEditForm: TNoticeEditForm
-  Left = 618
-  Height = 567
-  Top = 279
+  Left = 623
+  Height = 603
+  Top = 184
   Width = 565
-  ClientHeight = 567
+  ClientHeight = 603
   ClientWidth = 565
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
@@ -17,10 +17,10 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 70
+    Top = 76
     Width = 99
     BorderSpacing.Left = 8
-    BorderSpacing.Top = 12
+    BorderSpacing.Top = 18
     Caption = 'Уведомление'
     Font.Style = [fsBold]
     ParentColor = False
@@ -32,7 +32,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrCenter
     Left = 8
     Height = 20
-    Top = 106
+    Top = 112
     Width = 17
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -49,7 +49,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Control = Label3
     Left = 33
     Height = 28
-    Top = 102
+    Top = 108
     Width = 377
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -65,7 +65,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Control = DT1
     Left = 422
     Height = 20
-    Top = 106
+    Top = 112
     Width = 30
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 2
@@ -84,7 +84,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 458
     Height = 28
-    Top = 102
+    Top = 108
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
@@ -114,7 +114,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 226
+    Top = 268
     Width = 94
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -131,7 +131,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 258
+    Top = 300
     Width = 549
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -146,7 +146,7 @@ object NoticeEditForm: TNoticeEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 503
+    Top = 539
     Width = 561
     Align = alBottom
     AutoSize = True
@@ -477,7 +477,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 304
+    Top = 346
     Width = 378
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -495,7 +495,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 336
+    Top = 378
     Width = 551
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -516,7 +516,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 379
+    Top = 421
     Width = 163
     BorderSpacing.Left = 8
     BorderSpacing.Top = 15
@@ -535,7 +535,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 411
+    Top = 453
     Width = 549
     Alignment = taRightJustify
     BorderSpacing.Left = 8
@@ -552,7 +552,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 148
+    Top = 154
     Width = 39
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -563,12 +563,12 @@ object NoticeEditForm: TNoticeEditForm
   end
   object FileNameEdit: TEdit
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label4
+    AnchorSideTop.Control = NotChangeFileCheckBox
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = OpenButton
     Left = 8
     Height = 28
-    Top = 180
+    Top = 222
     Width = 503
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -587,7 +587,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideBottom.Side = asrBottom
     Left = 517
     Height = 36
-    Top = 176
+    Top = 218
     Width = 40
     Align = alCustom
     Anchors = [akTop, akRight]
@@ -626,9 +626,23 @@ object NoticeEditForm: TNoticeEditForm
     Caption = 'MotorName'
     ParentColor = False
   end
+  object NotChangeFileCheckBox: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 24
+    Top = 186
+    Width = 337
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    Caption = 'Не изменять существующий файл документа'
+    OnChange = NotChangeFileCheckBoxChange
+    TabOrder = 7
+  end
   object OpenDialog1: TOpenDialog
     Filter = 'Документ PDF|*.pdf'
-    Left = 464
-    Top = 136
+    Left = 416
+    Top = 168
   end
 end

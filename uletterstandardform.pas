@@ -266,6 +266,12 @@ var
 begin
   CanFormClose:= False;
 
+  if VST.IsAllUnchecked then
+  begin
+    ShowInfo('Не выбран ни один электродвигатель!');
+    Exit;
+  end;
+
   if SEmpty(OrganizationComboBox.Text) then
   begin
     ShowInfo('Не указана организация!');
@@ -577,26 +583,28 @@ begin
       LETTER_SUBJECTS[3],
       LETTER_SUBJECTS[4],
       LETTER_SUBJECTS[5],
-      LETTER_SUBJECTS[6]
+      LETTER_SUBJECTS[6],
+      LETTER_SUBJECTS[7]
     ])
+
   else if LetterType=7 then
     V:= VCreateStr([
-      LETTER_SUBJECTS[7]
+      LETTER_SUBJECTS[8]
     ])
   else if LetterType=9 then
     V:= VCreateStr([
-      LETTER_SUBJECTS[7],
       LETTER_SUBJECTS[8],
+      LETTER_SUBJECTS[9],
       LETTER_SUBJECTS[6] //об истечении срока гарантии
     ])
   else if LetterType=11 then
     V:= VCreateStr([
-      LETTER_SUBJECTS[9]
+      LETTER_SUBJECTS[10]
     ])
   else if LetterType=13 then
     V:= VCreateStr([
-      LETTER_SUBJECTS[10],
-      LETTER_SUBJECTS[11]
+      LETTER_SUBJECTS[11],
+      LETTER_SUBJECTS[12]
     ]);
 
   VToStrings(V, SubjectComboBox.Items);
@@ -756,22 +764,25 @@ begin
     Txt:= Letter5ReclamationToUser(LocationName, Notices, Motors,
             IsSeveralMotors, IsSeveralNotices)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[6] then
-    Txt:= Letter6ReclamationWarranty(LocationName, Notices, MotorName, MotorNum,
+    Txt:= Letter6ReclamationToUser(LocationName, Notices, MotorName, MotorNum,
             WarrantyBuildDate, WarrantyMileage, WarrantyUseDate, WarrantyType)
-  else if (SubjectComboBox.Text=LETTER_SUBJECTS[7]) and (LetterType=7) then
-    Txt:= Letter7RepairToBuilder(Motors, UserNameR,
-            IsSeveralMotors, IsSeveralNotices)
-  else if (SubjectComboBox.Text=LETTER_SUBJECTS[7]) and (LetterType=9) then
-    Txt:= Letter7RepairToUser(Notices, Motors,
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[7] then
+    Txt:= Letter7ReclamationToUser(Notices, Motors,
             IsSeveralMotors, IsSeveralNotices, IsSeveralAnswers)
-  else if SubjectComboBox.Text=LETTER_SUBJECTS[8] then
-    Txt:= Letter8RepairToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
+  else if (SubjectComboBox.Text=LETTER_SUBJECTS[8]) and (LetterType=7) then
+    Txt:= Letter8RepairToBuilder(Motors, UserNameR,
+            IsSeveralMotors, IsSeveralNotices)
+  else if (SubjectComboBox.Text=LETTER_SUBJECTS[8]) and (LetterType=9) then
+    Txt:= Letter8RepairToUser(Notices, Motors,
+            IsSeveralMotors, IsSeveralNotices, IsSeveralAnswers)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[9] then
-    Txt:= Letter9PretensionToBuilder(Motors, UserNameR, MoneyValue)
+    Txt:= Letter9RepairToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[10] then
-    Txt:= Letter10PretensionToUser(Notices, Motors, MoneyValue)
+    Txt:= Letter10PretensionToBuilder(Motors, UserNameR, MoneyValue)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[11] then
-    Txt:= Letter11PretensionToUser(Notices, Motors);
+    Txt:= Letter11PretensionToUser(Notices, Motors, MoneyValue)
+  else if SubjectComboBox.Text=LETTER_SUBJECTS[12] then
+    Txt:= Letter12PretensionToUser(Notices, Motors);
 
   LetterTextToStrings(Txt, Memo1.Lines);
 end;

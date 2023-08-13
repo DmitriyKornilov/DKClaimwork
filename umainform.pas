@@ -1603,6 +1603,7 @@ begin
   V:= VCreateStr([
     'в процессе рекламационной работы',
     'ожидающие согласования отправки в ремонт',
+    'на этапе транспортировки в ремонт',
     'в процессе гарантийного ремонта',
     'в процессе претензионной работы',
     'все электродвигатели'
@@ -1613,7 +1614,7 @@ end;
 
 procedure TMainForm.ViewItemSelect;
 begin
-  PeriodPanel.Visible:= VSTViewList.SelectedIndex=4;
+  PeriodPanel.Visible:= VSTViewList.SelectedIndex=5;
   DataLoad;
 end;
 

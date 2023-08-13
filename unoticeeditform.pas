@@ -19,6 +19,7 @@ type
   TNoticeEditForm = class(TForm)
     ButtonPanel: TPanel;
     CancelButton: TSpeedButton;
+    NotChangeFileCheckBox: TCheckBox;
     DividerBevel1: TDividerBevel;
     DT1: TDateTimePicker;
     Label6: TLabel;
@@ -42,6 +43,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure NotChangeFileCheckBoxChange(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
   private
@@ -94,7 +96,7 @@ end;
 
 procedure TNoticeEditForm.FormShow(Sender: TObject);
 begin
-  Height:= 450;
+  Height:= 500;
 
   case Category of
   1: LetterType:= 0;
@@ -112,6 +114,14 @@ begin
   MoneyEdit.Visible:= Category=3;
 
   DataLoad;
+end;
+
+procedure TNoticeEditForm.NotChangeFileCheckBoxChange(Sender: TObject);
+begin
+  if NotChangeFileCheckBox.Checked then
+    FileNameEdit.Clear;
+  FileNameEdit.Enabled:= not NotChangeFileCheckBox.Checked;
+  OpenButton.Enabled:= FileNameEdit.Enabled;
 end;
 
 procedure TNoticeEditForm.OpenButtonClick(Sender: TObject);
@@ -164,9 +174,12 @@ begin
   UserID:= UserIDs[UserNameComboBox.ItemIndex];
   LetterDate:= DT1.Date;
 
-  SrcFileName:= STrim(FileNameEdit.Text);
-  DocumentSave(LetterType, SrcFileName, MotorDate, MotorName, MotorNum,
-               OldLetterDate, OldLetterNum, LetterDate, LetterNum);
+  if not NotChangeFileCheckBox.Checked then
+  begin
+    SrcFileName:= STrim(FileNameEdit.Text);
+    DocumentSave(LetterType, SrcFileName, MotorDate, MotorName, MotorNum,
+                 OldLetterDate, OldLetterNum, LetterDate, LetterNum);
+  end;
 
   if Category = 1 then
     SQLite.ReclamationNoticeUpdate(LogID, UserID, LocationID, LetterNum, LetterDate)

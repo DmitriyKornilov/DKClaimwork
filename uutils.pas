@@ -40,13 +40,14 @@ const
    { 4} 'О выезде представителя производителя на расследование',
    { 5} 'О расследовании в СЛД Петроввальское',
    { 6} 'Об истечении срока гарантии',
+   { 7} 'О возврате',
 
-   { 7} 'О гарантийном ремонте',
-   { 8} 'Об отказе в гарантийном ремонте',
+   { 8} 'О гарантийном ремонте',
+   { 9} 'Об отказе в гарантийном ремонте',
 
-   { 9} 'О согласовании затрат по претензии',
-   {10} 'О возмещении затрат',
-   {11} 'Об отказе в компенсации затрат'
+   {10} 'О согласовании затрат по претензии',
+   {11} 'О возмещении затрат',
+   {12} 'Об отказе в компенсации затрат'
   );
 
   //Тип организации 0 - все, 1 - потребители, 2 - производители
@@ -171,23 +172,25 @@ const
                                        const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
   function Letter5ReclamationToUser(const ALocationName, ANoticesFullName, AMotorsFullName: String;
                                     const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
-  function Letter6ReclamationWarranty(const ALocationName, ANoticeFullName,
+  function Letter6ReclamationToUser(const ALocationName, ANoticeFullName,
                                          AMotorName, AMotorNum, AWarrantyBuildDate,
                                          AWarrantyMileage, AWarrantyUseDate: String;
                                     const AWarrantyType: Byte): TStrVector;
+  function Letter7ReclamationToUser(const ANoticesFullName, AMotorsFullName: String;
+                                    const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
 
-  function Letter7RepairToBuilder(const AMotorsFullName, AUserName: String;
+  function Letter8RepairToBuilder(const AMotorsFullName, AUserName: String;
                                   const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
-  function Letter7RepairToUser(const ANoticesFullName, AMotorsFullName: String;
-                             const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
   function Letter8RepairToUser(const ANoticesFullName, AMotorsFullName: String;
+                             const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
+  function Letter9RepairToUser(const ANoticesFullName, AMotorsFullName: String;
                              const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 
-  function Letter9PretensionToBuilder(const AMotorsFullName, AUserName: String;
+  function Letter10PretensionToBuilder(const AMotorsFullName, AUserName: String;
                                   const AMoneyValue: Int64): TStrVector;
-  function Letter10PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
+  function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
                                   const AMoneyValue: Int64): TStrVector;
-  function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
+  function Letter12PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
 
 var
   ApplicationDirectoryName: String;
@@ -392,7 +395,7 @@ begin
   Result:= VCreateStr([S]);
 end;
 
-function Letter6ReclamationWarranty(const ALocationName, ANoticeFullName,
+function Letter6ReclamationToUser(const ALocationName, ANoticeFullName,
                                          AMotorName, AMotorNum, AWarrantyBuildDate,
                                          AWarrantyMileage, AWarrantyUseDate: String;
                                     const AWarrantyType: Byte): TStrVector;
@@ -431,8 +434,41 @@ begin
   Result:= VCreateStr([S]);
 end;
 
+function Letter7ReclamationToUser(const ANoticesFullName, AMotorsFullName: String;
+                                    const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
+var
+  S1, S2: String;
+begin
+  if AIsSeveralNotices then
+    S1:= 'На Ваши письма №№ '
+  else
+    S1:= 'На Ваше письмо № ';
+  S1:= S1 + ANoticesFullName;
+  S1:= S1 + ' сообщаю, что в соответствии с решением производителя ';
+  if AIsSeveralAnswers then
+    S1:= S1 + '(копии писем прилагаю) '
+  else
+    S1:= S1 + '(копию письма прилагаю) ';
+  S1:= S1 + ' наша компания согласовывает отправку в гарантийный ремонт ';
+  if AIsSeveralMotors then
+    S1:= S1 + 'электродвигателей '
+  else
+    S1:= S1 + 'электродвигателя ';
+  S1:= S1 + AMotorsFullName;
+  S1:= S1 + '. Отгрузку необходимо произвести через транспортную компанию ' +
+            'ООО  «Желдорэкспедиция» за счет грузополучателя. Прошу Вас ' +
+            'обратить внимание на выполнение условий хранения и ' +
+            'транспортировки гарантийного товара.';
 
-function Letter7RepairToBuilder(const AMotorsFullName, AUserName: String;
+  S2:= 'Заводом-изготовителем будет проведено комплексное обследование ' +
+       'и в случае подтверждения неисправности – гарантийный ремонт.';
+
+  Result:= VCreateStr([S1, S2]);
+
+end;
+
+
+function Letter8RepairToBuilder(const AMotorsFullName, AUserName: String;
                                 const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S: String;
@@ -453,7 +489,7 @@ begin
   Result:= VCreateStr([S]);
 end;
 
-function Letter7RepairToUser(const ANoticesFullName, AMotorsFullName: String;
+function Letter8RepairToUser(const ANoticesFullName, AMotorsFullName: String;
                              const AIsSeveralMotors, AIsSeveralNotices, AIsSeveralAnswers: Boolean): TStrVector;
 var
   S1, S2: String;
@@ -488,7 +524,7 @@ begin
   Result:= VCreateStr([S1, S2]);
 end;
 
-function Letter8RepairToUser(const ANoticesFullName, AMotorsFullName: String;
+function Letter9RepairToUser(const ANoticesFullName, AMotorsFullName: String;
                const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S1, S2: String;
@@ -511,7 +547,7 @@ begin
   Result:= VCreateStr([S1, S2]);
 end;
 
-function Letter9PretensionToBuilder(const AMotorsFullName, AUserName: String;
+function Letter10PretensionToBuilder(const AMotorsFullName, AUserName: String;
                                   const AMoneyValue: Int64): TStrVector;
 var
   S: String;
@@ -529,7 +565,7 @@ begin
   Result:= VCreateStr([S]);
 end;
 
-function Letter10PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
+function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String;
                                   const AMoneyValue: Int64): TStrVector;
 var
   S: String;
@@ -547,7 +583,7 @@ begin
   Result:= VCreateStr([S]);
 end;
 
-function Letter11PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
+function Letter12PretensionToUser(const ANoticesFullName, AMotorsFullName: String): TStrVector;
 var
   S1, S2: String;
 begin
@@ -654,9 +690,10 @@ begin
   case AStatus of
   0: Result:= EmptyStr;
   1: Result:= 'Согласование';
-  2: Result:= 'В процессе';
-  3: Result:= 'Завершен';
-  4: Result:= 'Отказано';
+  2: Result:= 'Транспортировка';
+  3: Result:= 'В процессе';
+  4: Result:= 'Завершен';
+  5: Result:= 'Отказано';
   end;
 end;
 

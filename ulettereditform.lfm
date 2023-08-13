@@ -1,9 +1,9 @@
 object LetterEditForm: TLetterEditForm
   Left = 602
-  Height = 412
+  Height = 474
   Top = 226
   Width = 551
-  ClientHeight = 412
+  ClientHeight = 474
   ClientWidth = 551
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
@@ -33,10 +33,10 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 24
-    Top = 34
+    Top = 38
     Width = 113
     BorderSpacing.Left = 8
-    BorderSpacing.Top = 8
+    BorderSpacing.Top = 12
     BorderSpacing.Right = 6
     Caption = 'не требуется'
     OnChange = NotNeedCheckBoxChange
@@ -49,7 +49,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 74
+    Top = 78
     Width = 17
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -66,7 +66,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = Label2
     Left = 33
     Height = 28
-    Top = 70
+    Top = 74
     Width = 363
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -82,7 +82,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = DT1
     Left = 408
     Height = 20
-    Top = 74
+    Top = 78
     Width = 30
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 2
@@ -101,7 +101,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 444
     Height = 28
-    Top = 70
+    Top = 74
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
@@ -134,7 +134,7 @@ object LetterEditForm: TLetterEditForm
     Cursor = crHandPoint
     Left = 8
     Height = 30
-    Top = 188
+    Top = 228
     Width = 535
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
@@ -155,7 +155,7 @@ object LetterEditForm: TLetterEditForm
     Cursor = crHandPoint
     Left = 8
     Height = 30
-    Top = 230
+    Top = 270
     Width = 535
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
@@ -172,7 +172,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 6
     Height = 20
-    Top = 275
+    Top = 315
     Width = 140
     BorderSpacing.Left = 8
     BorderSpacing.Top = 15
@@ -190,7 +190,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 307
+    Top = 347
     Width = 537
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 12
@@ -211,7 +211,7 @@ object LetterEditForm: TLetterEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 348
+    Top = 410
     Width = 547
     Align = alBottom
     AutoSize = True
@@ -542,7 +542,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 116
+    Top = 120
     Width = 39
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -553,12 +553,12 @@ object LetterEditForm: TLetterEditForm
   end
   object FileNameEdit: TEdit
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label4
+    AnchorSideTop.Control = NotChangeFileCheckBox
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = OpenButton
     Left = 8
     Height = 28
-    Top = 148
+    Top = 188
     Width = 489
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -577,7 +577,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideBottom.Side = asrBottom
     Left = 503
     Height = 36
-    Top = 144
+    Top = 184
     Width = 40
     Align = alCustom
     Anchors = [akTop, akRight]
@@ -588,6 +588,20 @@ object LetterEditForm: TLetterEditForm
     Images = MainForm.ImagesEdit24x24
     ImageIndex = 6
     OnClick = OpenButtonClick
+  end
+  object NotChangeFileCheckBox: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 24
+    Top = 152
+    Width = 337
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    Caption = 'Не изменять существующий файл документа'
+    OnChange = NotChangeFileCheckBoxChange
+    TabOrder = 8
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Документ PDF|*.pdf'
