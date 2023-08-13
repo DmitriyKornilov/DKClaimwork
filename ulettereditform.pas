@@ -105,9 +105,16 @@ begin
       SQLite.ReclamationReportNotNeed(LogID, StatusGet)
     else
       SQLite.LetterNotNeed(LogID, LetterType);
+    //удаляем файл, если есть
+    SQLite.MotorLoad(LogID, k, MotorName, MotorNum, MotorDate);
+    SQLite.LetterLoad(LogID, LetterType, OldLetterNum, OldLetterDate);
+    DocumentDelete(LetterType, OldLetterDate, OldLetterNum,
+                   MotorDate, MotorName, MotorNum);
   end
   else begin  //запись документа
     LetterNum:= STrim(LetterNumEdit.Text);
+    if SEmpty(LetterNum) and (LetterType=4 {Акт осмотра двигателя}) then
+      LetterNum:= 'б/н';
     if SEmpty(LetterNum) then
     begin
       ShowInfo('Не указан номер!');

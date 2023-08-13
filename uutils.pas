@@ -1038,31 +1038,25 @@ function DocumentSave(const ALetterType: Byte;
                          const AOldLetterNum: String;
                          const ALetterDate: TDate;
                          const ALetterNum: String): Boolean;
-var
-  IsEmptyFile: Boolean;
 begin
   Result:= False;
-  IsEmptyFile:= False;
 
   if SEmpty(ASrcFileName) then
-    if Confirm('Не указан файл письма! Продолжить без файла?') then
-      IsEmptyFile:= True;
-
-  if not IsEmptyFile then
-  begin
-    if not FileExists(ASrcFileName) then
-    begin
-      ShowInfo('Указанный файл письма не найден!');
+    if not Confirm('Не указан файл письма! Продолжить без файла?') then
       Exit;
-    end;
-    //удаляем старый файл
-    DocumentDelete(ALetterType, AOldLetterDate, AOldLetterNum,
-                   AMotorDate, AMotorName, AMotorNum);
 
-    //копируем новый файл
+  //удаляем старый файл
+  DocumentDelete(ALetterType, AOldLetterDate, AOldLetterNum,
+                 AMotorDate, AMotorName, AMotorNum);
+
+  if SEmpty(ASrcFileName) then Exit;
+
+  //копируем новый файл
+  if FileExists(ASrcFileName) then
     Result:= DocumentCopy(ASrcFileName, ALetterType, ALetterDate, ALetterNum,
-                          AMotorDate, AMotorName, AMotorNum);
-  end;
+                          AMotorDate, AMotorName, AMotorNum)
+  else
+    ShowInfo('Указанный файл письма не найден!');
 end;
 
 end.
