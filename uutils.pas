@@ -632,7 +632,7 @@ begin
   Result:= EmptyStr;
   case AStatus of
   0: Result:= EmptyStr;
-  1: Result:= 'В работе';
+  1: Result:= 'Расследование';
   2: Result:= 'Принята';
   3: Result:= 'Отклонена';
   4: Result:= 'Отозвана';
@@ -653,9 +653,10 @@ begin
   Result:= EmptyStr;
   case AStatus of
   0: Result:= EmptyStr;
-  1: Result:= 'В процессе';
-  2: Result:= 'Завершен';
-  3: Result:= 'Отказано';
+  1: Result:= 'Согласование';
+  2: Result:= 'В процессе';
+  3: Result:= 'Завершен';
+  4: Result:= 'Отказано';
   end;
 end;
 

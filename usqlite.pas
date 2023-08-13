@@ -58,7 +58,7 @@ type
     //рекламации
     procedure ReclamationInfoLoad(const ALogID: Integer; out AUserID, ALocationID: Integer);
     procedure ReclamationNoticeDelete(const ALogID: Integer);
-    procedure ReclamationNoticeUpdate(const ALogID, AUserID, ALocationID, AStatus: Integer;
+    procedure ReclamationNoticeUpdate(const ALogID, AUserID, ALocationID: Integer;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
     function ReclamationStatusLoad(const ALogID: Integer): Integer;
@@ -486,7 +486,7 @@ begin
   QClose;
 end;
 
-procedure TSQLite.ReclamationNoticeUpdate(const ALogID, AUserID, ALocationID, AStatus: Integer;
+procedure TSQLite.ReclamationNoticeUpdate(const ALogID, AUserID, ALocationID: Integer;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
 begin
@@ -496,7 +496,7 @@ begin
       'UPDATE ' +
         'LOGRECLAMATION ' +
       'SET ' +
-        'UserID = :UserID, LocationID = :LocationID, Status = :Status, ' +
+        'UserID = :UserID, LocationID = :LocationID, Status = 1, ' +  {1 - расследование}
         'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -504,7 +504,6 @@ begin
     QParamInt('LogID', ALogID);
     QParamInt('LocationID', ALocationID);
     QParamInt('UserID', AUserID);
-    QParamInt('Status', AStatus);
     QParamStr('NoticeNum', ANoticeNum);
     QParamDT('NoticeDate', ANoticeDate);
     QExec;
@@ -572,7 +571,7 @@ begin
       'UPDATE ' +
         'LOGREPAIR ' +
       'SET ' +
-        'UserID = :UserID, Status = 1, ' +   {1 - в работе}
+        'UserID = :UserID, Status = 1, ' +   {1 - согласование}
         'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -2080,13 +2079,14 @@ begin
       '(t0.LogID>0) ';
 
   if not SEmpty(AMotorNumLike) then
-    S:= S + ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) '
+    S:= S + ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
     case AViewIndex of
-    0: S:= S + ' AND (t1.Status < 2) ';
-    1: S:= S + ' AND (t2.Status < 2) ';
-    2: S:= S + ' AND (t3.Status < 2) ';
-    3: S:= S + ' AND (' +
+    0: S:= S + ' AND (t1.Status < 2) ';                      //в процессе рекламационной работы
+    1: S:= S + ' AND (t1.Status = 2) AND (t2.Status < 2) ';  //ожидающие согласования отправки в ремонт
+    2: S:= S + ' AND (t2.Status = 2) ';                      //в процессе гарантийного ремонта
+    3: S:= S + ' AND (t3.Status = 1) ';                      //с незавершенной претензионной работой
+    4: S:= S + ' AND (' +                                    //все электродвигатели за период
                      '(t1.NoticeFromUserDate IS NULL) OR ' +
                      '(t2.NoticeFromUserDate IS NULL) OR ' +
                      '(t3.NoticeFromUserDate IS NULL) OR ' +
@@ -2111,7 +2111,7 @@ begin
   QSetSQL(S);
   if not SEmpty(AMotorNumLike) then
     QParamStr('NumberLike', SUpper(AMotorNumLike)+'%')
-  else if AViewIndex=3 then
+  else if AViewIndex=4 then
   begin
     QParamDT('BD', ABeginDate);
     QParamDT('ED', AEndDate);

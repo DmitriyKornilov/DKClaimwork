@@ -7,13 +7,12 @@ interface
 uses
   Classes, SysUtils, Graphics, fpspreadsheetgrid,
 
-  DK_SheetTables, DK_Vector,
+  DK_SheetTables, DK_Vector, DK_Fonts,
 
   Uutils;
 
 const
-  //TODO: Liberation
-  FONT_NAME_DEFAULT = 'Arial';
+  FONT_LIKE_DEFAULT = flArial;
   FONT_SIZE_DEFAULT = 8;
 
 type
@@ -56,13 +55,13 @@ implementation
 
 constructor TLogTable.Create(const AGrid: TsWorksheetGrid; const AOnSelect: TSheetSelectEvent);
 const
-  MAIN_COLUMN_WIDTH = 105;
+  MAIN_COLUMN_WIDTH = 110;
   NOTE_COLUMN_WIDTH = 180;
-  STATUS_COLUMN_WIDTH = 90;
+  STATUS_COLUMN_WIDTH = 95;
 begin
   inherited Create(AGrid);
   OnSelect:= AOnSelect;
-  SetFontsName(FONT_NAME_DEFAULT);
+  SetFontsName(FontLikeToName(FONT_LIKE_DEFAULT));
   SetFontsSize(FONT_SIZE_DEFAULT);
   HeaderFont.Style:= [fsBold];
 
@@ -113,7 +112,7 @@ begin
   AddToHeader(2, 3, 'Номер');
   AddToHeader(2, 4, 'Дата');
   AddToHeader(1, 5, 2, 5, 'Предприятие');
-  AddToHeader(1, 6, 2, 6, 'Потребитель');
+  AddToHeader(1, 6, 2, 6, 'Отправитель уведомления о неисправности');
   //рекламации
   AddToHeader(1, 7, 2, 7,    LETTER_NAMES[0]);
   AddToHeader(1, 8, 2, 8,    LETTER_NAMES[1]);
@@ -124,7 +123,7 @@ begin
   AddToHeader(1, 13, 2, 13, 'Примечание по ходу расследования');
   AddToHeader(1, 14, 2, 14, 'Статус рекламации');
   //гарантийный ремонт
-  AddToHeader(1, 15, 2, 15, 'Потребитель');
+  AddToHeader(1, 15, 2, 15, 'Отправитель запроса на согласование ремонта');
   AddToHeader(1, 16, 2, 16,    LETTER_NAMES[6]);
   AddToHeader(1, 17, 2, 17,    LETTER_NAMES[7]);
   AddToHeader(1, 18, 2, 18,    LETTER_NAMES[8]);
@@ -134,7 +133,7 @@ begin
   AddToHeader(1, 22, 2, 22, 'Примечание по ходу ремонта');
   AddToHeader(1, 23, 2, 23, 'Статус ремонта');
   //возмещение затрат
-  AddToHeader(1, 24, 2, 24, 'Потребитель');
+  AddToHeader(1, 24, 2, 24, 'Отправитель претензии');
   AddToHeader(1, 25, 2, 25, LETTER_NAMES[10]);
   AddToHeader(1, 26, 2, 26, 'Сумма к возмещению');
   AddToHeader(1, 27, 2, 27, LETTER_NAMES[11]);

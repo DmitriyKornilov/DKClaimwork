@@ -16,7 +16,7 @@ uses
 
   UMotorEditForm, USenderEditForm, UReceiverEditForm, UImageEditForm,
   UNoticeEditForm, UNoteEditForm, ULetterEditForm, URepairDatesEditForm,
-  ULetterCustomForm, UAboutForm, UMoneyDatesEditForm;
+  ULetterCustomForm, UAboutForm, UMoneyDatesEditForm, UStatisticForm;
 
 type
 
@@ -44,10 +44,13 @@ type
     Label17: TLabel;
     LetterButton: TBCButton;
     CopyMenuItem: TMenuItem;
+    ShowOneMenuItem: TMenuItem;
+    ShowAllMenuItem: TMenuItem;
     OpenMenuItem: TMenuItem;
     PeriodPanel: TPanel;
     Panel3: TPanel;
     PopupMenu2: TPopupMenu;
+    PopupMenu3: TPopupMenu;
     StatisticButton: TBCButton;
     ReclamationButton: TBCButton;
     DelCancelButton: TSpeedButton;
@@ -162,12 +165,15 @@ type
     procedure SearchNumEditButtonClick(Sender: TObject);
     procedure SearchNumEditChange(Sender: TObject);
     procedure SenderListMenuItemClick(Sender: TObject);
+    procedure ShowAllMenuItemClick(Sender: TObject);
     procedure ShowCancelButtonClick(Sender: TObject);
     procedure ShowFromBuilderButtonClick(Sender: TObject);
     procedure ShowFromUserButtonClick(Sender: TObject);
+    procedure ShowOneMenuItemClick(Sender: TObject);
     procedure ShowReportButtonClick(Sender: TObject);
     procedure ShowToBuilderButtonClick(Sender: TObject);
     procedure ShowToUserButtonClick(Sender: TObject);
+    procedure StatisticButtonClick(Sender: TObject);
     procedure UserListMenuItemClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -299,6 +305,7 @@ type
     procedure DataLoad;
     procedure DataSelect;
     procedure DataDraw(const AZoomPercent: Integer);
+    procedure DataExport(const AShowAllCategories: Boolean);
 
     procedure PDFOpen(const ALetterType: Byte);
     procedure PDFCopy(const ALetterType: Byte);
@@ -397,7 +404,7 @@ end;
 
 procedure TMainForm.ExportButtonClick(Sender: TObject);
 begin
-  LogTable.Save('Выполнено!');
+  ControlPopupMenuShow(Sender, PopupMenu3);
 end;
 
 procedure TMainForm.MotorListMenuItemClick(Sender: TObject);
@@ -456,6 +463,8 @@ begin
   SenderListEdit;
 end;
 
+
+
 procedure TMainForm.ShowCancelButtonClick(Sender: TObject);
 begin
   SelectedLetterType:= 5;
@@ -482,6 +491,16 @@ begin
   ControlPopupMenuShow(Sender, PopupMenu2);
 end;
 
+procedure TMainForm.ShowOneMenuItemClick(Sender: TObject);
+begin
+  DataExport(False);
+end;
+
+procedure TMainForm.ShowAllMenuItemClick(Sender: TObject);
+begin
+  DataExport(True);
+end;
+
 procedure TMainForm.ShowReportButtonClick(Sender: TObject);
 begin
   SelectedLetterType:= 4;
@@ -506,6 +525,18 @@ begin
   3: SelectedLetterType:= 13;
   end;
   ControlPopupMenuShow(Sender, PopupMenu2);
+end;
+
+procedure TMainForm.StatisticButtonClick(Sender: TObject);
+var
+  StatisticForm: TStatisticForm;
+begin
+  StatisticForm:= TStatisticForm.Create(MainForm);
+  try
+    StatisticForm.ShowModal;
+  finally
+    FreeAndNil(StatisticForm);
+  end;
 end;
 
 procedure TMainForm.UserListMenuItemClick(Sender: TObject);
@@ -921,10 +952,10 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
   begin
     if ACategory=Category then Exit;
     Category:= ACategory;
-
-    ReclamationVisible(ACategory=1);  //рекламации
-    RepairVisible(ACategory=2);  //гарантийный ремонт
-    PretensionVisible(ACategory=3);   //гарантийный ремонт
+    //0 - показать все категории
+    ReclamationVisible((ACategory=1) or (ACategory=0));  //рекламации
+    RepairVisible((ACategory=2) or (ACategory=0));       //гарантийный ремонт
+    PretensionVisible((ACategory=3) or (ACategory=0));   //гарантийный ремонт
 
     ButtonsEnable;
 end;
@@ -1172,6 +1203,26 @@ begin
     LogTable.SelectIndex(SelectedIndex);
 end;
 
+procedure TMainForm.DataExport(const AShowAllCategories: Boolean);
+var
+  OldCategory: Byte;
+begin
+  if AShowAllCategories then
+  begin
+    LogGrid.Visible:= False;
+    try
+      OldCategory:= Category;
+      CategorySelect(0);
+      LogTable.Save('Выполнено!');
+      CategorySelect(OldCategory);
+    finally
+      LogGrid.Visible:= True;
+    end;
+  end
+  else
+    LogTable.Save('Выполнено!');
+end;
+
 procedure TMainForm.PDFOpen(const ALetterType: Byte);
 var
   FileName: String;
@@ -1350,7 +1401,29 @@ end;
 procedure TMainForm.NoticeDelete;
 var
   LetterType: Byte;
+  //S1, S2: String;
 begin
+  //S1:= 'Внимание! Буду удалены без возможности восстановления все данные по ';
+  //S2:= ' для выбранного двигателя!' + SYMBOL_BREAK;
+  //
+  //case Category of
+  //1: begin
+  //     LetterType:= 0;
+  //     if not Confirm(S1 + 'рекламации' + S2 +
+  //       'Удалить "' + LETTER_NAMES[LetterType] + '"?') then Exit;
+  //
+  //   end;
+  //2: begin
+  //     LetterType:= 6;
+  //     if not Confirm(S1 + 'гарантийному ремонту' + S2 +
+  //       'Удалить "' + LETTER_NAMES[LetterType] + '"?') then Exit;
+  //   end;
+  //3: begin
+  //     LetterType:= 10;
+  //
+  //   end;
+  //end;
+
   case Category of
   1: LetterType:= 0;
   2: LetterType:= 6;
@@ -1528,9 +1601,10 @@ var
 begin
   S:= 'Включить в список электродвигатели:';
   V:= VCreateStr([
-    'с незавершенной рекламационной работой',
-    'с незавершенным гарантийным ремонтом',
-    'с незавершенной претензионной работой',
+    'в процессе рекламационной работы',
+    'ожидающие согласования отправки в ремонт',
+    'в процессе гарантийного ремонта',
+    'в процессе претензионной работы',
     'все электродвигатели'
   ]);
   VSTViewList:= TVSTStringList.Create(VT2, S, @ViewItemSelect);
@@ -1539,7 +1613,7 @@ end;
 
 procedure TMainForm.ViewItemSelect;
 begin
-  PeriodPanel.Visible:= VSTViewList.SelectedIndex=3;
+  PeriodPanel.Visible:= VSTViewList.SelectedIndex=4;
   DataLoad;
 end;
 

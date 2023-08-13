@@ -13,7 +13,8 @@ uses
   Forms, UMainForm, ULetters, USheets, Uutils, lazcontrols, datetimectrls,
   USQLite, UMotorEditForm, USenderEditForm, UReceiverEditForm, UImageEditForm,
   UNoticeEditForm, UNoteEditForm, rxnew, ULetterEditForm, ULetterStandardForm,
-  URepairDatesEditForm, ULetterCustomForm, UAboutForm, UMoneyDatesEditForm
+  URepairDatesEditForm, ULetterCustomForm, UAboutForm, UMoneyDatesEditForm,
+  UStatisticForm
   { you can add units after this };
 
 {$R *.res}

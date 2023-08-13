@@ -169,7 +169,7 @@ begin
                OldLetterDate, OldLetterNum, LetterDate, LetterNum);
 
   if Category = 1 then
-    SQLite.ReclamationNoticeUpdate(LogID, UserID, LocationID, 1{в работе}, LetterNum, LetterDate)
+    SQLite.ReclamationNoticeUpdate(LogID, UserID, LocationID, LetterNum, LetterDate)
   else if Category = 2 then
     SQLite.RepairNoticeUpdate(LogID, UserID, LetterNum, LetterDate)
   else if Category = 3 then

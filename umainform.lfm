@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 176
+  Left = 254
   Height = 700
-  Top = 63
+  Top = 282
   Width = 1570
   Caption = 'Учет рекламационно-претензионной работы ООО "Электрожелдормаш"'
   ClientHeight = 700
@@ -1024,13 +1024,14 @@ object MainForm: TMainForm
       DropDownArrowSize = 8
       GlobalOpacity = 255
       GlyphMargin = 0
-      OnClick = PretensionButtonClick
+      OnClick = StatisticButtonClick
       ParentColor = False
       Rounding.RoundX = 0
       Rounding.RoundY = 0
       RoundingDropDown.RoundX = 1
       RoundingDropDown.RoundY = 1
       TextApplyGlobalOpacity = False
+      Visible = False
       DropDownStyle = bdsCommon
       Images = ImagesMain24x24
       ImageIndex = 10
@@ -5087,6 +5088,8 @@ object MainForm: TMainForm
     BorderStyle = bsSingle
     ClientHeight = 650
     ClientWidth = 1174
+    Color = clWindow
+    ParentColor = False
     TabOrder = 3
     object LogGrid: TsWorksheetGrid
       Left = 0
@@ -5442,8 +5445,8 @@ object MainForm: TMainForm
     }
   end
   object PopupMenu1: TPopupMenu
-    Left = 522
-    Top = 250
+    Left = 680
+    Top = 112
     object MotorListMenuItem: TMenuItem
       Caption = 'Электродвигатели'
       OnClick = MotorListMenuItemClick
@@ -5487,8 +5490,8 @@ object MainForm: TMainForm
     end
   end
   object PopupMenu2: TPopupMenu
-    Left = 520
-    Top = 328
+    Left = 680
+    Top = 184
     object OpenMenuItem: TMenuItem
       Caption = 'Открыть'
       OnClick = OpenMenuItemClick
@@ -5501,6 +5504,18 @@ object MainForm: TMainForm
   object SaveDialog1: TSaveDialog
     Filter = 'Документ PDF|*.pdf'
     Left = 520
-    Top = 408
+    Top = 256
+  end
+  object PopupMenu3: TPopupMenu
+    Left = 680
+    Top = 256
+    object ShowOneMenuItem: TMenuItem
+      Caption = 'Скрыть остальные категории'
+      OnClick = ShowOneMenuItemClick
+    end
+    object ShowAllMenuItem: TMenuItem
+      Caption = 'Не скрывать остальные категории'
+      OnClick = ShowAllMenuItemClick
+    end
   end
 end

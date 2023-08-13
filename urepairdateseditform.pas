@@ -84,17 +84,17 @@ begin
   ED:= 0;
   Status:= 0; //не указано
   if NotNeedCheckBox.Checked then
-    Status:= 3 //отказано
+    Status:= 4 //отказано
   else begin
     if BeginCheckBox.Checked then
     begin
       BD:= DT1.Date;
-      Status:= 1; //в работе
+      Status:= 2; //в ремонте
     end;
     if EndCheckBox.Checked then
     begin
       ED:= DT2.Date;
-      Status:= 2; //завершено
+      Status:= 3; //завершено
     end;
   end;
 
@@ -122,7 +122,7 @@ begin
   if ED>0 then
     DT2.Date:= ED;
 
-  NotNeedCheckbox.Checked:= Status=3;
+  NotNeedCheckbox.Checked:= Status=4;
   BeginCheckBox.Enabled:= not NotNeedCheckBox.Checked;
   DT1.Enabled:= (not NotNeedCheckBox.Checked) and BeginCheckBox.Checked;
   EndCheckBox.Enabled:= DT1.Enabled;
