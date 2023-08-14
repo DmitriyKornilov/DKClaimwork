@@ -596,10 +596,10 @@ object LetterEditForm: TLetterEditForm
     Left = 8
     Height = 24
     Top = 152
-    Width = 337
+    Width = 336
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
-    Caption = 'Не изменять существующий файл документа'
+    Caption = 'Не заменять существующий файл документа'
     OnChange = NotChangeFileCheckBoxChange
     TabOrder = 8
   end

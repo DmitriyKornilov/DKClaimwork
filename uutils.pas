@@ -103,14 +103,13 @@ const
                                   const AMotorDate: TDate;
                                   const AMotorName, AMotorNum: String): Boolean;
 
-  //файлы писем
+  //имена файлов, пути
   function MotorNameDirectoryGet(const AMotorName: String): String;
-  function MotorNameDirectoryFullGet(const AMotorName: String): String;
   procedure MotorNameDirectoryCheck(const AOldMotorNameIDs, ANewMotorNameIDs: TIntVector;
                                     const AOldMotorNames, ANewMotorNames: TStrVector);
 
-  function MotorNumDirectoryGet(const AMotorNum: String; const AMotorDate: TDate): String;
-  function MotorNumDirectoryFullGet(const AMotorName, AMotorNum: String;
+
+  function MotorNumDirectoryGet(const AMotorName, AMotorNum: String;
                                     const AMotorDate: TDate): String;
   function MotorNumDirectoryDelete(const AMotorName, AMotorNum: String;
                                     const AMotorDate: TDate): Boolean;
@@ -121,17 +120,14 @@ const
   function FileNameGet(const ALetterType: Byte;
                        const ALetterDate: TDate;
                        const ALetterNum: String): String;
-  function FileNameGet(const ALetterType: Byte;
-                     const ALetterDate: TDate;
-                     const ALetterNum: String;
-                     const AMotorDate: TDate;
-                     const AMotorName, AMotorNum: String): String;
+
   function FileNameFullGet(const ALetterType: Byte;
                            const ALetterDate: TDate;
                            const ALetterNum: String;
                            const AMotorDate: TDate;
                            const AMotorName, AMotorNum: String): String;
 
+  //файлы писем
   function DocumentDelete(const ALetterType: Byte;
                         const ALetterDate: TDate;
                         const ALetterNum: String;
@@ -145,6 +141,13 @@ const
                         const AMotorName, AMotorNum: String): Boolean;
   function DocumentSave(const ALetterType: Byte;
                          const ASrcFileName: String;
+                         const AMotorDate: TDate;
+                         const AMotorName, AMotorNum: String;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+  function DocumentRename(const ALetterType: Byte;
                          const AMotorDate: TDate;
                          const AMotorName, AMotorNum: String;
                          const AOldLetterDate: TDate;
@@ -931,14 +934,8 @@ end;
 
 function MotorNameDirectoryGet(const AMotorName: String): String;
 begin
-  Result:= AMotorName;
-end;
-
-function MotorNameDirectoryFullGet(const AMotorName: String): String;
-begin
   Result:= ApplicationDirectoryName + 'files' +
-           DirectorySeparator +
-           MotorNameDirectoryGet(AMotorName);
+           DirectorySeparator + AMotorName;
 end;
 
 procedure MotorNameDirectoryCheck(const AOldMotorNameIDs, ANewMotorNameIDs: TIntVector;
@@ -952,24 +949,19 @@ begin
     n:= VIndexOf(ANewMotorNameIDs, AOldMotorNameIDs[i]);
     if (n>=0) and (not SSame(ANewMotorNames[n], AOldMotorNames[i])) then
     begin
-      S:= MotorNameDirectoryFullGet(AOldMotorNames[i]);
+      S:= MotorNameDirectoryGet(AOldMotorNames[i]);
       if DirectoryExists(S) then
-          RenameFile(S, MotorNameDirectoryFullGet(ANewMotorNames[n]));
+          RenameFile(S, MotorNameDirectoryGet(ANewMotorNames[n]));
     end;
   end;
 end;
 
-function MotorNumDirectoryGet(const AMotorNum: String; const AMotorDate: TDate): String;
-begin
-  Result:= AMotorNum + ' (' + FormatDateTime('mm.yy', AMotorDate) + ')';
-end;
-
-function MotorNumDirectoryFullGet(const AMotorName, AMotorNum: String;
+function MotorNumDirectoryGet(const AMotorName, AMotorNum: String;
                                   const AMotorDate: TDate): String;
 begin
-  Result:= MotorNameDirectoryFullGet(AMotorName) +
+  Result:= MotorNameDirectoryGet(AMotorName) +
            DirectorySeparator +
-           MotorNumDirectoryGet(AMotorNum, AMotorDate);
+           AMotorNum + ' (' + FormatDateTime('mm.yy', AMotorDate) + ')';
 end;
 
 function MotorNumDirectoryDelete(const AMotorName, AMotorNum: String;
@@ -978,7 +970,7 @@ var
   DirName: String;
 begin
   Result:= False;
-  DirName:= MotorNumDirectoryFullGet(AMotorName, AMotorNum, AMotorDate);
+  DirName:= MotorNumDirectoryGet(AMotorName, AMotorNum, AMotorDate);
   if DirectoryExists(DirName) then
     Result:= DeleteDirectory(DirName, False);
 end;
@@ -992,9 +984,9 @@ begin
   if SSame(AOldMotorName, ANewMotorName) and
      SSame(AOldMotorNum, ANewMotorNum) and
      SameDate(AOldMotorDate, ANewMotorDate) then Exit;
-  OldDirName:= MotorNumDirectoryFullGet(AOldMotorName, AOldMotorNum, AOldMotorDate);
+  OldDirName:= MotorNumDirectoryGet(AOldMotorName, AOldMotorNum, AOldMotorDate);
   if not DirectoryExists(OldDirName) then Exit;
-  NewDirName:= MotorNumDirectoryFullGet(ANewMotorName, ANewMotorNum, ANewMotorDate);
+  NewDirName:= MotorNumDirectoryGet(ANewMotorName, ANewMotorNum, ANewMotorDate);
   RenameFile(OldDirName, NewDirName);
 end;
 
@@ -1013,17 +1005,6 @@ begin
     Result:= 'Исх. №' + S + ' - ' + LETTER_NAMES[ALetterType];
 end;
 
-function FileNameGet(const ALetterType: Byte;
-                     const ALetterDate: TDate;
-                     const ALetterNum: String;
-                     const AMotorDate: TDate;
-                     const AMotorName, AMotorNum: String): String;
-var
-  S: String;
-begin
-  S:= MotorFullName(AMotorName, AMotorNum, AMotorDate);
-  Result:= FileNameGet(ALetterType, ALetterDate, ALetterNum) + SYMBOL_SPACE + S;
-end;
 
 function FileNameFullGet(const ALetterType: Byte;
                            const ALetterDate: TDate;
@@ -1031,10 +1012,9 @@ function FileNameFullGet(const ALetterType: Byte;
                            const AMotorDate: TDate;
                            const AMotorName, AMotorNum: String): String;
 begin
-  Result:= MotorNumDirectoryFullGet(AMotorName, AMotorNum, AMotorDate) +
+  Result:= MotorNumDirectoryGet(AMotorName, AMotorNum, AMotorDate) +
            DirectorySeparator +
-           FileNameGet(ALetterType, ALetterDate, ALetterNum,
-                       AMotorDate, AMotorName, AMotorNum) + '.pdf';
+           FileNameGet(ALetterType, ALetterDate, ALetterNum) + '.pdf';
 end;
 
 function DocumentDelete(const ALetterType: Byte;
@@ -1094,6 +1074,26 @@ begin
                           AMotorDate, AMotorName, AMotorNum)
   else
     ShowInfo('Указанный файл письма не найден!');
+end;
+
+function DocumentRename(const ALetterType: Byte;
+                         const AMotorDate: TDate;
+                         const AMotorName, AMotorNum: String;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+var
+  OldFileName, NewFileName: String;
+begin
+ if SameDate(ALetterDate, AOldLetterDate) and
+    SSame(ALetterNum, AOldLetterNum) then Exit;
+
+ OldFileName:= FileNameFullGet(ALetterType, AOldLetterDate, AOldLetterNum,
+                               AMotorDate, AMotorName, AMotorNum);
+ NewFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
+                               AMotorDate, AMotorName, AMotorNum);
+ Result:=  RenameFile(OldFileName, NewFileName);
 end;
 
 end.

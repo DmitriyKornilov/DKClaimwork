@@ -640,6 +640,7 @@ begin
   //переименовываем папку для этого двигателя
   MotorNumDirectoryCheck(OldMotorName, NewMotorName, OldMotorNum, NewMotorNum,
                          OldMotorDate, NewMotorDate);
+  ButtonsEnable;
 end;
 
 procedure TMainForm.EditNoteButtonClick(Sender: TObject);
@@ -1249,8 +1250,7 @@ begin
   SrcFileName:= FileNameFullGet(ALetterType, LetterDate, LetterNum,
                                 MotorDate, MotorName, MotorNum);
 
-  DestFileName:= FileNameGet(ALetterType, LetterDate, LetterNum,
-                             MotorDate, MotorName, MotorNum);
+  DestFileName:= FileNameGet(ALetterType, LetterDate, LetterNum);
   SaveDialog1.FileName:= DestFileName;
   if not SaveDialog1.Execute then Exit;
   DestFileName:= SaveDialog1.FileName;
