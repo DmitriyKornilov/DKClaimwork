@@ -996,13 +996,20 @@ function FileNameGet(const ALetterType: Byte;
 var
   S: String;
 begin
-  S:= LetterFullName(ALetterDate, ALetterNum, True {check bad symbols});
   if ALetterType = 4 then
-    Result:= 'Акт №' + S + ' осмотра электродвигателя'
-  else if ALetterType in [0, 2, 5, 6, 8, 12, 10] then
-    Result:= 'Вх. №' + S + ' - ' + LETTER_NAMES[ALetterType]
-  else if ALetterType in [1, 3, 7, 9, 11, 13] then
-    Result:= 'Исх. №' + S + ' - ' + LETTER_NAMES[ALetterType];
+  begin
+    Result:= 'Акт осмотра электродвигателя';
+    if not SSame('б/н', ALetterNum) then
+      Result:= Result + ' №' + ALetterNum;
+    Result:= Result + ' от ' + FormatDateTime('dd.mm.yyyy', ALetterDate);
+  end
+  else begin
+    S:= LetterFullName(ALetterDate, ALetterNum, True {check bad symbols});
+    if ALetterType in [0, 2, 5, 6, 8, 12, 10] then
+      Result:= 'Вх. №' + S + ' - ' + LETTER_NAMES[ALetterType]
+    else if ALetterType in [1, 3, 7, 9, 11, 13] then
+      Result:= 'Исх. №' + S + ' - ' + LETTER_NAMES[ALetterType];
+  end;
 end;
 
 
