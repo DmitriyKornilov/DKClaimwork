@@ -967,6 +967,8 @@ var
 begin
   if not CanDataLoad then Exit;
 
+  KeepLogIDStore;
+
   MotorNumLike:= STrim(SearchNumEdit.Text);
   SQLite.DataLoad(MotorNumLike,
               VSTOrderList.SelectedIndex, VSTViewList.SelectedIndex,
@@ -1041,7 +1043,7 @@ begin
   VChangeIf(PretensionMoneyGetValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
   PretensionStatusStrs:= PretensionStatusIntToStr(PretensionStatuses);
 
-  KeepLogIDStore;
+
   LogTable.Update(MotorNames, MotorNums, MotorDateStrs,
                   ReclamationLocationStrs, ReclamationUserStrs,
                   ReclamationNoticeFromUserStrs,
@@ -1384,12 +1386,14 @@ end;
 procedure TMainForm.NoticeEdit;
 var
   NoticeEditForm: TNoticeEditForm;
+  LogID: Integer;
 begin
   NoticeEditForm:= TNoticeEditForm.Create(MainForm);
   try
-    NoticeEditForm.LogID:= 0;
+    LogID:= 0;
     if LogTable.IsSelected then
-      NoticeEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
+      LogID:= LogIDs[LogTable.SelectedIndex];
+    NoticeEditForm.LogID:= LogID;
     NoticeEditForm.Category:= Category;
     if NoticeEditForm.ShowModal=mrOK then
       DataLoad;

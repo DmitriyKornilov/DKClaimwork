@@ -133,6 +133,11 @@ const
                         const ALetterNum: String;
                         const AMotorDate: TDate;
                         const AMotorName, AMotorNum: String): Boolean;
+  function DocumentsDelete(const ALetterType: Byte;
+                        const ALetterDate: TDate;
+                        const ALetterNum: String;
+                        const AMotorDates: TDateVector;
+                        const AMotorNames, AMotorNums: TStrVector): Boolean;
   function DocumentCopy(const ASrcFileName: String;
                         const ALetterType: Byte;
                         const ALetterDate: TDate;
@@ -150,6 +155,24 @@ const
   function DocumentRename(const ALetterType: Byte;
                          const AMotorDate: TDate;
                          const AMotorName, AMotorNum: String;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+  function DocumentUpdate(const ANeedChangeFile: Boolean;
+                         const ALetterType: Byte;
+                         const ASrcFileName: String;
+                         const AMotorDate: TDate;
+                         const AMotorName, AMotorNum: String;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+  function DocumentsUpdate(const ANeedChangeFile: Boolean;
+                         const ALetterType: Byte;
+                         const ASrcFileName: String;
+                         const AMotorDates: TDateVector;
+                         const AMotorNames, AMotorNums: TStrVector;
                          const AOldLetterDate: TDate;
                          const AOldLetterNum: String;
                          const ALetterDate: TDate;
@@ -1039,6 +1062,26 @@ begin
     Result:= DeleteFile(FileName);
 end;
 
+function DocumentsDelete(const ALetterType: Byte;
+                        const ALetterDate: TDate;
+                        const ALetterNum: String;
+                        const AMotorDates: TDateVector;
+                        const AMotorNames, AMotorNums: TStrVector): Boolean;
+var
+  b: Boolean;
+  i: Integer;
+begin
+  b:= True;
+  for i:= 0 to High(AMotorNames) do
+  begin
+    Result:= DocumentDelete(ALetterType, ALetterDate, ALetterNum,
+                            AMotorDates[i], AMotorNames[i], AMotorNums[i]);
+    if not Result then
+      b:= False;
+  end;
+  Result:= b;
+end;
+
 function DocumentCopy(const ASrcFileName: String;
                         const ALetterType: Byte;
                         const ALetterDate: TDate;
@@ -1048,9 +1091,11 @@ function DocumentCopy(const ASrcFileName: String;
 var
   DestFileName: String;
 begin
+  Result:= False;
   DestFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
                                    AMotorDate, AMotorName, AMotorNum);
-  Result:= CopyFile(ASrcFileName, DestFileName,
+  if FileExists(ASrcFileName) then
+    Result:= CopyFile(ASrcFileName, DestFileName,
                [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
 end;
 
@@ -1065,10 +1110,6 @@ function DocumentSave(const ALetterType: Byte;
 begin
   Result:= False;
 
-  if SEmpty(ASrcFileName) then
-    if not Confirm('Не указан файл письма! Продолжить без файла?') then
-      Exit;
-
   //удаляем старый файл
   DocumentDelete(ALetterType, AOldLetterDate, AOldLetterNum,
                  AMotorDate, AMotorName, AMotorNum);
@@ -1076,11 +1117,14 @@ begin
   if SEmpty(ASrcFileName) then Exit;
 
   //копируем новый файл
-  if FileExists(ASrcFileName) then
-    Result:= DocumentCopy(ASrcFileName, ALetterType, ALetterDate, ALetterNum,
-                          AMotorDate, AMotorName, AMotorNum)
-  else
-    ShowInfo('Указанный файл письма не найден!');
+  Result:= DocumentCopy(ASrcFileName, ALetterType, ALetterDate, ALetterNum,
+                        AMotorDate, AMotorName, AMotorNum);
+  if not Result then
+    ShowInfo('Не удалось скопировать файл' + SYMBOL_BREAK +
+             ASrcFileName + SYMBOL_BREAK +
+             'в папку' + SYMBOL_BREAK +
+             ExtractFilePath(ASrcFileName));
+
 end;
 
 function DocumentRename(const ALetterType: Byte;
@@ -1093,14 +1137,96 @@ function DocumentRename(const ALetterType: Byte;
 var
   OldFileName, NewFileName: String;
 begin
- if SameDate(ALetterDate, AOldLetterDate) and
+  if SameDate(ALetterDate, AOldLetterDate) and
     SSame(ALetterNum, AOldLetterNum) then Exit;
 
- OldFileName:= FileNameFullGet(ALetterType, AOldLetterDate, AOldLetterNum,
+  OldFileName:= FileNameFullGet(ALetterType, AOldLetterDate, AOldLetterNum,
                                AMotorDate, AMotorName, AMotorNum);
- NewFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
+  if not FileExists(OldFileName) then Exit;
+
+  NewFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
                                AMotorDate, AMotorName, AMotorNum);
- Result:=  RenameFile(OldFileName, NewFileName);
+  Result:=  RenameFile(OldFileName, NewFileName);
+
+  if not Result then
+    ShowInfo('Не удалось переименовать файл' + SYMBOL_BREAK +
+             OldFileName + SYMBOL_BREAK +
+             'на' + SYMBOL_BREAK +
+             NewFileName);
+end;
+
+function DocumentUpdate(const ANeedChangeFile: Boolean;
+                         const ALetterType: Byte;
+                         const ASrcFileName: String;
+                         const AMotorDate: TDate;
+                         const AMotorName, AMotorNum: String;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+begin
+  Result:= False;
+
+  if ANeedChangeFile then
+  begin
+    if SEmpty(ASrcFileName) then
+      if not Confirm('Не указан файл письма! Продолжить без файла?') then
+        Exit;
+    if not FileExists(ASrcFileName) then
+    begin
+      ShowInfo('Указанный файл письма не найден!');
+      Exit;
+    end;
+    Result:= DocumentSave(ALetterType, ASrcFileName, AMotorDate, AMotorName, AMotorNum,
+                 AOldLetterDate, AOldLetterNum, ALetterDate, ALetterNum);
+  end
+  else
+    Result:= DocumentRename(ALetterType, AMotorDate, AMotorName, AMotorNum,
+                   AOldLetterDate, AOldLetterNum, ALetterDate, ALetterNum);
+
+end;
+
+function DocumentsUpdate(const ANeedChangeFile: Boolean;
+                         const ALetterType: Byte;
+                         const ASrcFileName: String;
+                         const AMotorDates: TDateVector;
+                         const AMotorNames, AMotorNums: TStrVector;
+                         const AOldLetterDate: TDate;
+                         const AOldLetterNum: String;
+                         const ALetterDate: TDate;
+                         const ALetterNum: String): Boolean;
+var
+  i: Integer;
+  b: Boolean;
+begin
+  Result:= False;
+
+  b:= True;
+  if ANeedChangeFile then
+  begin
+    if SEmpty(ASrcFileName) then
+      if not Confirm('Не указан файл письма! Продолжить без файла?') then
+        Exit;
+    if (not SEmpty(ASrcFileName)) and (not FileExists(ASrcFileName)) then
+    begin
+      ShowInfo('Указанный файл письма' + ASrcFileName + 'не найден!');
+      Exit;
+    end;
+    for i:= 0 to High(AMotorDates) do
+    begin
+      Result:= DocumentSave(ALetterType, ASrcFileName, AMotorDates[i], AMotorNames[i], AMotorNums[i],
+                            AOldLetterDate, AOldLetterNum, ALetterDate, ALetterNum);
+    end;
+  end
+  else begin
+    for i:= 0 to High(AMotorDates) do
+    begin
+      Result:= DocumentRename(ALetterType, AMotorDates[i], AMotorNames[i], AMotorNums[i],
+                     AOldLetterDate, AOldLetterNum, ALetterDate, ALetterNum);
+      if not Result then b:= False;
+    end;
+  end;
+  Result:= b;
 end;
 
 end.

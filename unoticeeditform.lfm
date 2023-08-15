@@ -1,23 +1,24 @@
 object NoticeEditForm: TNoticeEditForm
   Left = 623
-  Height = 603
+  Height = 680
   Top = 184
   Width = 565
-  ClientHeight = 603
+  ClientHeight = 680
   ClientWidth = 565
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = MotorNameLabel
+    AnchorSideTop.Control = VT1
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 76
+    Top = 202
     Width = 99
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -32,12 +33,12 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrCenter
     Left = 8
     Height = 20
-    Top = 112
-    Width = 17
+    Top = 238
+    Width = 46
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
     BorderSpacing.Right = 6
-    Caption = '№'
+    Caption = 'номер'
     ParentColor = False
     ParentFont = False
   end
@@ -47,11 +48,10 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Control = DT1
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = Label3
-    Left = 33
+    Left = 62
     Height = 28
-    Top = 108
-    Width = 377
-    Anchors = [akTop, akLeft, akRight]
+    Top = 234
+    Width = 150
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
     BorderSpacing.Right = 12
@@ -60,15 +60,16 @@ object NoticeEditForm: TNoticeEditForm
     TabOrder = 0
   end
   object Label3: TLabel
+    AnchorSideLeft.Control = LetterNumEdit
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = DT1
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = DT1
-    Left = 422
+    Left = 224
     Height = 20
-    Top = 112
+    Top = 238
     Width = 30
-    Anchors = [akTop, akRight]
-    BorderSpacing.Left = 2
+    BorderSpacing.Left = 12
     BorderSpacing.Top = 6
     BorderSpacing.Right = 6
     Caption = 'дата'
@@ -82,9 +83,9 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 458
+    Left = 260
     Height = 28
-    Top = 108
+    Top = 234
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
@@ -97,7 +98,6 @@ object NoticeEditForm: TNoticeEditForm
     TrailingSeparator = False
     TextForNullDate = 'NULL'
     LeadingZeros = True
-    Anchors = [akTop, akRight]
     Kind = dtkDate
     TimeFormat = tf24
     TimeDisplay = tdHMS
@@ -114,7 +114,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 268
+    Top = 394
     Width = 94
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -131,7 +131,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 300
+    Top = 426
     Width = 549
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -146,7 +146,7 @@ object NoticeEditForm: TNoticeEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 539
+    Top = 616
     Width = 561
     Align = alBottom
     AutoSize = True
@@ -477,7 +477,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 346
+    Top = 472
     Width = 378
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -495,7 +495,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 378
+    Top = 504
     Width = 551
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -516,7 +516,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 421
+    Top = 547
     Width = 163
     BorderSpacing.Left = 8
     BorderSpacing.Top = 15
@@ -535,7 +535,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 453
+    Top = 579
     Width = 549
     Alignment = taRightJustify
     BorderSpacing.Left = 8
@@ -552,7 +552,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 154
+    Top = 280
     Width = 39
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -568,7 +568,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Control = OpenButton
     Left = 8
     Height = 28
-    Top = 222
+    Top = 348
     Width = 503
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -587,7 +587,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideBottom.Side = asrBottom
     Left = 517
     Height = 36
-    Top = 218
+    Top = 344
     Width = 40
     Align = alCustom
     Anchors = [akTop, akRight]
@@ -605,26 +605,13 @@ object NoticeEditForm: TNoticeEditForm
     Left = 8
     Height = 20
     Top = 6
-    Width = 136
+    Width = 133
     BorderSpacing.Left = 8
     BorderSpacing.Top = 6
-    Caption = 'Электродвигатель '
+    Caption = 'Электродвигатели'
     Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
-  end
-  object MotorNameLabel: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label8
-    AnchorSideTop.Side = asrBottom
-    Left = 8
-    Height = 20
-    Top = 38
-    Width = 81
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 12
-    Caption = 'MotorName'
-    ParentColor = False
   end
   object NotChangeFileCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
@@ -632,17 +619,38 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 24
-    Top = 186
-    Width = 337
+    Top = 312
+    Width = 336
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
-    Caption = 'Не изменять существующий файл документа'
+    Caption = 'Не заменять существующий файл документа'
     OnChange = NotChangeFileCheckBoxChange
     TabOrder = 7
   end
+  object VT1: TVirtualStringTree
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label8
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 6
+    Height = 150
+    Top = 34
+    Width = 553
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 6
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.MainColumn = -1
+    TabOrder = 8
+  end
   object OpenDialog1: TOpenDialog
     Filter = 'Документ PDF|*.pdf'
-    Left = 416
-    Top = 168
+    Left = 424
+    Top = 336
   end
 end

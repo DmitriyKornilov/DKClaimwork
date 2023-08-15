@@ -1,22 +1,20 @@
 object LetterStandardForm: TLetterStandardForm
-  Left = 370
-  Height = 800
-  Top = 123
-  Width = 1100
-  ClientHeight = 800
-  ClientWidth = 1100
+  Left = 458
+  Height = 698
+  Top = 169
+  Width = 926
+  ClientHeight = 698
+  ClientWidth = 926
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
-  OnCreate = FormCreate
-  OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 736
-    Width = 1096
+    Top = 634
+    Width = 922
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 2
@@ -24,7 +22,7 @@ object LetterStandardForm: TLetterStandardForm
     BorderSpacing.Bottom = 6
     BevelOuter = bvNone
     ClientHeight = 58
-    ClientWidth = 1096
+    ClientWidth = 922
     TabOrder = 0
     object CancelButton: TSpeedButton
       AnchorSideTop.Control = DividerBevel1
@@ -32,7 +30,7 @@ object LetterStandardForm: TLetterStandardForm
       AnchorSideRight.Control = ButtonPanel
       AnchorSideRight.Side = asrBottom
       Cursor = crHandPoint
-      Left = 965
+      Left = 791
       Height = 38
       Top = 20
       Width = 125
@@ -184,7 +182,7 @@ object LetterStandardForm: TLetterStandardForm
       AnchorSideTop.Side = asrCenter
       AnchorSideRight.Control = CancelButton
       Cursor = crHandPoint
-      Left = 840
+      Left = 666
       Height = 38
       Top = 20
       Width = 125
@@ -334,7 +332,7 @@ object LetterStandardForm: TLetterStandardForm
       Left = 0
       Height = 20
       Top = 0
-      Width = 1096
+      Width = 922
       Align = alTop
       Font.Style = [fsBold]
       ParentFont = False
@@ -347,8 +345,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideBottom.Control = ButtonPanel
     Left = 141
     Height = 20
-    Top = 708
-    Width = 953
+    Top = 606
+    Width = 779
     Align = alCustom
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -366,7 +364,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideBottom.Control = ButtonPanel
     Left = 8
     Height = 20
-    Top = 708
+    Top = 606
     Width = 77
     Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 8
@@ -376,51 +374,15 @@ object LetterStandardForm: TLetterStandardForm
     ParentColor = False
     ParentFont = False
   end
-  object Label7: TLabel
+  object Label4: TLabel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     Left = 6
     Height = 20
     Top = 6
-    Width = 279
-    BorderSpacing.Left = 6
-    BorderSpacing.Top = 6
-    Caption = 'Включить в письмо электродвигатели'
-    Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
-  end
-  object VT1: TVirtualStringTree
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label7
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 6
-    Height = 110
-    Top = 34
-    Width = 1088
-    Align = alCustom
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 6
-    BorderSpacing.Top = 8
-    BorderSpacing.Right = 6
-    DefaultText = 'Node'
-    Header.AutoSizeIndex = 0
-    Header.Columns = <>
-    Header.MainColumn = -1
-    TabOrder = 1
-  end
-  object Label4: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = VT1
-    AnchorSideTop.Side = asrBottom
-    Left = 6
-    Height = 20
-    Top = 156
     Width = 135
     BorderSpacing.Left = 6
-    BorderSpacing.Top = 12
+    BorderSpacing.Top = 6
     Caption = 'Реквизиты письма'
     Font.Style = [fsBold]
     ParentColor = False
@@ -433,7 +395,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 195
+    Top = 45
     Width = 101
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -450,8 +412,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = Label2
     Left = 126
     Height = 28
-    Top = 191
-    Width = 746
+    Top = 41
+    Width = 572
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 12
     BorderSpacing.Top = 15
@@ -459,15 +421,15 @@ object LetterStandardForm: TLetterStandardForm
     MaxLength = 50
     OnChange = LetterNumEditChange
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 1
   end
   object Label2: TLabel
     AnchorSideTop.Control = DT1
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = DT1
-    Left = 890
+    Left = 716
     Height = 20
-    Top = 195
+    Top = 45
     Width = 99
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 2
@@ -484,15 +446,15 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 995
+    Left = 821
     Height = 28
-    Top = 191
+    Top = 41
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 3
+    TabOrder = 2
     BorderSpacing.Left = 6
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -517,7 +479,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 231
+    Top = 81
     Width = 32
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -534,8 +496,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 227
-    Width = 968
+    Top = 77
+    Width = 794
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     BorderSpacing.Right = 6
@@ -544,7 +506,7 @@ object LetterStandardForm: TLetterStandardForm
     OnChange = OrganizationComboBoxChange
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 4
+    TabOrder = 3
   end
   object Label14: TLabel
     AnchorSideLeft.Control = Owner
@@ -553,7 +515,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 267
+    Top = 117
     Width = 36
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -570,8 +532,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 263
-    Width = 968
+    Top = 113
+    Width = 794
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     BorderSpacing.Right = 6
@@ -579,7 +541,7 @@ object LetterStandardForm: TLetterStandardForm
     ItemHeight = 20
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 5
+    TabOrder = 4
   end
   object Label9: TLabel
     AnchorSideLeft.Control = Owner
@@ -588,7 +550,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 303
+    Top = 153
     Width = 42
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -605,15 +567,15 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 299
-    Width = 746
+    Top = 149
+    Width = 572
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     DropDownCount = 15
     ItemHeight = 20
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 6
+    TabOrder = 5
   end
   object SenderSignCheckBox: TCheckBox
     AnchorSideLeft.Control = Label2
@@ -621,15 +583,15 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 890
+    Left = 716
     Height = 24
-    Top = 301
+    Top = 151
     Width = 101
     BorderSpacing.Top = 8
     Caption = 'факсимиле'
     Checked = True
     State = cbChecked
-    TabOrder = 7
+    TabOrder = 6
   end
   object Label11: TLabel
     AnchorSideLeft.Control = Owner
@@ -638,7 +600,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 339
+    Top = 189
     Width = 92
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -655,8 +617,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 335
-    Width = 968
+    Top = 185
+    Width = 794
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     BorderSpacing.Right = 6
@@ -664,7 +626,7 @@ object LetterStandardForm: TLetterStandardForm
     ItemHeight = 20
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 8
+    TabOrder = 7
   end
   object Label10: TLabel
     AnchorSideLeft.Control = Owner
@@ -673,7 +635,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 8
     Height = 20
-    Top = 375
+    Top = 225
     Width = 35
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -690,8 +652,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 371
-    Width = 968
+    Top = 221
+    Width = 794
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     BorderSpacing.Right = 6
@@ -700,14 +662,14 @@ object LetterStandardForm: TLetterStandardForm
     OnChange = SubjectComboBoxChange
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 9
+    TabOrder = 8
   end
   object Label13: TLabel
     AnchorSideTop.Control = DelegateComboBox
     AnchorSideTop.Side = asrCenter
     Left = 10
     Height = 20
-    Top = 411
+    Top = 261
     Width = 104
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -725,8 +687,8 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 126
     Height = 28
-    Top = 407
-    Width = 746
+    Top = 257
+    Width = 572
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     DropDownCount = 15
@@ -734,16 +696,16 @@ object LetterStandardForm: TLetterStandardForm
     OnChange = DelegateComboBoxChange
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 10
+    TabOrder = 9
     Visible = False
   end
   object Label16: TLabel
     AnchorSideTop.Control = DT2
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = DT1
-    Left = 885
+    Left = 711
     Height = 20
-    Top = 411
+    Top = 261
     Width = 104
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 2
@@ -761,15 +723,15 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 995
+    Left = 821
     Height = 28
-    Top = 407
+    Top = 257
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 11
+    TabOrder = 10
     BorderSpacing.Left = 6
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -794,7 +756,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 8
     Height = 20
-    Top = 675
+    Top = 573
     Width = 121
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -812,11 +774,11 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideBottom.Control = Label12
     Left = 135
     Height = 28
-    Top = 671
+    Top = 569
     Width = 100
     BorderSpacing.Left = 6
     BorderSpacing.Top = 12
-    TabOrder = 12
+    TabOrder = 11
     Visible = False
   end
   object Label19: TLabel
@@ -826,7 +788,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 247
     Height = 20
-    Top = 675
+    Top = 573
     Width = 78
     BorderSpacing.Left = 12
     BorderSpacing.Top = 12
@@ -845,13 +807,13 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 331
     Height = 28
-    Top = 671
+    Top = 569
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 13
+    TabOrder = 12
     BorderSpacing.Left = 6
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -875,7 +837,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 436
     Height = 20
-    Top = 675
+    Top = 573
     Width = 18
     BorderSpacing.Left = 6
     BorderSpacing.Top = 12
@@ -894,13 +856,13 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 460
     Height = 28
-    Top = 671
+    Top = 569
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 14
+    TabOrder = 13
     BorderSpacing.Left = 6
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -928,7 +890,7 @@ object LetterStandardForm: TLetterStandardForm
     Cursor = crHandPoint
     Left = 565
     Height = 30
-    Top = 670
+    Top = 568
     Width = 81
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -937,7 +899,7 @@ object LetterStandardForm: TLetterStandardForm
     BorderSpacing.Bottom = 8
     Caption = 'Создать'
     OnClick = ProxyButtonClick
-    TabOrder = 15
+    TabOrder = 14
     Visible = False
   end
   object RadioButton1: TRadioButton
@@ -947,13 +909,13 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = MileageEdit
     Left = 126
     Height = 24
-    Top = 445
+    Top = 295
     Width = 105
     BorderSpacing.Right = 6
     Caption = 'По пробегу'
     Checked = True
     OnClick = RadioButton1Click
-    TabOrder = 16
+    TabOrder = 15
     TabStop = True
     Visible = False
   end
@@ -964,12 +926,12 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrBottom
     Left = 237
     Height = 28
-    Top = 443
+    Top = 293
     Width = 100
     BorderSpacing.Left = 6
     BorderSpacing.Top = 8
     OnChange = MileageEditChange
-    TabOrder = 17
+    TabOrder = 16
     Visible = False
   end
   object Label17: TLabel
@@ -980,7 +942,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 343
     Height = 20
-    Top = 447
+    Top = 297
     Width = 18
     BorderSpacing.Left = 6
     BorderSpacing.Top = 1
@@ -997,12 +959,12 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 381
     Height = 24
-    Top = 445
+    Top = 295
     Width = 178
     BorderSpacing.Left = 20
     Caption = 'По дате изготовления'
     OnClick = RadioButton2Click
-    TabOrder = 18
+    TabOrder = 17
     Visible = False
   end
   object RadioButton3: TRadioButton
@@ -1012,12 +974,12 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 579
     Height = 24
-    Top = 445
+    Top = 295
     Width = 236
     BorderSpacing.Left = 20
     Caption = 'По дате ввода в эксплуатацию'
     OnClick = RadioButton3Click
-    TabOrder = 19
+    TabOrder = 18
     Visible = False
   end
   object DT3: TDateTimePicker
@@ -1029,13 +991,13 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     Left = 821
     Height = 28
-    Top = 443
+    Top = 293
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 20
+    TabOrder = 19
     BorderSpacing.Left = 6
     BorderSpacing.Right = 6
     TrailingSeparator = False
@@ -1059,13 +1021,13 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 995
+    Left = 821
     Height = 24
-    Top = 301
+    Top = 151
     Width = 71
     BorderSpacing.Top = 8
     Caption = 'печать'
-    TabOrder = 21
+    TabOrder = 20
   end
   object Label5: TLabel
     AnchorSideLeft.Control = Owner
@@ -1073,7 +1035,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrBottom
     Left = 6
     Height = 20
-    Top = 483
+    Top = 333
     Width = 95
     BorderSpacing.Left = 6
     BorderSpacing.Top = 12
@@ -1088,7 +1050,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrCenter
     Left = 126
     Height = 20
-    Top = 483
+    Top = 333
     Width = 483
     BorderSpacing.Top = 18
     Caption = '(заполняется без красных строк, абзацы отделяются пустой строкой)'
@@ -1103,16 +1065,16 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ProxyNumEdit
     Left = 6
-    Height = 150
-    Top = 509
-    Width = 1088
+    Height = 198
+    Top = 359
+    Width = 914
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 6
     BorderSpacing.Top = 6
     BorderSpacing.Right = 6
     BorderSpacing.Bottom = 12
     ScrollBars = ssAutoVertical
-    TabOrder = 22
+    TabOrder = 21
   end
   object SaveDialog1: TSaveDialog
     Filter = 'Документ PDF|*.pdf'
