@@ -1606,7 +1606,7 @@ begin
   S:= 'Включить в список электродвигатели:';
   V:= VCreateStr([
     'в процессе рекламационной работы',
-    'ожидающие согласования отправки в ремонт',
+    'ожидающие согласования гарантийного ремонта',
     'на этапе транспортировки в ремонт',
     'в процессе гарантийного ремонта',
     'в процессе претензионной работы',
@@ -1618,7 +1618,7 @@ end;
 
 procedure TMainForm.ViewItemSelect;
 begin
-  PeriodPanel.Visible:= VSTViewList.SelectedIndex=5;
+  PeriodPanel.Visible:= VSTViewList.SelectedIndex=VSTViewList.RowCount-1;
   DataLoad;
 end;
 

@@ -30,12 +30,10 @@ type
     SaveButton: TSpeedButton;
     MoneySendCheckBox: TCheckBox;
     DT1: TDateTimePicker;
-    NotNeedCheckBox: TCheckBox;
     MoneyGetCheckBox: TCheckBox;
     procedure CancelButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure MoneyGetCheckBoxChange(Sender: TObject);
-    procedure NotNeedCheckBoxChange(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure MoneySendCheckBoxChange(Sender: TObject);
   private
@@ -69,20 +67,9 @@ begin
   DataLoad;
 end;
 
-procedure TMoneyDatesEditForm.NotNeedCheckBoxChange(Sender: TObject);
-begin
-  if NotNeedCheckBox.Checked then
-  begin
-    MoneySendCheckBox.Checked:= False;
-    MoneyGetCheckBox.Checked:= False;
-  end;
-  MoneySendCheckBox.Enabled:= not NotNeedCheckBox.Checked;
-  MoneyGetCheckBox.Enabled:= not NotNeedCheckBox.Checked;
-end;
-
 procedure TMoneyDatesEditForm.MoneyGetControlsEnabled;
 begin
-  Label3.Enabled:= (not NotNeedCheckBox.Checked) and MoneyGetCheckBox.Checked;
+  Label3.Enabled:= MoneyGetCheckBox.Checked;
   DT2.Enabled:= Label3.Enabled;
   Label4.Enabled:= Label3.Enabled;
   MoneyGetEdit.Enabled:= Label3.Enabled;
@@ -90,7 +77,7 @@ end;
 
 procedure TMoneyDatesEditForm.MoneySendControlsEnabled;
 begin
-  Label1.Enabled:= (not NotNeedCheckBox.Checked) and MoneySendCheckBox.Checked;
+  Label1.Enabled:= MoneySendCheckBox.Checked;
   DT1.Enabled:= Label1.Enabled;
   Label2.Enabled:= Label1.Enabled;
   MoneySendEdit.Enabled:= Label1.Enabled;
@@ -119,39 +106,31 @@ begin
   MoneySendDate:= 0;
   MoneyGetDate:= 0;
   Status:= 0;   //не указано
-  if NotNeedCheckBox.Checked then
-    Status:= 3  //отказано
-  else begin
-    if MoneySendCheckBox.Checked then
-    begin
-      MoneySendValue:= Trunc(100*MoneySendEdit.Value);
-      if MoneySendValue=0 then
-      begin
-        ShowInfo('Не указана сумма компенсации Потребителю!');
-        Exit;
-      end;
-      MoneySendDate:= DT1.Date;
-    end;
-    if MoneyGetCheckBox.Checked then
-    begin
-      MoneyGetValue:= Trunc(100*MoneyGetEdit.Value);
-      if MoneyGetValue=0 then
-      begin
-        ShowInfo('Не указана сумма возмещения Производителем!');
-        Exit;
-      end;
-      MoneyGetDate:= DT1.Date;
-    end;
-    if (MoneySendValue=MoneyValue) and (MoneyGetValue=MoneyValue) then
-      Status:= 2  //завершено
-    else
-      Status:= 1; //в процессе
-  end;
 
-  if Status=0 then
-    SQLite.PretensionMoneyDelete(LogID)
-  else
-    SQLite.PretensionMoneyUpdate(LogID, Status, MoneySendValue, MoneySendDate,
+  if MoneySendCheckBox.Checked then
+  begin
+    MoneySendValue:= Trunc(100*MoneySendEdit.Value);
+    if MoneySendValue=0 then
+    begin
+      ShowInfo('Не указана сумма компенсации Потребителю!');
+      Exit;
+    end;
+    MoneySendDate:= DT1.Date;
+  end;
+  if MoneyGetCheckBox.Checked then
+  begin
+    MoneyGetValue:= Trunc(100*MoneyGetEdit.Value);
+    if MoneyGetValue=0 then
+    begin
+      ShowInfo('Не указана сумма возмещения Производителем!');
+      Exit;
+    end;
+    MoneyGetDate:= DT1.Date;
+  end;
+  if (MoneySendValue=MoneyValue) and (MoneyGetValue=MoneyValue) then
+    Status:= 3;  //завершено
+
+  SQLite.PretensionMoneyUpdate(LogID, Status, MoneySendValue, MoneySendDate,
                                  MoneyGetValue, MoneyGetDate);
 
   CanFormClose:= True;
@@ -186,16 +165,9 @@ begin
     DT2.Date:= MoneyGetDate;
     MoneyGetEdit.Text:= PriceIntToStr(MoneyGetValue);
   end;
-
-  NotNeedCheckbox.Checked:= Status=3;
-
-  MoneySendCheckBox.Enabled:= not NotNeedCheckBox.Checked;
   MoneySendControlsEnabled;
-  MoneyGetCheckBox.Enabled:= not NotNeedCheckBox.Checked;
   MoneyGetControlsEnabled;
 end;
-
-
 
 end.
 

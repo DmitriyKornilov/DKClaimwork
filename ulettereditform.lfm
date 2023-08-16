@@ -1,9 +1,9 @@
 object LetterEditForm: TLetterEditForm
   Left = 544
-  Height = 576
+  Height = 589
   Top = 200
   Width = 900
-  ClientHeight = 576
+  ClientHeight = 589
   ClientWidth = 900
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
@@ -18,7 +18,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 196
+    Top = 216
     Width = 225
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -35,7 +35,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 24
-    Top = 230
+    Top = 250
     Width = 113
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -52,7 +52,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = LetterNumEdit
     Left = 139
     Height = 20
-    Top = 232
+    Top = 252
     Width = 46
     BorderSpacing.Left = 18
     BorderSpacing.Top = 12
@@ -69,7 +69,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = Label2
     Left = 191
     Height = 28
-    Top = 228
+    Top = 248
     Width = 150
     BorderSpacing.Left = 6
     BorderSpacing.Top = 12
@@ -86,7 +86,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = DT1
     Left = 353
     Height = 20
-    Top = 232
+    Top = 252
     Width = 30
     BorderSpacing.Left = 6
     BorderSpacing.Top = 6
@@ -104,7 +104,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 389
     Height = 28
-    Top = 228
+    Top = 248
     Width = 99
     CenturyFrom = 1941
     MaxDate = 2958465
@@ -136,7 +136,7 @@ object LetterEditForm: TLetterEditForm
     Cursor = crHandPoint
     Left = 8
     Height = 30
-    Top = 382
+    Top = 402
     Width = 229
     Align = alCustom
     AutoSize = True
@@ -158,7 +158,7 @@ object LetterEditForm: TLetterEditForm
     Cursor = crHandPoint
     Left = 245
     Height = 30
-    Top = 382
+    Top = 402
     Width = 244
     Align = alCustom
     AutoSize = True
@@ -174,7 +174,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 6
     Height = 20
-    Top = 427
+    Top = 447
     Width = 140
     BorderSpacing.Left = 8
     BorderSpacing.Top = 15
@@ -192,7 +192,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 459
+    Top = 479
     Width = 250
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -213,7 +213,7 @@ object LetterEditForm: TLetterEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 512
+    Top = 525
     Width = 896
     Align = alBottom
     AutoSize = True
@@ -544,7 +544,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 274
+    Top = 294
     Width = 39
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
@@ -560,7 +560,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = OpenButton
     Left = 8
     Height = 28
-    Top = 342
+    Top = 362
     Width = 838
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -579,7 +579,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideBottom.Side = asrBottom
     Left = 852
     Height = 36
-    Top = 338
+    Top = 358
     Width = 40
     Align = alCustom
     Anchors = [akTop, akRight]
@@ -597,7 +597,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 24
-    Top = 306
+    Top = 326
     Width = 336
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -626,7 +626,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 6
-    Height = 150
+    Height = 170
     Top = 34
     Width = 888
     Align = alCustom

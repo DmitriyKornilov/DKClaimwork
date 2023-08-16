@@ -88,6 +88,8 @@ type
     procedure ReclamationStatusSet(const AStatus: Integer);
     function RepairStatusGet: Integer;
     procedure RepairStatusSet(const AStatus: Integer);
+    function PretensionStatusGet: Integer;
+    procedure PretensionStatusSet(const AStatus: Integer);
   public
     Category: Byte;
     LetterType: Byte;
@@ -165,7 +167,7 @@ begin
     else if LetterType=4 then {Акт осмотра двигателя}
       SQLite.ReclamationReportNotNeed(UsedLogIDs, ReclamationStatusGet)
     else
-      SQLite.LetterNotNeed(UsedLogIDs, LetterType);
+      SQLite.LettersNotNeed(UsedLogIDs, LetterType);
   end
   else begin  //документ требуется - запись документа
     LetterNum:= STrim(LetterNumEdit.Text);
@@ -200,6 +202,8 @@ begin
         SQLite.ReclamationReportUpdate(UsedLogIDs, LetterNum, LetterDate, ReclamationStatusGet)
       else if LetterType=9 then {Ответ на запрос о ремонте Потребителю}
         SQLite.RepairAnswersToUserUpdate(UsedLogIDs, LetterNum, LetterDate, RepairStatusGet)
+      else if LetterType=13 then {Ответ на претензию Потребителю}
+        SQLite.PretensionAnswersToUserUpdate(UsedLogIDs, LetterNum, LetterDate, PretensionStatusGet)
       else
         SQLite.LettersUpdate(UsedLogIDs, LetterType, LetterNum, LetterDate);
     end;
@@ -247,6 +251,25 @@ begin
     StatusComboBox.ItemIndex:= 0;
 end;
 
+function TLetterEditForm.PretensionStatusGet: Integer;
+begin
+  if StatusComboBox.ItemIndex = 0 then
+    Result:= 2
+  else
+    Result:= 4;
+end;
+
+procedure TLetterEditForm.PretensionStatusSet(const AStatus: Integer);
+begin
+  StatusComboBox.Clear;
+  StatusComboBox.Items.Add('согласовано');
+  StatusComboBox.Items.Add('отказано');
+  if AStatus=4 then
+    StatusComboBox.ItemIndex:= 1
+  else
+    StatusComboBox.ItemIndex:= 0;
+end;
+
 procedure TLetterEditForm.DataLoad;
 var
   Status: Integer;
@@ -264,8 +287,9 @@ begin
   MotorListShow;
 
   //combobox статуса рекламации и ремонта
-  if (LetterType=4) or    {Акт осмотра двигателя}
-     (LetterType=9) then  {Ответ о ремонте потребителю}
+  if (LetterType=4)  or    {Акт осмотра двигателя}
+     (LetterType=9)  or    {Ответ о ремонте потребителю}
+     (LetterType=13) then  {Ответ на претензию потребителю}
   begin
     Label3.Visible:= True;
     StatusCombobox.Visible:= True;
@@ -274,12 +298,18 @@ begin
       Label3.Caption:= 'Статус рекламации';
       Status:= SQLite.ReclamationStatusLoad(LogID);
       ReclamationStatusSet(Status);
-    end;
-    if (LetterType=9) then
+    end
+    else if (LetterType=9) then
     begin
-      Label3.Caption:= 'Статус согласования';
+      Label3.Caption:= 'Статус согласования гарантийного ремонта';
       Status:= SQLite.RepairStatusLoad(LogID);
       RepairStatusSet(Status);
+    end
+    else if (LetterType=13) then
+    begin
+      Label3.Caption:= 'Статус согласования возмещения затрат';
+      Status:= SQLite.PretensionStatusLoad(LogID);
+      PretensionStatusSet(Status);
     end;
   end;
 

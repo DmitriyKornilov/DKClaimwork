@@ -93,6 +93,7 @@ type
                                    const AMoneySendValue: Int64; const AMoneySendDate: TDate;
                                    const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
     procedure PretensionMoneyDelete(const ALogID: Integer);
+    function PretensionStatusLoad(const ALogID: Integer): Integer;
 
     //двигатели и письма для ответа
     procedure MotorsWithoutNoticeLoad(const AThisLogID: Integer;
@@ -143,8 +144,13 @@ type
     procedure MotorsReturn(const ALogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate);
-    //письма по ремонту
+    //ответ по ремонту
     procedure RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
+    //ответ на претензию
+    procedure PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
@@ -154,14 +160,12 @@ type
                          out ALetterNum: String;
                          out ALetterDate: TDate);
     procedure LetterDelete(const ALogID: Integer; const ALetterType: Byte);
-    procedure LetterUpdate(const ALogID: Integer; const ALetterType: Byte;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate);
     procedure LettersUpdate(const ALogIDs: TIntVector;
                            const ALetterType: Byte;
                            const ALetterNum: String;
-                           const ALetterDate: TDate);
-    procedure LetterNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
+                           const ALetterDate: TDate;
+                           const AStatus: Integer = -1);
+    procedure LettersNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
 
 
 
@@ -535,7 +539,6 @@ begin
       QParamInt('LogID', ALogIDs[i]);
       QExec;
     end;
-
     QCommit;
   except
     QRollback;
@@ -668,40 +671,61 @@ begin
 end;
 
 procedure TSQLite.RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
-var
-  S: String;
 begin
-  S:=
-    'UPDATE ' +
-      'LOGREPAIR ' +
-    'SET ' +
-      'Status = :Status, ';
-  if ABeginDate = 0 then
-    S:= S + 'BeginDate = NULL, '
-  else
-    S:= S + 'BeginDate = :BeginDate, ';
-  if AEndDate = 0 then
-    S:= S + 'EndDate = NULL '
-  else
-    S:= S + 'EndDate = :EndDate ';
-  S:= S +
-    'WHERE ' +
-        'LogID = :LogID';
-
   QSetQuery(FQuery);
   try
-    QSetSQL(S);
+    QSetSQL(
+      'UPDATE ' +
+        'LOGREPAIR ' +
+      'SET ' +
+        'Status = :Status, ' +
+        'BeginDate = :BeginDate, ' +
+        'EndDate = :EndDate ' +
+      'WHERE ' +
+          'LogID = :LogID'
+    );
     QParamInt('LogID', ALogID);
     QParamInt('Status', AStatus);
-    if ABeginDate>0 then
-      QParamDT('BeginDate', ABeginDate);
-    if AEndDate>0 then
-      QParamDT('EndDate', AEndDate);
+    QParamDT('BeginDate', ABeginDate, ABeginDate>0);
+    QParamDT('EndDate', AEndDate, AEndDate>0);
     QExec;
     QCommit;
   except
     QRollback;
   end;
+
+
+  //S:=
+  //  'UPDATE ' +
+  //    'LOGREPAIR ' +
+  //  'SET ' +
+  //    'Status = :Status, ';
+  //if ABeginDate = 0 then
+  //  S:= S + 'BeginDate = NULL, '
+  //else
+  //  S:= S + 'BeginDate = :BeginDate, ';
+  //if AEndDate = 0 then
+  //  S:= S + 'EndDate = NULL '
+  //else
+  //  S:= S + 'EndDate = :EndDate ';
+  //S:= S +
+  //  'WHERE ' +
+  //      'LogID = :LogID';
+  //
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(S);
+  //  QParamInt('LogID', ALogID);
+  //  QParamInt('Status', AStatus);
+  //  if ABeginDate>0 then
+  //    QParamDT('BeginDate', ABeginDate);
+  //  if AEndDate>0 then
+  //    QParamDT('EndDate', AEndDate);
+  //  QExec;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.RepairDatesDelete(const ALogID: Integer);
@@ -840,26 +864,13 @@ begin
     'UPDATE ' +
       'LOGPRETENSION ' +
     'SET ' +
-      'Status = :Status, ';
-
-  if AMoneySendDate = 0 then
-    S:= S + 'MoneySendDate = NULL, '
-  else
-    S:= S + 'MoneySendDate = :MoneySendDate, ';
-  if AMoneySendValue = 0 then
-    S:= S + 'MoneySendValue = NULL, '
-  else
-    S:= S + 'MoneySendValue = :MoneySendValue, ';
-
-  if AMoneyGetDate = 0 then
-    S:= S + 'MoneyGetDate = NULL, '
-  else
-    S:= S + 'MoneyGetDate = :MoneyGetDate, ';
-  if AMoneyGetValue = 0 then
-    S:= S + 'MoneyGetValue = NULL '
-  else
-    S:= S + 'MoneyGetValue = :MoneyGetValue ';
-
+    'MoneySendDate  = :MoneySendDate, ' +
+    'MoneySendValue = :MoneySendValue, ' +
+    'MoneyGetDate   = :MoneyGetDate, ' +
+    'MoneyGetValue  = :MoneyGetValue ';
+  if AStatus>0 then
+    S:= S +
+      ', Status = :Status ';
   S:= S +
     'WHERE ' +
         'LogID = :LogID';
@@ -868,20 +879,66 @@ begin
   try
     QSetSQL(S);
     QParamInt('LogID', ALogID);
-    QParamInt('Status', AStatus);
-    if AMoneySendDate>0 then
-      QParamDT('MoneySendDate', AMoneySendDate);
-    if AMoneySendValue > 0 then
-      QParamInt64('MoneySendValue', AMoneySendValue);
-    if AMoneyGetDate>0 then
-      QParamDT('MoneyGetDate', AMoneyGetDate);
-    if AMoneyGetValue > 0 then
-      QParamInt64('MoneyGetValue', AMoneyGetValue);
+    QParamDT('MoneySendDate', AMoneySendDate, AMoneySendDate>0);
+    QParamInt64('MoneySendValue', AMoneySendValue, AMoneySendValue>0);
+    QParamDT('MoneyGetDate', AMoneyGetDate, AMoneyGetDate>0);
+    QParamInt64('MoneyGetValue', AMoneyGetValue, AMoneyGetValue>0);
+    if AStatus>0 then
+      QParamInt('Status', AStatus);
     QExec;
     QCommit;
   except
     QRollback;
   end;
+  //S:=
+  //  'UPDATE ' +
+  //    'LOGPRETENSION ' +
+  //  'SET ';
+  //if AStatus>0 then
+  //  S:= S +
+  //    'Status = :Status, ';
+  //
+  //if AMoneySendDate = 0 then
+  //  S:= S + 'MoneySendDate = NULL, '
+  //else
+  //  S:= S + 'MoneySendDate = :MoneySendDate, ';
+  //if AMoneySendValue = 0 then
+  //  S:= S + 'MoneySendValue = NULL, '
+  //else
+  //  S:= S + 'MoneySendValue = :MoneySendValue, ';
+  //
+  //if AMoneyGetDate = 0 then
+  //  S:= S + 'MoneyGetDate = NULL, '
+  //else
+  //  S:= S + 'MoneyGetDate = :MoneyGetDate, ';
+  //if AMoneyGetValue = 0 then
+  //  S:= S + 'MoneyGetValue = NULL '
+  //else
+  //  S:= S + 'MoneyGetValue = :MoneyGetValue ';
+  //
+  //S:= S +
+  //  'WHERE ' +
+  //      'LogID = :LogID';
+  //
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(S);
+  //  QParamInt('LogID', ALogID);
+  //  if AStatus>0 then
+  //    QParamInt('Status', AStatus);
+  //  if AMoneySendDate>0 then
+  //    QParamDT('MoneySendDate', AMoneySendDate);
+  //  if AMoneySendValue > 0 then
+  //    QParamInt64('MoneySendValue', AMoneySendValue);
+  //  if AMoneyGetDate>0 then
+  //    QParamDT('MoneyGetDate', AMoneyGetDate);
+  //  if AMoneyGetValue > 0 then
+  //    QParamInt64('MoneyGetValue', AMoneyGetValue);
+  //  QExec;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.PretensionMoneyDelete(const ALogID: Integer);
@@ -892,6 +949,11 @@ begin
   PretensionInfoLoad(ALogID, UserID, MoneyValue);
   Status:= Ord(UserID>0);
   PretensionMoneyUpdate(ALogID, Status, 0, 0, 0, 0);
+end;
+
+function TSQLite.PretensionStatusLoad(const ALogID: Integer): Integer;
+begin
+  Result:= ValueInt32Int32ID('LOGPRETENSION', 'Status', 'LogID', ALogID);
 end;
 
 procedure TSQLite.MotorsWithoutNoticeLoad(const AThisLogID: Integer;
@@ -1010,15 +1072,12 @@ begin
   NeedMoney:= ALetterType in [11,13];
   NeedLocation:= ALocationID>0;
   NeedAnswers:= ALetterType in [3,9,13];
+  NoticeLetterType:= NoticeLetterTypeGet(ALetterType);
   if NeedAnswers then {3,9,13 - ответы потребителю}
-  begin
-    NoticeLetterType:= ALetterType-3;
-    AnswerLetterType:= ALetterType-1;
-  end
-  else begin  {1,7,11 - уведомления производителю}
-    NoticeLetterType:= ALetterType-1;
+    AnswerLetterType:= ALetterType - 1
+  else
     AnswerLetterType:= 0; // 0 - ответы не нужны
-  end;
+
 
   LetterDBNamesGet(ALetterType, TableName, ThisDateField, ThisNumField);
   LetterDBNamesGet(NoticeLetterType, TableName, NoticeDateField, NoticeNumField);
@@ -1147,15 +1206,11 @@ begin
   AUserTitle:= EmptyStr;
 
   NeedAnswer:= ALetterType in [3,9,13];
+  NoticeLetterType:= NoticeLetterTypeGet(ALetterType);
   if NeedAnswer then {3,9,13 - ответы потребителю}
-  begin
-    NoticeLetterType:= ALetterType-3;
-    AnswerLetterType:= ALetterType-1;
-  end
-  else begin  {1,7,11 - уведомления производителю}
-    NoticeLetterType:= ALetterType-1;
+    AnswerLetterType:= ALetterType - 1
+  else   {1,7,11 - уведомления производителю}
     AnswerLetterType:= 0; // 0 - ответы не нужны
-  end;
 
   LetterDBNamesGet(ALetterType, TableName, ThisDateField, ThisNumField);
   LetterDBNamesGet(NoticeLetterType, TableName, NoticeDateField, NoticeNumField);
@@ -1242,113 +1297,59 @@ end;
 
 
 procedure TSQLite.LetterDelete(const ALogID: Integer; const ALetterType: Byte);
-var
-  TableName, DateField, NumField: String;
+//var
+//  TableName, DateField, NumField: String;
 begin
-  LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        SqlEsc(TableName) +
-      'SET ' +
-        SqlEsc(NumField)  + ' = NULL, ' +
-        SqlEsc(DateField) + ' = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
-end;
-
-procedure TSQLite.LetterUpdate(const ALogID: Integer; const ALetterType: Byte;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate);
-var
-  TableName, DateField, NumField: String;
-begin
-  LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        SqlEsc(TableName) +
-      'SET ' +
-        SqlEsc(NumField)  + ' = :NumValue, ' +
-        SqlEsc(DateField) + ' = :DateValue ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QParamStr('NumValue', ALetterNum);
-    QParamDT('DateValue', ALetterDate);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(VCreateInt([ALogID]), ALetterType, EmptyStr, 0);
+  //LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
+  //
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      SqlEsc(TableName) +
+  //    'SET ' +
+  //      SqlEsc(NumField)  + ' = NULL, ' +
+  //      SqlEsc(DateField) + ' = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('LogID', ALogID);
+  //  QExec;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.LettersUpdate(const ALogIDs: TIntVector;
                            const ALetterType: Byte;
                            const ALetterNum: String;
-                           const ALetterDate: TDate);
+                           const ALetterDate: TDate;
+                           const AStatus: Integer = -1);
 var
-  TableName, DateField, NumField: String;
+  TableName, DateField, NumField, S: String;
   i: Integer;
 begin
   LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-
+  S:=
+    'UPDATE ' +
+      SqlEsc(TableName) +
+    'SET ' +
+      SqlEsc(NumField)  + ' = :NumValue, ' +
+      SqlEsc(DateField) + ' = :DateValue ';
+  if AStatus>=0 then
+    S:= S + ', Status = :Status ';
+  S:= S +
+    'WHERE ' +
+        'LogID = :LogID';
   QSetQuery(FQuery);
   try
-    QSetSQL(
-      'UPDATE ' +
-        SqlEsc(TableName) +
-      'SET ' +
-        SqlEsc(NumField)  + ' = :NumValue, ' +
-        SqlEsc(DateField) + ' = :DateValue ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamStr('NumValue', ALetterNum);
-    QParamDT('DateValue', ALetterDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
-
-end;
-
-procedure TSQLite.LetterNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
-var
-  i: Integer;
-  TableName, DateField, NumField: String;
-begin
-  LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        SqlEsc(TableName) +
-      'SET ' +
-        SqlEsc(NumField)  + ' = :NumValue, ' +
-        SqlEsc(DateField) + ' = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamStr('NumValue', LETTER_NOTNEED_MARK);
+    QSetSQL(S);
+    QParamStr('NumValue', ALetterNum, not SEmpty(ALetterNum));
+    QParamDT('DateValue', ALetterDate, ALetterDate>0);
+    if AStatus>=0 then
+      QParamInt('Status', AStatus);
     for i:= 0 to High(ALogIDs) do
     begin
       QParamInt('LogID', ALogIDs[i]);
@@ -1360,65 +1361,98 @@ begin
   end;
 end;
 
+procedure TSQLite.LettersNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
+//var
+//  i: Integer;
+//  TableName, DateField, NumField: String;
+begin
+  LettersUpdate(ALogIDs, ALetterType, LETTER_NOTNEED_MARK, 0);
 
+  //LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
+  //
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      SqlEsc(TableName) +
+  //    'SET ' +
+  //      SqlEsc(NumField)  + ' = :NumValue, ' +
+  //      SqlEsc(DateField) + ' = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
+end;
 
 procedure TSQLite.ReclamationCancelNotNeed(const ALogIDs: TIntVector);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = 1, ' +   {1 - в работе}
-        'CancelNum = :NumValue, ' +
-        'CancelDate = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamStr('NumValue', LETTER_NOTNEED_MARK);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(ALogIDs, 5 {отзыв рекл}, LETTER_NOTNEED_MARK, 0, 1{в работе});
+
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = 1, ' +   {1 - в работе}
+  //      'CancelNum = :NumValue, ' +
+  //      'CancelDate = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ReclamationCancelUpdate(const ALogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = 4, '  + {4 - отозвана}
-        'CancelNum = :NumValue, ' +
-        'CancelDate = :DateValue ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamStr('NumValue', ALetterNum);
-    QParamDT('DateValue', ALetterDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(ALogIDs, 5 {отзыв рекл}, ALetterNum, ALetterDate, 4{отозвана});
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = 4, '  + {4 - отозвана}
+  //      'CancelNum = :NumValue, ' +
+  //      'CancelDate = :DateValue ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamStr('NumValue', ALetterNum);
+  //  QParamDT('DateValue', ALetterDate);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ReclamationCancelDelete(const ALogID: Integer);
@@ -1432,87 +1466,91 @@ begin
   if not IsDocumentEmpty(LetterDate, LetterNum) then
     Status:= 1 {в работе};
 
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = :Status, ' +
-        'CancelNum = NULL, ' +
-        'CancelDate = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QParamInt('Status', Status);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(VCreateInt([ALogID]), 5 {отзыв рекл}, EmptyStr, 0, Status);
+
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'CancelNum = NULL, ' +
+  //      'CancelDate = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('LogID', ALogID);
+  //  QParamInt('Status', Status);
+  //  QExec;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ReclamationReportNotNeed(const ALogIDs: TIntVector; const AStatus: Integer);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = :Status, ' +
-        'ReportNum = :NumValue, ' +
-        'ReportDate = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('Status', AStatus);
-    QParamStr('NumValue', LETTER_NOTNEED_MARK);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(ALogIDs, 4 {акт осмотра}, LETTER_NOTNEED_MARK, 0, AStatus);
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'ReportNum = :NumValue, ' +
+  //      'ReportDate = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('Status', AStatus);
+  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ReclamationReportUpdate(const ALogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = :Status, ' +
-        'ReportNum = :NumValue, ' +
-        'ReportDate = :DateValue ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('Status', AStatus);
-    QParamStr('NumValue', ALetterNum);
-    QParamDT('DateValue', ALetterDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(ALogIDs, 4 {акт осмотра}, ALetterNum, ALetterDate, AStatus);
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'ReportNum = :NumValue, ' +
+  //      'ReportDate = :DateValue ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('Status', AStatus);
+  //  QParamStr('NumValue', ALetterNum);
+  //  QParamDT('DateValue', ALetterDate);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ReclamationReportDelete(const ALogID: Integer);
@@ -1531,25 +1569,27 @@ begin
       Status:= 1 {в работе}
   end;
 
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = :Status, ' +
-        'ReportNum = NULL, ' +
-        'ReportDate = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QParamInt('Status', Status);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(VCreateInt([ALogID]), 4 {акт осмотра}, EmptyStr, 0, Status);
+
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGRECLAMATION ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'ReportNum = NULL, ' +
+  //      'ReportDate = NULL ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('LogID', ALogID);
+  //  QParamInt('Status', Status);
+  //  QExec;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.MotorsReturn(const ALogIDs: TIntVector;
@@ -1618,33 +1658,68 @@ procedure TSQLite.RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'Status = :Status, ' +
-        'AnswerToUserNum = :NumValue, ' +
-        'AnswerToUserDate = :DateValue ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('Status', AStatus);
-    QParamStr('NumValue', ALetterNum);
-    QParamDT('DateValue', ALetterDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
+  LettersUpdate(ALogIDs, 9 {ответ потреб. по ремонту}, ALetterNum, ALetterDate, AStatus);
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGREPAIR ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'AnswerToUserNum = :NumValue, ' +
+  //      'AnswerToUserDate = :DateValue ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('Status', AStatus);
+  //  QParamStr('NumValue', ALetterNum);
+  //  QParamDT('DateValue', ALetterDate);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
+end;
+
+procedure TSQLite.PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
+//var
+//  i: Integer;
+begin
+  LettersUpdate(ALogIDs, 13 {ответ потреб. по претензии}, ALetterNum, ALetterDate, AStatus);
+  //QSetQuery(FQuery);
+  //try
+  //  QSetSQL(
+  //    'UPDATE ' +
+  //      'LOGPRETENSION ' +
+  //    'SET ' +
+  //      'Status = :Status, ' +
+  //      'AnswerToUserNum = :NumValue, ' +
+  //      'AnswerToUserDate = :DateValue ' +
+  //    'WHERE ' +
+  //      'LogID = :LogID'
+  //  );
+  //  QParamInt('Status', AStatus);
+  //  QParamStr('NumValue', ALetterNum);
+  //  QParamDT('DateValue', ALetterDate);
+  //  for i:= 0 to High(ALogIDs) do
+  //  begin
+  //    QParamInt('LogID', ALogIDs[i]);
+  //    QExec;
+  //  end;
+  //  QCommit;
+  //except
+  //  QRollback;
+  //end;
 end;
 
 procedure TSQLite.ImageListLoad(out AImageIDs: TIntVector; out AImageNames: TStrVector);
@@ -2324,20 +2399,21 @@ begin
     S:= S + ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
     case AViewIndex of
-    0: S:= S + ' AND (t1.Status < 2) ';                      //в процессе рекламационной работы
-    1: S:= S + ' AND (t1.Status = 2) AND (t2.Status < 2) ';  //ожидающие согласования отправки в ремонт
-    2: S:= S + ' AND (t2.Status = 2) ';                      //на этапе транспортировки в ремонт
-    3: S:= S + ' AND (t2.Status = 3) ';                      //в процессе гарантийного ремонта
-    4: S:= S + ' AND (t3.Status = 1) ';                      //с незавершенной претензионной работой
-    5: S:= S + ' AND (' +                                    //все электродвигатели за период
+    0: S:= S + ' AND (t1.Status < 2) ';                        //в процессе рекламационной работы
+    1: S:= S + ' AND ((t1.Status = 2) AND (t2.Status < 2)) ';  //ожидающие согласования ремонта
+    2: S:= S + ' AND (t2.Status = 2) ';                        //на этапе транспортировки в ремонт
+    3: S:= S + ' AND (t2.Status = 3) ';                        //в процессе гарантийного ремонта
+    4: S:= S + ' AND ((t3.Status > 0) AND (t3.Status < 3)) ';  //с незавершенной претензионной работой
+    5: S:= S + ' AND (' +                                      //все электродвигатели за период
                      '(t1.NoticeFromUserDate IS NULL) OR ' +
-                     '(t2.NoticeFromUserDate IS NULL) OR ' +
-                     '(t3.NoticeFromUserDate IS NULL) OR ' +
-                     '(t2.BeginDate IS NULL) OR ' +
-                     '(t2.EndDate   IS NULL) OR ' +
                      '(t1.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
                      '(t2.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
                      '(t3.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t1.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t2.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t3.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
+                     '(t3.MoneySendDate BETWEEN :BD AND :ED) OR ' +
+                     '(t3.MoneyGetDate  BETWEEN :BD AND :ED) OR ' +
                      '(t2.BeginDate BETWEEN :BD AND :ED) OR ' +
                      '(t2.EndDate   BETWEEN :BD AND :ED)' +
                      ') ';
@@ -2357,12 +2433,12 @@ begin
   QSetQuery(FQuery);
   QSetSQL(S);
   if not SEmpty(AMotorNumLike) then
-    QParamStr('NumberLike', SUpper(AMotorNumLike)+'%')
-  else if AViewIndex=5 then
-  begin
+    QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  //else if AViewIndex=5 then
+  //begin
     QParamDT('BD', ABeginDate);
     QParamDT('ED', AEndDate);
-  end;
+  //end;
 
   QOpen;
   if not QIsEmpty then

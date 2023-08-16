@@ -50,9 +50,10 @@ const
    {12} 'Об отказе в компенсации затрат'
   );
 
+  function NoticeLetterTypeGet(const ALetterType: Byte): Byte;
+
   //Тип организации 0 - все, 1 - потребители, 2 - производители
   function OrganizationTypeGet(const ALetterType: Byte): Byte;
-
 
   //наименования таблиц и полей логов
   procedure LetterDBNamesGet(const ALetterType: Byte;
@@ -635,6 +636,16 @@ begin
     Result:= 1; //потребители
 end;
 
+function NoticeLetterTypeGet(const ALetterType: Byte): Byte;
+begin
+  if {(ALetterType>=0) and} (ALetterType<=5) then
+    Result:= 0
+  else if (ALetterType>=6) and (ALetterType<=9) then
+    Result:= 6
+  else if (ALetterType>=10) and (ALetterType<=13) then
+    Result:= 10;
+end;
+
 procedure LetterDBNamesGet(const ALetterType: Byte;
                           out ATableName, ADateField, ANumField: String);
 var
@@ -737,9 +748,10 @@ begin
   Result:= EmptyStr;
   case AStatus of
   0: Result:= EmptyStr;
-  1: Result:= 'В процессе';
-  2: Result:= 'Завершена';
-  3: Result:= 'Отказано';
+  1: Result:= 'Согласование';
+  2: Result:= 'Возмещение';
+  3: Result:= 'Завершена';
+  4: Result:= 'Отказано';
   end;
 end;
 
