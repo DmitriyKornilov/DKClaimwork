@@ -1533,6 +1533,7 @@
       "LogID",
       "LocationID",
       "UserID",
+      "Mileage",
       "NoticeFromUserDate",
       "NoticeFromUserNum",
       "NoticeToBuilderDate",
@@ -1635,6 +1636,30 @@
         "FieldName" : "UserID",
         "OnDelete" : 2,
         "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "Mileage" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "-1",
+      "Description" : [
+        "Пробег локомотива, км"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
       },
       "ReferenceFrom" : {
         "TableNames" : [

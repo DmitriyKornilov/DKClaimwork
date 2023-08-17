@@ -198,6 +198,7 @@ type
     MotorNums: TStrVector;
     MotorDates: TDateVector;
 
+    Mileages: TIntVector;
     ReclamationUserNames: TStrVector;
     ReclamationUserTitles: TStrVector;
     ReclamationLocationNames: TStrVector;
@@ -250,6 +251,7 @@ type
     PretensionNotes: TStrVector;
     PretensionStatuses: TIntVector;
 
+    MileageStrs: TStrVector;
     MotorDateStrs: TStrVector;
     ReclamationUserStrs: TStrVector;
     ReclamationLocationStrs: TStrVector;
@@ -886,7 +888,7 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       ShowReportButton.Visible:= AVisible;
       ShowCancelButton.Visible:= AVisible;
       EditCancelPanel.Visible:= AVisible;
-      for i:= 5 to 14 do
+      for i:= 5 to 15 do
         LogTable.ColumnVisible[i]:= AVisible;
       if not AVisible then Exit;
       Label1.Caption:= 'Уведомление о неисправности';
@@ -910,7 +912,7 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       i: Integer;
     begin
       RepairButton.Down:= AVisible;
-      for i:= 15 to 23 do
+      for i:= 16 to 24 do
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
@@ -933,7 +935,7 @@ procedure TMainForm.CategorySelect(const ACategory: Byte);
       i: Integer;
     begin
       PretensionButton.Down:= AVisible;
-      for i:= 24 to 35 do
+      for i:= 25 to 36 do
         LogTable.ColumnVisible[i]:= AVisible;
 
       if not AVisible then Exit;
@@ -967,110 +969,118 @@ var
 begin
   if not CanDataLoad then Exit;
 
-  KeepLogIDStore;
+  Screen.Cursor:= crHourGlass;
+  try
 
-  MotorNumLike:= STrim(SearchNumEdit.Text);
-  SQLite.DataLoad(MotorNumLike,
-              VSTOrderList.SelectedIndex, VSTViewList.SelectedIndex,
-              DT1.Date, DT2.Date,
-              LogIDs, MotorNames, MotorNums, MotorDates,
-              ReclamationUserNames, ReclamationUserTitles,
-              ReclamationLocationNames, ReclamationLocationTitles,
-              ReclamationNoticeFromUserDates, ReclamationNoticeFromUserNums,
-              ReclamationNoticeToBuilderDates, ReclamationNoticeToBuilderNums,
-              ReclamationAnswerFromBuilderDates, ReclamationAnswerFromBuilderNums,
-              ReclamationAnswerToUserDates, ReclamationAnswerToUserNums,
-              ReclamationCancelDates, ReclamationCancelNums,
-              ReclamationReportDates, ReclamationReportNums,
-              ReclamationNotes, ReclamationStatuses,
-              RepairUserNames, RepairUserTitles,
-              RepairNoticeFromUserDates, RepairNoticeFromUserNums,
-              RepairNoticeToBuilderDates, RepairNoticeToBuilderNums,
-              RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums,
-              RepairAnswerToUserDates, RepairAnswerToUserNums,
-              RepairBeginDates, RepairEndDates,
-              RepairNotes, RepairStatuses,
-              PretensionUserNames, PretensionUserTitles,
-              PretensionNoticeFromUserDates, PretensionNoticeFromUserNums,
-              PretensionMoneyValues,
-              PretensionNoticeToBuilderDates, PretensionNoticeToBuilderNums,
-              PretensionAnswerFromBuilderDates, PretensionAnswerFromBuilderNums,
-              PretensionAnswerToUserDates, PretensionAnswerToUserNums,
-              PretensionMoneySendDates, PretensionMoneySendValues,
-              PretensionMoneyGetDates, PretensionMoneyGetValues,
-              PretensionNotes, PretensionStatuses);
+    KeepLogIDStore;
 
-  MotorDateStrs:= MotorDatesToStr(MotorDates);
-  ReclamationUserStrs:= VCut(ReclamationUserTitles); //VCut(ReclamationUserNames);
-  VChangeIf(ReclamationUserStrs, '<?>', EmptyStr);
-  ReclamationLocationStrs:= VCut(ReclamationLocationTitles); //VCut(ReclamationLocationNames);
-  VChangeIf(ReclamationLocationStrs, '<?>', EmptyStr);
-  ReclamationNoticeFromUserStrs:= LetterFullNames(ReclamationNoticeFromUserDates, ReclamationNoticeFromUserNums);
-  ReclamationNoticeToBuilderStrs:= LetterFullNames(ReclamationNoticeToBuilderDates, ReclamationNoticeToBuilderNums);
-  ReclamationAnswerFromBuilderStrs:= LetterFullNames(ReclamationAnswerFromBuilderDates, ReclamationAnswerFromBuilderNums);
-  ReclamationAnswerToUserStrs:= LetterFullNames(ReclamationAnswerToUserDates, ReclamationAnswerToUserNums);
-  ReclamationCancelStrs:= LetterFullNames(ReclamationCancelDates, ReclamationCancelNums);
-  VChangeIf(ReclamationCancelStrs, EmptyStr, '—');
-  ReclamationReportStrs:= LetterFullNames(ReclamationReportDates, ReclamationReportNums);
-  ReclamationStatusStrs:= ReclamationStatusIntToStr(ReclamationStatuses);
+    MotorNumLike:= STrim(SearchNumEdit.Text);
+    SQLite.DataLoad(MotorNumLike,
+                VSTOrderList.SelectedIndex, VSTViewList.SelectedIndex,
+                DT1.Date, DT2.Date,
+                LogIDs, MotorNames, MotorNums, MotorDates, Mileages,
+                ReclamationUserNames, ReclamationUserTitles,
+                ReclamationLocationNames, ReclamationLocationTitles,
+                ReclamationNoticeFromUserDates, ReclamationNoticeFromUserNums,
+                ReclamationNoticeToBuilderDates, ReclamationNoticeToBuilderNums,
+                ReclamationAnswerFromBuilderDates, ReclamationAnswerFromBuilderNums,
+                ReclamationAnswerToUserDates, ReclamationAnswerToUserNums,
+                ReclamationCancelDates, ReclamationCancelNums,
+                ReclamationReportDates, ReclamationReportNums,
+                ReclamationNotes, ReclamationStatuses,
+                RepairUserNames, RepairUserTitles,
+                RepairNoticeFromUserDates, RepairNoticeFromUserNums,
+                RepairNoticeToBuilderDates, RepairNoticeToBuilderNums,
+                RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums,
+                RepairAnswerToUserDates, RepairAnswerToUserNums,
+                RepairBeginDates, RepairEndDates,
+                RepairNotes, RepairStatuses,
+                PretensionUserNames, PretensionUserTitles,
+                PretensionNoticeFromUserDates, PretensionNoticeFromUserNums,
+                PretensionMoneyValues,
+                PretensionNoticeToBuilderDates, PretensionNoticeToBuilderNums,
+                PretensionAnswerFromBuilderDates, PretensionAnswerFromBuilderNums,
+                PretensionAnswerToUserDates, PretensionAnswerToUserNums,
+                PretensionMoneySendDates, PretensionMoneySendValues,
+                PretensionMoneyGetDates, PretensionMoneyGetValues,
+                PretensionNotes, PretensionStatuses);
 
-  RepairUserStrs:= VCut(RepairUserTitles); // VCut(RepairUserNames);
-  VChangeIf(RepairUserStrs, '<?>', EmptyStr);
-  RepairNoticeFromUserStrs:= LetterFullNames(RepairNoticeFromUserDates, RepairNoticeFromUserNums);
-  RepairNoticeToBuilderStrs:= LetterFullNames(RepairNoticeToBuilderDates, RepairNoticeToBuilderNums);
-  RepairAnswerFromBuilderStrs:= LetterFullNames(RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums);
-  RepairAnswerToUserStrs:= LetterFullNames(RepairAnswerToUserDates, RepairAnswerToUserNums);
-  RepairBeginDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairBeginDates, True);
-  VChangeIf(RepairBeginDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
-  RepairEndDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairEndDates, True);
-  VChangeIf(RepairEndDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
-  RepairStatusStrs:= RepairStatusIntToStr(RepairStatuses);
+    MotorDateStrs:= MotorDatesToStr(MotorDates);
+    MileageStrs:= MileagesToStr(Mileages);
+    ReclamationUserStrs:= VCut(ReclamationUserTitles); //VCut(ReclamationUserNames);
+    VChangeIf(ReclamationUserStrs, '<?>', EmptyStr);
+    ReclamationLocationStrs:= VCut(ReclamationLocationTitles); //VCut(ReclamationLocationNames);
+    VChangeIf(ReclamationLocationStrs, '<?>', EmptyStr);
+    ReclamationNoticeFromUserStrs:= LetterFullNames(ReclamationNoticeFromUserDates, ReclamationNoticeFromUserNums);
+    ReclamationNoticeToBuilderStrs:= LetterFullNames(ReclamationNoticeToBuilderDates, ReclamationNoticeToBuilderNums);
+    ReclamationAnswerFromBuilderStrs:= LetterFullNames(ReclamationAnswerFromBuilderDates, ReclamationAnswerFromBuilderNums);
+    ReclamationAnswerToUserStrs:= LetterFullNames(ReclamationAnswerToUserDates, ReclamationAnswerToUserNums);
+    ReclamationCancelStrs:= LetterFullNames(ReclamationCancelDates, ReclamationCancelNums);
+    VChangeIf(ReclamationCancelStrs, EmptyStr, '—');
+    ReclamationReportStrs:= LetterFullNames(ReclamationReportDates, ReclamationReportNums);
+    ReclamationStatusStrs:= ReclamationStatusIntToStr(ReclamationStatuses);
 
-  PretensionUserStrs:= VCut(PretensionUserTitles); // VCut(PretensionUserNames);
-  VChangeIf(PretensionUserStrs, '<?>', EmptyStr);
-  PretensionNoticeFromUserStrs:= LetterFullNames(PretensionNoticeFromUserDates, PretensionNoticeFromUserNums);
-  PretensionMoneyValueStrs:= VPriceIntToStr(PretensionMoneyValues, True, True);
-  PretensionNoticeToBuilderStrs:= LetterFullNames(PretensionNoticeToBuilderDates, PretensionNoticeToBuilderNums);
-  PretensionAnswerFromBuilderStrs:= LetterFullNames(PretensionAnswerFromBuilderDates, PretensionAnswerFromBuilderNums);
-  PretensionAnswerToUserStrs:= LetterFullNames(PretensionAnswerToUserDates, PretensionAnswerToUserNums);
-  PretensionMoneySendDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneySendDates, True);
-  VChangeIf(PretensionMoneySendDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
-  PretensionMoneySendValuesStrs:= VPriceIntToStr(PretensionMoneySendValues, True, True);
-  VChangeIf(PretensionMoneySendValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
-  PretensionMoneyGetDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneyGetDates, True);
-  VChangeIf(PretensionMoneyGetDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
-  PretensionMoneyGetValuesStrs:= VPriceIntToStr(PretensionMoneyGetValues, True, True);
-  VChangeIf(PretensionMoneyGetValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
-  PretensionStatusStrs:= PretensionStatusIntToStr(PretensionStatuses);
+    RepairUserStrs:= VCut(RepairUserTitles); // VCut(RepairUserNames);
+    VChangeIf(RepairUserStrs, '<?>', EmptyStr);
+    RepairNoticeFromUserStrs:= LetterFullNames(RepairNoticeFromUserDates, RepairNoticeFromUserNums);
+    RepairNoticeToBuilderStrs:= LetterFullNames(RepairNoticeToBuilderDates, RepairNoticeToBuilderNums);
+    RepairAnswerFromBuilderStrs:= LetterFullNames(RepairAnswerFromBuilderDates, RepairAnswerFromBuilderNums);
+    RepairAnswerToUserStrs:= LetterFullNames(RepairAnswerToUserDates, RepairAnswerToUserNums);
+    RepairBeginDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairBeginDates, True);
+    VChangeIf(RepairBeginDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
+    RepairEndDatesStrs:= VFormatDateTime('dd.mm.yyyy', RepairEndDates, True);
+    VChangeIf(RepairEndDatesStrs, LETTER_NOTNEED_MARK, RepairStatuses, 3{отказано});
+    RepairStatusStrs:= RepairStatusIntToStr(RepairStatuses);
+
+    PretensionUserStrs:= VCut(PretensionUserTitles); // VCut(PretensionUserNames);
+    VChangeIf(PretensionUserStrs, '<?>', EmptyStr);
+    PretensionNoticeFromUserStrs:= LetterFullNames(PretensionNoticeFromUserDates, PretensionNoticeFromUserNums);
+    PretensionMoneyValueStrs:= VPriceIntToStr(PretensionMoneyValues, True, True);
+    PretensionNoticeToBuilderStrs:= LetterFullNames(PretensionNoticeToBuilderDates, PretensionNoticeToBuilderNums);
+    PretensionAnswerFromBuilderStrs:= LetterFullNames(PretensionAnswerFromBuilderDates, PretensionAnswerFromBuilderNums);
+    PretensionAnswerToUserStrs:= LetterFullNames(PretensionAnswerToUserDates, PretensionAnswerToUserNums);
+    PretensionMoneySendDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneySendDates, True);
+    VChangeIf(PretensionMoneySendDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
+    PretensionMoneySendValuesStrs:= VPriceIntToStr(PretensionMoneySendValues, True, True);
+    VChangeIf(PretensionMoneySendValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
+    PretensionMoneyGetDatesStrs:= VFormatDateTime('dd.mm.yyyy', PretensionMoneyGetDates, True);
+    VChangeIf(PretensionMoneyGetDatesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
+    PretensionMoneyGetValuesStrs:= VPriceIntToStr(PretensionMoneyGetValues, True, True);
+    VChangeIf(PretensionMoneyGetValuesStrs, LETTER_NOTNEED_MARK, PretensionStatuses, 3{отказано});
+    PretensionStatusStrs:= PretensionStatusIntToStr(PretensionStatuses);
 
 
-  LogTable.Update(MotorNames, MotorNums, MotorDateStrs,
-                  ReclamationLocationStrs, ReclamationUserStrs,
-                  ReclamationNoticeFromUserStrs,
-                  ReclamationNoticeToBuilderStrs,
-                  ReclamationAnswerFromBuilderStrs,
-                  ReclamationAnswerToUserStrs,
-                  ReclamationCancelStrs,
-                  ReclamationReportStrs,
-                  ReclamationNotes, ReclamationStatusStrs,
-                  RepairUserStrs,
-                  RepairNoticeFromUserStrs,
-                  RepairNoticeToBuilderStrs,
-                  RepairAnswerFromBuilderStrs,
-                  RepairAnswerToUserStrs,
-                  RepairBeginDatesStrs, RepairEndDatesStrs,
-                  RepairNotes, RepairStatusStrs,
-                  PretensionUserStrs,
-                  PretensionNoticeFromUserStrs, PretensionMoneyValueStrs,
-                  PretensionNoticeToBuilderStrs,
-                  PretensionAnswerFromBuilderStrs,
-                  PretensionAnswerToUserStrs,
-                  PretensionMoneySendDatesStrs, PretensionMoneySendValuesStrs,
-                  PretensionMoneyGetDatesStrs, PretensionMoneyGetValuesStrs,
-                  PretensionNotes, PretensionStatusStrs);
-  KeepLogIDRestore;
+    LogTable.Update(MotorNames, MotorNums, MotorDateStrs, MileageStrs,
+                    ReclamationLocationStrs, ReclamationUserStrs,
+                    ReclamationNoticeFromUserStrs,
+                    ReclamationNoticeToBuilderStrs,
+                    ReclamationAnswerFromBuilderStrs,
+                    ReclamationAnswerToUserStrs,
+                    ReclamationCancelStrs,
+                    ReclamationReportStrs,
+                    ReclamationNotes, ReclamationStatusStrs,
+                    RepairUserStrs,
+                    RepairNoticeFromUserStrs,
+                    RepairNoticeToBuilderStrs,
+                    RepairAnswerFromBuilderStrs,
+                    RepairAnswerToUserStrs,
+                    RepairBeginDatesStrs, RepairEndDatesStrs,
+                    RepairNotes, RepairStatusStrs,
+                    PretensionUserStrs,
+                    PretensionNoticeFromUserStrs, PretensionMoneyValueStrs,
+                    PretensionNoticeToBuilderStrs,
+                    PretensionAnswerFromBuilderStrs,
+                    PretensionAnswerToUserStrs,
+                    PretensionMoneySendDatesStrs, PretensionMoneySendValuesStrs,
+                    PretensionMoneyGetDatesStrs, PretensionMoneyGetValuesStrs,
+                    PretensionNotes, PretensionStatusStrs);
+    KeepLogIDRestore;
 
-  ButtonsEnable;
+    ButtonsEnable;
+
+  finally
+    Screen.Cursor:= crDefault;
+  end;
 end;
 
 procedure TMainForm.DataSelect;
@@ -1396,7 +1406,10 @@ begin
     NoticeEditForm.LogID:= LogID;
     NoticeEditForm.Category:= Category;
     if NoticeEditForm.ShowModal=mrOK then
+    begin
+      KeepLogID:= LogID;
       DataLoad;
+    end;
   finally
     FreeAndNil(NoticeEditForm);
   end;
@@ -1453,7 +1466,11 @@ begin
     LetterEditForm.LetterType:= ALetterType;
     LetterEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
     if LetterEditForm.ShowModal=mrOk then
+    begin
+      KeepLogID:= LetterEditForm.LogID;
       DataLoad;
+    end;
+
   finally
     FreeAndNil(LetterEditForm);
   end;
@@ -1519,7 +1536,10 @@ begin
   try
     RepairDatesEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
     if RepairDatesEditForm.ShowModal=mrOk then
+    begin
+      KeepLogID:= RepairDatesEditForm.LogID;
       DataLoad;
+    end;
   finally
     FreeAndNil(RepairDatesEditForm);
   end;
@@ -1540,7 +1560,10 @@ begin
   try
     MoneyDatesEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
     if MoneyDatesEditForm.ShowModal=mrOk then
+    begin
+      KeepLogID:= MoneyDatesEditForm.LogID;
       DataLoad;
+    end;
   finally
     FreeAndNil(MoneyDatesEditForm);
   end;
@@ -1562,7 +1585,10 @@ begin
     NoteEditForm.LogID:= LogIDs[LogTable.SelectedIndex];
     NoteEditForm.Category:= Category;
     if NoteEditForm.ShowModal=mrOk then
+    begin
+      KeepLogID:= NoteEditForm.LogID;
       DataLoad;
+    end;
   finally
     FreeAndNil(NoteEditForm);
   end;

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Buttons, rxcurredit, DateTimePicker, DividerBevel, FileUtil,
+  Buttons, Spin, rxcurredit, DateTimePicker, DividerBevel, FileUtil,
 
   DK_Vector, DK_Dialogs, DK_StrUtils, DK_PriceUtils, DK_VSTTables,
 
@@ -19,6 +19,7 @@ type
   TNoticeEditForm = class(TForm)
     ButtonPanel: TPanel;
     CancelButton: TSpeedButton;
+    Label9: TLabel;
     NotChangeFileCheckBox: TCheckBox;
     DividerBevel1: TDividerBevel;
     DT1: TDateTimePicker;
@@ -31,6 +32,7 @@ type
     MoneyEdit: TCurrencyEdit;
     OpenButton: TSpeedButton;
     OpenDialog1: TOpenDialog;
+    MileageSpinEdit: TSpinEdit;
     UserNameComboBox: TComboBox;
     Label5: TLabel;
     Label1: TLabel;
@@ -124,6 +126,8 @@ begin
 
   Label6.Visible:= Category=1;
   LocationNameComboBox.Visible:= Category=1;
+  Label9.Visible:= Category=1;
+  MileageSpinEdit.Visible:= Category=1;
 
   Label7.Visible:= Category=3;
   MoneyEdit.Visible:= Category=3;
@@ -147,7 +151,7 @@ end;
 procedure TNoticeEditForm.SaveButtonClick(Sender: TObject);
 var
   SrcFileName: String;
-  LocationID, UserID, i: Integer;
+  LocationID, UserID, Mileage, i: Integer;
   LetterNum: String;
   LetterDate: TDate;
   MoneyValue: Int64;
@@ -184,6 +188,7 @@ begin
       Exit;
     end;
     LocationID:= LocationIDs[LocationNameComboBox.ItemIndex];
+    Mileage:= MileageSpinEdit.Value;
   end
   else if Category = 3 then
   begin
@@ -217,7 +222,7 @@ begin
                   OldLetterDate, OldLetterNum, LetterDate, LetterNum) then Exit;
 
   if Category = 1 then
-    SQLite.ReclamationNoticeUpdate(UsedLogIDs, UserID, LocationID, LetterNum, LetterDate)
+    SQLite.ReclamationNoticeUpdate(UsedLogIDs, UserID, LocationID, Mileage, LetterNum, LetterDate)
   else if Category = 2 then
     SQLite.RepairNoticeUpdate(UsedLogIDs, UserID, LetterNum, LetterDate)
   else if Category = 3 then

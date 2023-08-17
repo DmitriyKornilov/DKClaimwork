@@ -159,6 +159,7 @@ CREATE TABLE IF NOT EXISTS LOGRECLAMATION (
     LogID                 INTEGER  NOT NULL,
     LocationID            INTEGER  NOT NULL DEFAULT 0,
     UserID                INTEGER  NOT NULL DEFAULT 0,
+    Mileage               INTEGER  NOT NULL DEFAULT -1,
     NoticeFromUserDate    DATETIME,
     NoticeFromUserNum     TEXT    ,
     NoticeToBuilderDate   DATETIME,

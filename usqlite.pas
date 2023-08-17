@@ -59,10 +59,26 @@ type
     procedure ReclamationInfoLoad(const ALogID: Integer; out AUserID, ALocationID: Integer);
     procedure ReclamationNoticeDelete(const ALogID: Integer);
     procedure ReclamationNoticeUpdate(const ALogIDs: TIntVector;
-                                      const AUserID, ALocationID: Integer;
+                                      const AUserID, ALocationID, AMileage: Integer;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
     function ReclamationStatusLoad(const ALogID: Integer): Integer;
+
+    procedure ReclamationCancelNotNeed(const ALogIDs: TIntVector);
+    procedure ReclamationCancelUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate);
+    procedure ReclamationCancelDelete(const ALogID: Integer);
+
+    procedure ReclamationReportNotNeed(const ALogIDs: TIntVector; const AStatus: Integer);
+    procedure ReclamationReportUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
+    procedure ReclamationReportDelete(const ALogID: Integer);
+    procedure MotorsReturn(const ALogIDs: TIntVector;   //возврат двигателя на этапе расследования рекламации
+                           const ALetterNum: String;
+                           const ALetterDate: TDate);
 
 
     //ремонты
@@ -76,6 +92,10 @@ type
     procedure RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
     procedure RepairDatesDelete(const ALogID: Integer);
     function RepairStatusLoad(const ALogID: Integer): Integer;
+    procedure RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
 
 
     //претензии
@@ -94,6 +114,10 @@ type
                                    const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
     procedure PretensionMoneyDelete(const ALogID: Integer);
     function PretensionStatusLoad(const ALogID: Integer): Integer;
+    procedure PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate;
+                           const AStatus: Integer);
 
     //двигатели и письма для ответа
     procedure MotorsWithoutNoticeLoad(const AThisLogID: Integer;
@@ -126,35 +150,6 @@ type
                                     out AAnswerDate: TDate;
                                     out ALocationTitle, AUserTitle: String);
 
-    //письма по рекламациям
-    procedure ReclamationCancelNotNeed(const ALogIDs: TIntVector);
-    procedure ReclamationCancelUpdate(const ALogIDs: TIntVector;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate);
-    procedure ReclamationCancelDelete(const ALogID: Integer);
-
-    procedure ReclamationReportNotNeed(const ALogIDs: TIntVector; const AStatus: Integer);
-    procedure ReclamationReportUpdate(const ALogIDs: TIntVector;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate;
-                           const AStatus: Integer);
-    procedure ReclamationReportDelete(const ALogID: Integer);
-
-    //возврат двигателя на этапе расследования рекламации
-    procedure MotorsReturn(const ALogIDs: TIntVector;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate);
-    //ответ по ремонту
-    procedure RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate;
-                           const AStatus: Integer);
-    //ответ на претензию
-    procedure PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
-                           const ALetterNum: String;
-                           const ALetterDate: TDate;
-                           const AStatus: Integer);
-
     //письма общие
     procedure LetterLoad(const ALogID: Integer; const ALetterType: Byte;
                          out ALetterNum: String;
@@ -166,8 +161,6 @@ type
                            const ALetterDate: TDate;
                            const AStatus: Integer = -1);
     procedure LettersNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
-
-
 
 
     //изображения
@@ -225,6 +218,7 @@ type
                        out AMotorNames: TStrVector;
                        out AMotorNums: TStrVector;
                        out AMotorDates: TDateVector;
+                       out AMileages: TIntVector;
                        out AReclamationUserNames: TStrVector;
                        out AReclamationUserTitles: TStrVector;
                        out AReclamationLocationNames: TStrVector;
@@ -513,7 +507,7 @@ begin
 end;
 
 procedure TSQLite.ReclamationNoticeUpdate(const ALogIDs: TIntVector;
-                                      const AUserID, ALocationID: Integer;
+                                      const AUserID, ALocationID, AMileage: Integer;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
 var
@@ -525,13 +519,14 @@ begin
       'UPDATE ' +
         'LOGRECLAMATION ' +
       'SET ' +
-        'UserID = :UserID, LocationID = :LocationID, Status = 1, ' +  {1 - расследование}
+        'UserID = :UserID, LocationID = :LocationID, Mileage = :Mileage, Status = 1, ' +  {1 - расследование}
         'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
       'WHERE ' +
         'LogID = :LogID'
     );
     QParamInt('LocationID', ALocationID);
     QParamInt('UserID', AUserID);
+    QParamInt('Mileage', AMileage);
     QParamStr('NoticeNum', ANoticeNum);
     QParamDT('NoticeDate', ANoticeDate);
     for i:= 0 to High(ALogIDs) do
@@ -558,7 +553,7 @@ begin
       'UPDATE ' +
         'LOGRECLAMATION ' +
       'SET ' +
-        'UserID = 0, LocationID = 0, Status = 0, ' +
+        'UserID = 0, LocationID = 0, Mileage = -1, Status = 0, ' +
         'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
       'WHERE ' +
         'LogID = :LogID'
@@ -2227,6 +2222,7 @@ procedure TSQLite.DataLoad(const AMotorNumLike: String;
                        out AMotorNames: TStrVector;
                        out AMotorNums: TStrVector;
                        out AMotorDates: TDateVector;
+                       out AMileages: TIntVector;
                        out AReclamationUserNames: TStrVector;
                        out AReclamationUserTitles: TStrVector;
                        out AReclamationLocationNames: TStrVector;
@@ -2285,6 +2281,7 @@ begin
   AMotorNums:= nil;
   AMotorDates:= nil;
 
+  AMileages:= nil;
   AReclamationUserNames:= nil;
   AReclamationUserTitles:= nil;
   AReclamationLocationNames:= nil;
@@ -2351,7 +2348,7 @@ begin
       't1.AnswerToUserNum       AS ReclamationAnswerToUserNum, ' +
       't1.Note                  AS ReclamationNote, ' +
       't1.Status                AS ReclamationStatus, ' +
-      't1.CancelDate, t1.CancelNum, t1.ReportDate, t1.ReportNum, ' +
+      't1.CancelDate, t1.CancelNum, t1.ReportDate, t1.ReportNum, t1.Mileage, ' +
 
       't2.NoticeFromUserDate    AS RepairNoticeFromUserDate, '  +
       't2.NoticeFromUserNum     AS RepairNoticeFromUserNum, ' +
@@ -2451,6 +2448,7 @@ begin
       VAppend(AMotorNums, QFieldStr('MotorNum'));
       VAppend(AMotorDates, QFieldDT('MotorDate'));
 
+      VAppend(AMileages, QFieldInt('Mileage'));
       VAppend(AReclamationUserNames, QFieldStr('ReclamationUserName'));
       VAppend(AReclamationUserTitles, QFieldStr('ReclamationUserTitle'));
       VAppend(AReclamationLocationNames, QFieldStr('LocationName'));

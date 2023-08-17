@@ -1,10 +1,10 @@
 object NoticeEditForm: TNoticeEditForm
-  Left = 623
-  Height = 680
-  Top = 184
-  Width = 565
-  ClientHeight = 680
-  ClientWidth = 565
+  Left = 718
+  Height = 760
+  Top = 58
+  Width = 539
+  ClientHeight = 760
+  ClientWidth = 539
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -132,7 +132,7 @@ object NoticeEditForm: TNoticeEditForm
     Left = 8
     Height = 28
     Top = 426
-    Width = 549
+    Width = 523
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -146,8 +146,8 @@ object NoticeEditForm: TNoticeEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 616
-    Width = 561
+    Top = 696
+    Width = 535
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 2
@@ -155,7 +155,7 @@ object NoticeEditForm: TNoticeEditForm
     BorderSpacing.Bottom = 6
     BevelOuter = bvNone
     ClientHeight = 58
-    ClientWidth = 561
+    ClientWidth = 535
     TabOrder = 3
     object CancelButton: TSpeedButton
       AnchorSideTop.Control = DividerBevel1
@@ -163,7 +163,7 @@ object NoticeEditForm: TNoticeEditForm
       AnchorSideRight.Control = ButtonPanel
       AnchorSideRight.Side = asrBottom
       Cursor = crHandPoint
-      Left = 430
+      Left = 404
       Height = 38
       Top = 20
       Width = 125
@@ -315,7 +315,7 @@ object NoticeEditForm: TNoticeEditForm
       AnchorSideTop.Side = asrCenter
       AnchorSideRight.Control = CancelButton
       Cursor = crHandPoint
-      Left = 305
+      Left = 279
       Height = 38
       Top = 20
       Width = 125
@@ -465,7 +465,7 @@ object NoticeEditForm: TNoticeEditForm
       Left = 0
       Height = 20
       Top = 0
-      Width = 561
+      Width = 535
       Align = alTop
       Font.Style = [fsBold]
       ParentFont = False
@@ -496,7 +496,7 @@ object NoticeEditForm: TNoticeEditForm
     Left = 8
     Height = 28
     Top = 504
-    Width = 551
+    Width = 525
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -510,13 +510,13 @@ object NoticeEditForm: TNoticeEditForm
   end
   object Label7: TLabel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = LocationNameComboBox
+    AnchorSideTop.Control = MileageSpinEdit
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 20
-    Top = 547
+    Top = 625
     Width = 163
     BorderSpacing.Left = 8
     BorderSpacing.Top = 15
@@ -535,8 +535,8 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 579
-    Width = 549
+    Top = 657
+    Width = 523
     Alignment = taRightJustify
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -569,7 +569,7 @@ object NoticeEditForm: TNoticeEditForm
     Left = 8
     Height = 28
     Top = 348
-    Width = 503
+    Width = 477
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
@@ -585,7 +585,7 @@ object NoticeEditForm: TNoticeEditForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FileNameEdit
     AnchorSideBottom.Side = asrBottom
-    Left = 517
+    Left = 491
     Height = 36
     Top = 344
     Width = 40
@@ -636,7 +636,7 @@ object NoticeEditForm: TNoticeEditForm
     Left = 6
     Height = 150
     Top = 34
-    Width = 553
+    Width = 527
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 6
@@ -647,6 +647,40 @@ object NoticeEditForm: TNoticeEditForm
     Header.Columns = <>
     Header.MainColumn = -1
     TabOrder = 8
+  end
+  object Label9: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = LocationNameComboBox
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 20
+    Top = 550
+    Width = 173
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 18
+    Caption = 'Пробег локомотива, км'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object MileageSpinEdit: TSpinEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label9
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 28
+    Top = 582
+    Width = 523
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 8
+    MaxValue = 10000000
+    TabOrder = 9
+    Visible = False
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Документ PDF|*.pdf'
