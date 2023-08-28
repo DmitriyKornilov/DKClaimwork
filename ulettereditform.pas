@@ -6,21 +6,24 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Buttons, DateTimePicker, DividerBevel,
+  Buttons, EditBtn, DateTimePicker, DividerBevel, VirtualTrees,
 
   DK_Vector, DK_StrUtils, DK_Dialogs, DK_VSTTables,
 
   USQLite, UUtils,
 
-  ULetterStandardForm, ULetterCustomForm, VirtualTrees;
+  ULetterStandardForm, ULetterCustomForm;
 
 type
 
   { TLetterEditForm }
 
   TLetterEditForm = class(TForm)
+    AddButton: TSpeedButton;
     ButtonPanel: TPanel;
     CancelButton: TSpeedButton;
+    ChoosePanel: TPanel;
+    DelButton: TSpeedButton;
     DividerBevel1: TDividerBevel;
     DT1: TDateTimePicker;
     FileNameEdit: TEdit;
@@ -28,7 +31,9 @@ type
     Label2: TLabel;
     Label1: TLabel;
     Label4: TLabel;
-    Label8: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
     LetterCustomCreateButton: TButton;
     LetterNameLabel: TLabel;
     LetterNumEdit: TEdit;
@@ -36,11 +41,17 @@ type
     NotChangeFileCheckBox: TCheckBox;
     NotNeedCheckBox: TCheckBox;
     OpenButton: TSpeedButton;
-    OpenDialog1: TOpenDialog;
+    Panel1: TPanel;
     SaveButton: TSpeedButton;
+    SearchLabel: TLabel;
+    SearchNumEdit: TEditButton;
+    SearchPanel: TPanel;
     StatusComboBox: TComboBox;
     VT1: TVirtualStringTree;
+    VT2: TVirtualStringTree;
+    procedure AddButtonClick(Sender: TObject);
     procedure CancelButtonClick(Sender: TObject);
+    procedure DelButtonClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -51,36 +62,39 @@ type
     procedure NotNeedCheckBoxChange(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
+    procedure SearchNumEditButtonClick(Sender: TObject);
+    procedure SearchNumEditChange(Sender: TObject);
+    procedure VT1DblClick(Sender: TObject);
+    procedure VT2DblClick(Sender: TObject);
   private
     CanFormClose: Boolean;
-    VSTMotorList: TVSTCheckTable;
 
+    Category: Byte;
+    UserNameR: String;
+    UserID, LocationID: Integer;
+    LocationName: String;
     MotorReturn: Boolean;
 
-    UserNameR: String;
-    UserID: Integer;
-    LocationName: String;
     OldLetterNum: String;
     OldLetterDate: TDate;
+    OldLogIDs: TIntVector;
+    OldMotorNames, OldMotorNums: TStrVector;
+    OldMotorDates: TDateVector;
+    OldNoticeNums: TStrVector;
+    OldNoticeDates: TDateVector;
 
-    //список аналогичных писем
-    LogIDs: TIntVector;
-    MotorNames, MotorNums: TStrVector;
-    MotorDates: TDateVector;
-    NoticeNums: TStrVector;
-    NoticeDates: TDateVector;
-    AnswerNums: TStrVector;
-    AnswerDates: TDateVector;
-    LocationTitles, UserTitles: TStrVector;
-    MoneyValues: TInt64Vector;
+    VSTFreeMotorList: TVSTTable;
+    FreeLogIDs, FreeMotorIDs: TIntVector;
+    FreeMotors, FreeMotorNames, FreeMotorNums: TStrVector;
+    FreeMotorDates: TDateVector;
 
+    VSTBusyMotorList: TVSTTable;
+    BusyLogIDs, BusyMotorIDs: TIntVector;
+    BusyMotors, BusyMotorNames, BusyMotorNums: TStrVector;
+    BusyMotorDates: TDateVector;
 
     procedure DataLoad;
-    procedure MotorListLoad;
-    procedure MotorListShow;
 
-    procedure DocFileOpen;
-    procedure DocFileNameSet(const AFileName: String);
     procedure LetterStandardFormOpen;
     procedure LetterCustomFormOpen;
 
@@ -88,12 +102,20 @@ type
     procedure ReclamationStatusSet(const AStatus: Integer);
     function RepairStatusGet: Integer;
     procedure RepairStatusSet(const AStatus: Integer);
-    function PretensionStatusGet: Integer;
-    procedure PretensionStatusSet(const AStatus: Integer);
+
+    procedure FreeMotorListCreate;
+    procedure FreeMotorsLoad(const ASelectedMotorID: Integer = 0);
+    procedure FreeMotorSelect;
+
+    procedure BusyMotorListCreate;
+    procedure BusyMotorsLoad(const ASelectedMotorID: Integer = 0);
+    procedure BusyMotorSelect;
+
+    procedure MotorFreeToBusy;
+    procedure MotorBusyToFree;
   public
-    Category: Byte;
     LetterType: Byte;
-    LogID: Integer;
+    ID, LogID: Integer;
   end;
 
 var
@@ -122,37 +144,35 @@ end;
 
 procedure TLetterEditForm.OpenButtonClick(Sender: TObject);
 begin
-  DocFileOpen;
+  DocumentChoose(FileNameEdit);
 end;
 
 procedure TLetterEditForm.SaveButtonClick(Sender: TObject);
 var
   SrcFileName, LetterNum: String;
   LetterDate: TDate;
-  i, k: Integer;
-  UsedLogIDs: TIntVector;
-  UsedMotorNames, UsedMotorNums: TStrVector;
-  UsedMotorDates: TDateVector;
+  i, n: Integer;
+  DelLogIDs: TIntVector;
 begin
   CanFormClose:= False;
 
-  if VSTMotorList.IsAllUnchecked then
+  if VIsNil(BusyMotorIDs) then
   begin
     ShowInfo('Не выбран ни один электродвигатель!');
     Exit;
   end;
 
-  UsedLogIDs:= nil;
-  UsedMotorNames:= nil;
-  UsedMotorNums:= nil;
-  UsedMotorDates:= nil;
-  for i:= 0 to High(LogIDs) do
+  //списки на удаление
+  DelLogIDs:= nil;
+  for i:= 0 to High(OldLogIDs) do
   begin
-    if not VSTMotorList.Checked[i] then continue;
-    VAppend(UsedLogIDs, LogIDs[i]);
-    VAppend(UsedMotorNames, MotorNames[i]);
-    VAppend(UsedMotorNums, MotorNums[i]);
-    VAppend(UsedMotorDates, MotorDates[i]);
+    n:= VIndexOf(BusyLogIDs, OldLogIDs[i]);
+    if n<0 then
+    begin
+      VAppend(DelLogIDs, OldLogIDs[i]);
+      DocumentDelete(LetterType, OldLetterDate, OldLetterNum,
+                     OldMotorDates[i], OldMotorNames[i], OldMotorNums[i]);
+    end;
   end;
 
   if NotNeedCheckBox.Checked then //документ не требуется
@@ -160,14 +180,14 @@ begin
     //удаляем файлы, если есть
     if not NotChangeFileCheckBox.Checked then
       DocumentsDelete(LetterType, OldLetterDate, OldLetterNum,
-                      UsedMotorDates, UsedMotorNames, UsedMotorNums);
+                      BusyMotorDates, BusyMotorNames, BusyMotorNums);
     //записываем в базу
     if LetterType=5 then {Отзыв рекламации}
-      SQLite.ReclamationCancelNotNeed(UsedLogIDs)
+      SQLite.ReclamationCancelNotNeed(BusyLogIDs, DelLogIDs)
     else if LetterType=4 then {Акт осмотра двигателя}
-      SQLite.ReclamationReportNotNeed(UsedLogIDs, ReclamationStatusGet)
+      SQLite.ReclamationReportNotNeed(BusyLogIDs, DelLogIDs, ReclamationStatusGet)
     else
-      SQLite.LettersNotNeed(UsedLogIDs, LetterType);
+      SQLite.LettersNotNeed(BusyLogIDs, DelLogIDs, LetterType);
   end
   else begin  //документ требуется - запись документа
     LetterNum:= STrim(LetterNumEdit.Text);
@@ -175,7 +195,7 @@ begin
       LetterNum:= 'б/н';
     if SEmpty(LetterNum) then
     begin
-      ShowInfo('Не указан номер!');
+      ShowInfo('Не указан номер письма!');
       Exit;
     end;
     LetterDate:= DT1.Date;
@@ -183,34 +203,52 @@ begin
     if MotorReturn then //возврат двигателя на этапе расследования рекламации
     begin
       //удаляем все файлы по согласованию гарантийного ремонта (не требуются)
-      for k:= 6 to 9 do
-        DocumentsDelete(k, OldLetterDate, OldLetterNum,
-                       UsedMotorDates, UsedMotorNames, UsedMotorNums);
+      for i:= 6 to 9 do
+        DocumentsDelete(i, OldLetterDate, OldLetterNum,
+                       BusyMotorDates, BusyMotorNames, BusyMotorNums);
       //записываем в базу данные по возврату
-      SQLite.MotorsReturn(UsedLogIDs, LetterNum, LetterDate);
+      SQLite.MotorsReturn(BusyLogIDs, BusyMotorIDs, UserID, LetterNum, LetterDate);
     end
     else begin // другие письма
       //пересохраняем файлы писем, если нужно
       SrcFileName:= STrim(FileNameEdit.Text);
       if not DocumentsUpdate(not NotChangeFileCheckBox.Checked, LetterType, SrcFileName,
-                  UsedMotorDates, UsedMotorNames, UsedMotorNums,
+                  BusyMotorDates, BusyMotorNames, BusyMotorNums,
                   OldLetterDate, OldLetterNum, LetterDate, LetterNum) then Exit;
       //записываем в базу данные
       if LetterType=5 then {Отзыв рекламации}
-        SQLite.ReclamationCancelUpdate(UsedLogIDs, LetterNum, LetterDate)
+        SQLite.ReclamationCancelUpdate(BusyLogIDs, DelLogIDs, LetterNum, LetterDate)
       else if LetterType=4 then {Акт осмотра двигателя}
-        SQLite.ReclamationReportUpdate(UsedLogIDs, LetterNum, LetterDate, ReclamationStatusGet)
+        SQLite.ReclamationReportUpdate(BusyLogIDs, DelLogIDs, LetterNum, LetterDate, ReclamationStatusGet)
       else if LetterType=9 then {Ответ на запрос о ремонте Потребителю}
-        SQLite.RepairAnswersToUserUpdate(UsedLogIDs, LetterNum, LetterDate, RepairStatusGet)
-      else if LetterType=13 then {Ответ на претензию Потребителю}
-        SQLite.PretensionAnswersToUserUpdate(UsedLogIDs, LetterNum, LetterDate, PretensionStatusGet)
+        SQLite.RepairAnswersToUserUpdate(BusyLogIDs, DelLogIDs, LetterNum, LetterDate, RepairStatusGet)
       else
-        SQLite.LettersUpdate(UsedLogIDs, LetterType, LetterNum, LetterDate);
+        SQLite.LettersUpdate(BusyLogIDs, DelLogIDs, LetterType, LetterNum, LetterDate);
     end;
   end;
 
   CanFormClose:= True;
   ModalResult:= mrOK;
+end;
+
+procedure TLetterEditForm.SearchNumEditButtonClick(Sender: TObject);
+begin
+  SearchNumEdit.Clear;
+end;
+
+procedure TLetterEditForm.SearchNumEditChange(Sender: TObject);
+begin
+  FreeMotorsLoad;
+end;
+
+procedure TLetterEditForm.VT1DblClick(Sender: TObject);
+begin
+  MotorFreeToBusy;
+end;
+
+procedure TLetterEditForm.VT2DblClick(Sender: TObject);
+begin
+  MotorBusyToFree;
 end;
 
 function TLetterEditForm.ReclamationStatusGet: Integer;
@@ -251,23 +289,115 @@ begin
     StatusComboBox.ItemIndex:= 0;
 end;
 
-function TLetterEditForm.PretensionStatusGet: Integer;
+procedure TLetterEditForm.FreeMotorListCreate;
 begin
-  if StatusComboBox.ItemIndex = 0 then
-    Result:= 2
-  else
-    Result:= 4;
+  VSTFreeMotorList:= TVSTTable.Create(VT1);
+  VSTFreeMotorList.CanSelect:= True;
+  VSTFreeMotorList.OnSelect:= @FreeMotorSelect;
+  VSTFreeMotorList.HeaderVisible:= False;
+  VSTFreeMotorList.AddColumn('Список');
 end;
 
-procedure TLetterEditForm.PretensionStatusSet(const AStatus: Integer);
+procedure TLetterEditForm.FreeMotorsLoad(const ASelectedMotorID: Integer);
+var
+  S: String;
+  i: Integer;
+  NoticeNums: TStrVector;
+  NoticeDates: TDateVector;
 begin
-  StatusComboBox.Clear;
-  StatusComboBox.Items.Add('согласовано');
-  StatusComboBox.Items.Add('отказано');
-  if AStatus=4 then
-    StatusComboBox.ItemIndex:= 1
+  S:= STrim(SearchNumEdit.Text);
+  SQLite.MotorsEmptyLetterLoad(LetterType, S, BusyLogIDs, UserID, FreeLogIDs, FreeMotorIDs,
+                               FreeMotorNames, FreeMotorNums, FreeMotorDates,
+                               NoticeNums, NoticeDates, LocationID);
+
+  if Category=1 then
+    FreeMotors:= VReclamationMotorStr(FreeMotorNames, FreeMotorNums, FreeMotorDates,
+                                      NoticeNums, NoticeDates)
   else
-    StatusComboBox.ItemIndex:= 0;
+    FreeMotors:= VRepairMotorStr(FreeMotorNames, FreeMotorNums, FreeMotorDates,
+                                      NoticeNums, NoticeDates);
+
+  VSTFreeMotorList.UnSelect;
+  VSTFreeMotorList.SetColumn('Список', FreeMotors, taLeftJustify);
+  VSTFreeMotorList.Draw;
+
+  i:= -1;
+  if ASelectedMotorID>0 then
+    i:= VIndexOf(FreeMotorIDs, ASelectedMotorID);
+  if i>=0 then
+    VSTFreeMotorList.Select(i);
+end;
+
+procedure TLetterEditForm.FreeMotorSelect;
+begin
+  AddButton.Enabled:= VSTFreeMotorList.IsSelected;
+  if VSTFreeMotorList.IsSelected then
+    VSTBusyMotorList.UnSelect;
+end;
+
+procedure TLetterEditForm.BusyMotorListCreate;
+begin
+  VSTBusyMotorList:= TVSTTable.Create(VT2);
+  VSTBusyMotorList.CanSelect:= True;
+  VSTBusyMotorList.OnSelect:= @BusyMotorSelect;
+  VSTBusyMotorList.HeaderVisible:= False;
+  VSTBusyMotorList.AddColumn('Список');
+end;
+
+procedure TLetterEditForm.BusyMotorsLoad(const ASelectedMotorID: Integer);
+var
+  i: Integer;
+begin
+  VSTBusyMotorList.UnSelect;
+  VSTBusyMotorList.SetColumn('Список', BusyMotors, taLeftJustify);
+  VSTBusyMotorList.Draw;
+
+  i:= -1;
+  if ASelectedMotorID>0 then
+    i:= VIndexOf(BusyMotorIDs, ASelectedMotorID);
+  if i>=0 then
+    VSTBusyMotorList.Select(i);
+end;
+
+procedure TLetterEditForm.BusyMotorSelect;
+begin
+  DelButton.Enabled:= VSTBusyMotorList.IsSelected;
+  if VSTBusyMotorList.IsSelected then
+    VSTFreeMotorList.UnSelect;
+end;
+
+procedure TLetterEditForm.MotorFreeToBusy;
+var
+  i, SelectedMotorID: Integer;
+begin
+  if not VSTFreeMotorList.IsSelected then Exit;
+  i:= VSTFreeMotorList.SelectedIndex;
+  SelectedMotorID:= FreeMotorIDs[i];
+  VAppend(BusyMotorIDs, SelectedMotorID);
+  VAppend(BusyLogIDs, FreeLogIDs[i]);
+  VAppend(BusyMotors, FreeMotors[i]);
+  VAppend(BusyMotorNames, FreeMotorNames[i]);
+  VAppend(BusyMotorNums, FreeMotorNums[i]);
+  VAppend(BusyMotorDates, FreeMotorDates[i]);
+  BusyMotorsLoad(SelectedMotorID);
+  FreeMotorsLoad;
+end;
+
+procedure TLetterEditForm.MotorBusyToFree;
+var
+  i, SelectedMotorID: Integer;
+begin
+  if not VSTBusyMotorList.IsSelected then Exit;
+  i:= VSTBusyMotorList.SelectedIndex;
+  SelectedMotorID:= BusyMotorIDs[i];
+  VDel(BusyLogIDs, i);
+  VDel(BusyMotorIDs, i);
+  VDel(BusyMotors, i);
+  VDel(BusyMotorNames, i);
+  VDel(BusyMotorNums, i);
+  VDel(BusyMotorDates, i);
+  BusyMotorsLoad;
+  FreeMotorsLoad(SelectedMotorID);
 end;
 
 procedure TLetterEditForm.DataLoad;
@@ -276,6 +406,7 @@ var
 begin
   Caption:= LETTER_NAMES[LetterType];
   LetterNameLabel.Caption:= LETTER_NAMES[LetterType];
+  Category:= CategoryFromLetterType(LetterType);
 
   SQLite.LetterLoad(LogID, LetterType, OldLetterNum, OldLetterDate);
   if OldLetterNum<>LETTER_NOTNEED_MARK then
@@ -283,13 +414,18 @@ begin
   if OldLetterDate>0 then
     DT1.Date:= OldLetterDate;
 
-  MotorListLoad;
-  MotorListShow;
+  UserID:= SQLite.LetterUserIDLoad(LetterType, ID);
+  UserNameR:= SQLite.UserNameRLoad(UserID);
+  LocationID:= 0;
+  if Category=1 then
+  begin
+    LocationID:= SQLite.ReclamationLocationIDLoad(ID);
+    LocationName:= SQLite.LocationNameLoad(LocationID);
+  end;
 
   //combobox статуса рекламации и ремонта
   if (LetterType=4)  or    {Акт осмотра двигателя}
-     (LetterType=9)  or    {Ответ о ремонте потребителю}
-     (LetterType=13) then  {Ответ на претензию потребителю}
+     (LetterType=9)  then    {Ответ о ремонте потребителю}
   begin
     Label3.Visible:= True;
     StatusCombobox.Visible:= True;
@@ -304,12 +440,6 @@ begin
       Label3.Caption:= 'Статус согласования гарантийного ремонта';
       Status:= SQLite.RepairStatusLoad(LogID);
       RepairStatusSet(Status);
-    end
-    else if (LetterType=13) then
-    begin
-      Label3.Caption:= 'Статус согласования возмещения затрат';
-      Status:= SQLite.PretensionStatusLoad(LogID);
-      PretensionStatusSet(Status);
     end;
   end;
 
@@ -317,183 +447,73 @@ begin
   if (LetterType=1)  or   {Уведомление о неисправности Производителю}
      (LetterType=3)  or   {Ответ Потребителю о выезде представителя}
      (LetterType=7)  or   {Запрос о ремонте двигателя Производителю}
-     (LetterType=9)  or   {Ответ на запрос о ремонте Потребителю}
-     (LetterType=11) or   {Уведомление о претензии Производителю}
-     (LetterType=13)      {Ответ на Претензию Потребителю}
+     (LetterType=9)       {Ответ на запрос о ремонте Потребителю}
   then begin
     LetterStandardCreateButton.Visible:= True;
     LetterCustomCreateButton.Visible:= True;
   end;
-end;
 
-procedure TLetterEditForm.MotorListLoad;
-var
-  LocationID: Integer;
-  MoneyValue: Int64;
-  MotorName, MotorNum, NoticeNum, AnswerNum, LocationTitle, UserTitle: String;
-  MotorDate, NoticeDate, AnswerDate: TDate;
-begin
-  LocationID:= 0;
-  UserID:= 0;
-  MoneyValue:= 0;
-  SQLite.ReclamationInfoLoad(LogID, UserID, LocationID);
-  case Category of
-  2: SQLite.RepairInfoLoad(LogID, UserID);
-  3: SQLite.PretensionInfoLoad(LogID, UserID, MoneyValue);
-  end;
+  SQLite.MotorsInLetterLoad(LetterType, OldLetterNum, OldLetterDate,
+                            BusyLogIDs, BusyMotorIDs,
+                            BusyMotorNames, BusyMotorNums, BusyMotorDates,
+                            OldNoticeNums, OldNoticeDates);
 
-  UserNameR:= EmptyStr;
-  UserNameR:= SQLite.UserNameRLoad(UserID);
-
-  LocationName:= EmptyStr;
-  LocationName:= SQLite.LocationNameLoad(LocationID);
-  if Category<>1 then
-    LocationID:= 0;
-
-  SQLite.MotorNoticeAnswerLoad(LogID, LetterType,
-                               MotorName, MotorNum, MotorDate,
-                               NoticeNum, NoticeDate, AnswerNum, AnswerDate,
-                               LocationTitle, UserTitle);
-
-  if Category<>3 then  //для претензии не нужны данные по аналогичным письмам
-    SQLite.MotorNoticeAnswerLoad(LogID, LocationID, UserID,
-                         LetterType, OldLetterNum, OldLetterDate,
-                         LogIDs, MotorNames, MotorNums, MotorDates,
-                         NoticeNums, NoticeDates, AnswerNums, AnswerDates,
-                         LocationTitles, UserTitles, MoneyValues);
-  VIns(LogIDs, 0, LogID);
-  VIns(MotorNames, 0, MotorName);
-  VIns(MotorNums, 0, MotorNum);
-  VIns(MotorDates, 0, MotorDate);
-  VIns(NoticeNums, 0, NoticeNum);
-  VIns(NoticeDates, 0, NoticeDate);
-  VIns(AnswerNums, 0, AnswerNum);
-  VIns(AnswerDates, 0, AnswerDate);
-  VIns(LocationTitles, 0, LocationTitle);
-  VIns(UserTitles, 0, UserTitle);
-  VIns(MoneyValues, 0, MoneyValue);
-end;
-
-procedure TLetterEditForm.MotorListShow;
-var
-  NeedAnswers: Boolean;
-  S: String;
-  Motors, Notices, Moneys, Answers: TStrVector;
-begin
-  NeedAnswers:= LetterType in [3,9,13];
-
-  case Category of
-  1: S:= 'Уведомление ';
-  2: S:= 'Запрос ';
-  3: S:= 'Претензия ';
-  end;
-
-  VSTMotorList.Clear;
-  VSTMotorList.AddColumn('Электродвигатель', 280);
-  VSTMotorList.AddColumn('Потребитель', 100);
   if Category=1 then
-    VSTMotorList.AddColumn('Предприятие', 150);
-  VSTMotorList.AddColumn(S + 'от потребителя', 200);
-  if Category=3 then
-    VSTMotorList.AddColumn('Сумма', 100);
+    BusyMotors:= VReclamationMotorStr(BusyMotorNames, BusyMotorNums, BusyMotorDates,
+                                      OldNoticeNums, OldNoticeDates)
+  else
+    BusyMotors:= VRepairMotorStr(BusyMotorNames, BusyMotorNums, BusyMotorDates,
+                                      OldNoticeNums, OldNoticeDates);
 
-  if NeedAnswers then
-    VSTMotorList.AddColumn('Ответ производителя');
 
-  Motors:= MotorFullNames(MotorNames, MotorNums, MotorDates);
-  Notices:= LetterFullNames(NoticeDates, NoticeNums);
-
-  VSTMotorList.SetColumn('Электродвигатель', Motors, taLeftJustify);
-  VSTMotorList.SetColumn('Потребитель', UserTitles);
-  if Category=1 then
-    VSTMotorList.SetColumn('Предприятие', LocationTitles);
-  VSTMotorList.SetColumn(S + 'от потребителя', Notices, taLeftJustify);
-
-  if Category=3 then
-  begin
-    Moneys:= VPriceIntToStr(MoneyValues, True);
-    VSTMotorList.SetColumn('Сумма', Moneys);
-  end;
-
-  if NeedAnswers then
-  begin
-    Answers:= LetterFullNames(AnswerDates, AnswerNums);
-    VSTMotorList.SetColumn('Ответ производителя', Answers, taLeftJustify);
-  end;
-
-  VSTMotorList.Draw;
-  VSTMotorList.Checked[0]:= True;
-end;
-
-procedure TLetterEditForm.DocFileOpen;
-begin
-  if not OpenDialog1.Execute then Exit;
-    DocFileNameSet(OpenDialog1.FileName);
-end;
-
-procedure TLetterEditForm.DocFileNameSet(const AFileName: String);
-begin
-  FileNameEdit.ReadOnly:= False;
-  FileNameEdit.Text:= AFileName;
-  FileNameEdit.ReadOnly:= True;
+  BusyMotorsLoad;
+  OldLogIDs:= VCut(BusyLogIDs);
+  OldMotorNames:= VCut(BusyMotorNames);
+  OldMotorNums:= VCut(BusyMotorNums);
+  OldMotorDates:= VCut(BusyMotorDates);
 end;
 
 procedure TLetterEditForm.LetterStandardFormOpen;
 var
   LetterStandardForm: TLetterStandardForm;
-  UsedMotorNames, UsedMotorNums, UsedNoticeNums, UsedAnswerNums: TStrVector;
-  UsedMotorDates, UsedNoticeDates, UsedAnswerDates: TDateVector;
-  i: Integer;
+  MotorNames, MotorNums, NoticeNums, AnswerNums: TStrVector;
+  MotorDates, NoticeDates, AnswerDates: TDateVector;
 begin
-  if VSTMotorList.IsAllUnchecked then
+  if VIsNil(BusyMotorIDs) then
   begin
     ShowInfo('Не выбран ни один электродвигатель!');
     Exit;
   end;
 
-  UsedMotorNames:= nil;
-  UsedMotorNums:= nil;
-  UsedMotorDates:= nil;
-  UsedNoticeNums:= nil;
-  UsedNoticeDates:= nil;
-  UsedAnswerNums:= nil;
-  UsedAnswerDates:= nil;
-  for i:= 0 to High(LogIDs) do
-  begin
-    if not VSTMotorList.Checked[i] then continue;
-    VAppend(UsedMotorNames, MotorNames[i]);
-    VAppend(UsedMotorNums, MotorNums[i]);
-    VAppend(UsedMotorDates, MotorDates[i]);
-    VAppend(UsedNoticeNums, NoticeNums[i]);
-    VAppend(UsedNoticeDates, NoticeDates[i]);
-    VAppend(UsedAnswerNums, AnswerNums[i]);
-    VAppend(UsedAnswerDates, AnswerDates[i]);
-  end;
+  SQLite.NoticeAndAnswersLoad(LetterType, BusyLogIDs,
+                       MotorNames, MotorNums, MotorDates,
+                       NoticeNums, NoticeDates, AnswerNums, AnswerDates);
+
+
 
   LetterStandardForm:= TLetterStandardForm.Create(LetterEditForm);
   try
     LetterStandardForm.Category:= Category;
     LetterStandardForm.LetterType:= LetterType;
-    LetterStandardForm.LetterNumEdit.Text:= LetterNumEdit.Text;
+    LetterStandardForm.LetterNumEdit.Text:= STrim(LetterNumEdit.Text);
     LetterStandardForm.DT1.Date:= DT1.Date;
     LetterStandardForm.LocationName:= LocationName;
     LetterStandardForm.UserNameR:= UserNameR;
     LetterStandardForm.UserID:= UserID;
-    LetterStandardForm.MoneyValue:= MoneyValues[0];
-    LetterStandardForm.MotorNames:= UsedMotorNames;
-    LetterStandardForm.MotorNums:= UsedMotorNums;
-    LetterStandardForm.MotorDates:= UsedMotorDates;
-    LetterStandardForm.NoticeNums:= UsedNoticeNums;
-    LetterStandardForm.NoticeDates:= UsedNoticeDates;
-    LetterStandardForm.AnswerNums:= UsedAnswerNums;
-    LetterStandardForm.AnswerDates:= UsedAnswerDates;
+    LetterStandardForm.MotorNames:= MotorNames;
+    LetterStandardForm.MotorNums:= MotorNums;
+    LetterStandardForm.MotorDates:= MotorDates;
+    LetterStandardForm.NoticeNums:= NoticeNums;
+    LetterStandardForm.NoticeDates:= NoticeDates;
+    LetterStandardForm.AnswerNums:= AnswerNums;
+    LetterStandardForm.AnswerDates:= AnswerDates;
 
     MotorReturn:= False;
     if LetterStandardForm.ShowModal=mrOK then
     begin
       LetterNumEdit.Text:= STrim(LetterStandardForm.LetterNumEdit.Text);
       DT1.Date:= LetterStandardForm.DT1.Date;
-      DocFileNameSet(LetterStandardForm.FileNameLabel.Caption);
+      DocumentSet(LetterStandardForm.FileNameLabel.Caption, FileNameEdit);
       MotorReturn:= SSame(LetterStandardForm.SubjectComboBox.Text, LETTER_SUBJECTS[7]);
     end;
 
@@ -508,21 +528,17 @@ var
 begin
   LetterCustomForm:= TLetterCustomForm.Create(LetterEditForm);
   try
-    LetterCustomForm.LogID:= LogID;
+    LetterCustomForm.UserID:= UserID;
     LetterCustomForm.LetterType:= LetterType;
-    LetterCustomForm.Category:= Category;
-    LetterCustomForm.LetterNumEdit.Text:= LetterNumEdit.Text;
+    LetterCustomForm.LetterNumEdit.Text:= Strim(LetterNumEdit.Text);
     LetterCustomForm.DT1.Date:= DT1.Date;
-    LogIDs:= nil;
     if LetterCustomForm.ShowModal=mrOK then
     begin
       NotNeedCheckBox.Checked:= False;
       LetterNumEdit.Text:= STrim(LetterCustomForm.LetterNumEdit.Text);
       DT1.Date:= LetterCustomForm.DT1.Date;
-      DocFileNameSet(LetterCustomForm.FileNameLabel.Caption);
-    end
-    else
-      VAppend(LogIDs, LogID);
+      DocumentSet(LetterCustomForm.FileNameLabel.Caption, FileNameEdit);
+    end;
   finally
     FreeAndNil(LetterCustomForm);
   end;
@@ -531,22 +547,26 @@ end;
 procedure TLetterEditForm.FormCreate(Sender: TObject);
 begin
   CanFormClose:= True;
-  LogIDs:= nil;
   MotorReturn:= False;
-  DT1.Date:= Date;
 
-  VSTMotorList:= TVSTCheckTable.Create(VT1);
-  VSTMotorList.SelectedBGColor:= VT1.Color;
+  DT1.Date:= Date;
+  AddButton.Enabled:= False;
+  DelButton.Enabled:= False;
+
+  FreeMotorListCreate;
+  BusyMotorListCreate;
 end;
 
 procedure TLetterEditForm.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(VSTMotorList);
+  FreeAndNil(VSTFreeMotorList);
+  FreeAndNil(VSTBusyMotorList);
 end;
 
 procedure TLetterEditForm.FormShow(Sender: TObject);
 begin
   DataLoad;
+  FreeMotorsLoad;
 end;
 
 procedure TLetterEditForm.LetterCustomCreateButtonClick(Sender: TObject);
@@ -571,6 +591,16 @@ procedure TLetterEditForm.CancelButtonClick(Sender: TObject);
 begin
   CanFormClose:= True;
   ModalResult:= mrCancel;
+end;
+
+procedure TLetterEditForm.DelButtonClick(Sender: TObject);
+begin
+  MotorBusyToFree;
+end;
+
+procedure TLetterEditForm.AddButtonClick(Sender: TObject);
+begin
+  MotorFreeToBusy;
 end;
 
 procedure TLetterEditForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);

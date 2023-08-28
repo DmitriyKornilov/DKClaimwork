@@ -310,8 +310,6 @@ begin
   DT5.Date:= IncMonth(Date);
   FileNameLabel.Caption:= EmptyStr;
 
-  OrganizationType:= OrganizationTypeGet(LetterType);
-
   OrganizationsLoad;
   ReceiversLoad;
   SendersLoad;
@@ -327,6 +325,7 @@ procedure TLetterStandardForm.OrganizationsLoad;
 var
   Ind: Integer;
 begin
+  OrganizationType:= OrganizationTypeGet(LetterType);
   if OrganizationType=2 then  //Уведомление производителю
   begin
     SQLite.OrganizationListLoad(OrganizationType, OrganizationIDs,
@@ -432,15 +431,6 @@ begin
       LETTER_SUBJECTS[8],
       LETTER_SUBJECTS[9],
       LETTER_SUBJECTS[6] //об истечении срока гарантии
-    ])
-  else if LetterType=11 then
-    V:= VCreateStr([
-      LETTER_SUBJECTS[10]
-    ])
-  else if LetterType=13 then
-    V:= VCreateStr([
-      LETTER_SUBJECTS[11],
-      LETTER_SUBJECTS[12]
     ]);
 
   VToStrings(V, SubjectComboBox.Items);
@@ -515,12 +505,10 @@ begin
     S:= S + '_' + 'О расследовании'
   else
     S:= S + '_' + SubjectComboBox.Text;
-  S:= S + ' ' + MotorsFullName(MotorNames, MotorNums);
+  S:= S + ' ' + VMotorNameNumToString(MotorNames, MotorNums);
   S:= S + '.pdf';
   FileNameLabel.Caption:= S;
 end;
-
-
 
 procedure TLetterStandardForm.LetterTextCreate;
 var
@@ -530,10 +518,10 @@ var
   WarrantyMileage, WarrantyUseDate, WarrantyBuildDate: String;
   Txt: TStrVector;
 begin
-  Notices:= LettersUniqueFullName(NoticeDates, NoticeNums, IsSeveralNotices);
-  Motors:= MotorsFullName(MotorNames, MotorNums);
+  Notices:= VLetterUniqueFullName(NoticeDates, NoticeNums, IsSeveralNotices);
+  Motors:= VMotorNameNumToString(MotorNames, MotorNums);
   IsSeveralMotors:= Length(MotorNames)>1;
-  LettersUniqueFullName(AnswerDates, AnswerNums, IsSeveralAnswers);
+  VLetterUniqueFullName(AnswerDates, AnswerNums, IsSeveralAnswers);
 
   if (DelegateComboBox.Visible) and (not VIsNil(DelegateNameIs)) then
   begin
@@ -586,13 +574,8 @@ begin
     Txt:= Letter8RepairToUser(Notices, Motors,
             IsSeveralMotors, IsSeveralNotices, IsSeveralAnswers)
   else if SubjectComboBox.Text=LETTER_SUBJECTS[9] then
-    Txt:= Letter9RepairToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
-  else if SubjectComboBox.Text=LETTER_SUBJECTS[10] then
-    Txt:= Letter10PretensionToBuilder(Motors, UserNameR, MoneyValue)
-  else if SubjectComboBox.Text=LETTER_SUBJECTS[11] then
-    Txt:= Letter11PretensionToUser(Notices, Motors, MoneyValue)
-  else if SubjectComboBox.Text=LETTER_SUBJECTS[12] then
-    Txt:= Letter12PretensionToUser(Notices, Motors);
+    Txt:= Letter9RepairToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices);
+
 
   LetterTextToStrings(Txt, Memo1.Lines);
 end;
@@ -618,7 +601,7 @@ begin
   IsSeveralMotors:= Length(MotorNames)>1;
   DelegateName:= DelegateNameRs[DelegateComboBox.ItemIndex];
   DelegatePassport:= DelegatePassports[DelegateComboBox.ItemIndex];
-  Motors:= MotorsFullName(MotorNames, MotorNums);
+  Motors:= VMotorNameNumToString(MotorNames, MotorNums);
 
   ProxyCreate(FileName, ProxyNum, DT4.Date, DT5.Date, IsSeveralMotors,
               DelegateName, DelegatePassport, Motors, LocationName);

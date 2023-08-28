@@ -30,7 +30,7 @@ type
 
   public
     Category: Byte; //1-по расследованию, 2-по ремонту, 3-по возмещению затрат
-    LogID: Integer;
+    ID: Integer;
   end;
 
 var
@@ -47,7 +47,10 @@ var
   Note: String;
 begin
   Note:= SFromStrings(Memo1.Lines);
-  SQLite.NoteUpdate(LogID, Category, Note);
+  if Category=3 then
+    SQLite.PretensionNoteUpdate(ID, Note)
+  else
+    SQLite.NoteUpdate(ID, Category, Note);
   ModalResult:= mrOK;
 end;
 
@@ -57,11 +60,11 @@ begin
 end;
 
 procedure TNoteEditForm.FormShow(Sender: TObject);
-var
-  Note: String;
 begin
-  SQLite.NoteLoad(LogID, Category, Note);
-  Memo1.Text:= Note;
+  if Category=3 then
+    Memo1.Text:= SQLite.PretensionNoteLoad(ID)
+  else
+    Memo1.Text:= SQLite.NoteLoad(ID, Category);
 end;
 
 end.

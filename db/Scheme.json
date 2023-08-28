@@ -8,11 +8,17 @@
     "EJDMPERFORMERS",
     "EJDMSENDERS",
     "LOCATIONS",
-    "LOGMOTORS",
-    "LOGPRETENSION",
-    "LOGRECLAMATION",
-    "LOGREPAIR",
     "MOTORNAMES",
+    "MOTORS",
+    "PRETENSIONATTACHMENTS",
+    "PRETENSIONMOTORS",
+    "PRETENSIONS",
+    "RECLAMATIONATTACHMENTS",
+    "RECLAMATIONMOTORS",
+    "RECLAMATIONS",
+    "REPAIRATTACHMENTS",
+    "REPAIRMOTORS",
+    "REPAIRS",
     "USERRECEIVERS",
     "USERS"
   ],
@@ -892,7 +898,7 @@
       },
       "ReferenceFrom" : {
         "TableNames" : [
-          "LOGRECLAMATION"
+          "RECLAMATIONS"
         ],
         "FieldNames" : [
           "LocationID"
@@ -952,17 +958,78 @@
     "IndexesList" : [
     ]
   },
-  "LOGMOTORS" : {
-    "Description" : "Список двигателей в рекламационно-претензионной работе",
+  "MOTORNAMES" : {
+    "Description" : "Наименования двигателей",
     "Notes" : [
     ],
     "FieldsList" : [
-      "LogID",
+      "MotorNameID",
+      "MotorName"
+    ],
+    "MotorNameID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+        "0"
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+          "MOTORS"
+        ],
+        "FieldNames" : [
+          "MotorNameID"
+        ]
+      }
+    },
+    "MotorName" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+        "<?>"
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "IndexesList" : [
+    ]
+  },
+  "MOTORS" : {
+    "Description" : "Список электродвигателей",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "MotorID",
       "MotorNameID",
       "MotorNum",
       "MotorDate"
     ],
-    "LogID" : {
+    "MotorID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : true,
       "Status" : true,
@@ -980,14 +1047,12 @@
       },
       "ReferenceFrom" : {
         "TableNames" : [
-          "LOGRECLAMATION",
-          "LOGREPAIR",
-          "LOGPRETENSION"
+          "REPAIRMOTORS",
+          "PRETENSIONMOTORS"
         ],
         "FieldNames" : [
-          "LogID",
-          "LogID",
-          "LogID"
+          "MotorID",
+          "MotorID"
         ]
       }
     },
@@ -1046,7 +1111,7 @@
       "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "Дата изготовления  двигателя (ПСИ)"
+        "Дата изготовления двигателя (ПСИ)"
       ],
       "ExistingValues" : [
       ],
@@ -1066,29 +1131,14 @@
     "IndexesList" : [
     ]
   },
-  "LOGPRETENSION" : {
-    "Description" : "Список претензий на возмещение затрат",
+  "PRETENSIONATTACHMENTS" : {
+    "Description" : "Приложения к претензионной работе",
     "Notes" : [
     ],
     "FieldsList" : [
       "ID",
-      "LogID",
-      "UserID",
-      "NoticeFromUserDate",
-      "NoticeFromUserNum",
-      "MoneyValue",
-      "NoticeToBuilderDate",
-      "NoticeToBuilderNum",
-      "AnswerFromBuilderDate",
-      "AnswerFromBuilderNum",
-      "AnswerToUserDate",
-      "AnswerToUserNum",
-      "MoneySendDate",
-      "MoneySendValue",
-      "MoneyGetDate",
-      "MoneyGetValue",
-      "Status",
-      "Note"
+      "PretensionID",
+      "AttachmentName"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -1113,19 +1163,149 @@
         ]
       }
     },
-    "LogID" : {
+    "PretensionID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "ID двигателя в списке рекламационно-претензионной работы"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "LOGMOTORS",
+        "TableName" : "PRETENSIONS",
+        "FieldName" : "PretensionID",
+        "OnDelete" : 0,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "AttachmentName" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Имя файла приложения"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "IndexesList" : [
+    ]
+  },
+  "PRETENSIONMOTORS" : {
+    "Description" : "Список претензий на возмещение затрат",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "LogID",
+      "PretensionID",
+      "MotorID",
+      "RecLogID"
+    ],
+    "LogID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "PretensionID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        ""
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "PRETENSIONS",
+        "FieldName" : "PretensionID",
+        "OnDelete" : 0,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "MotorID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "MOTORS",
+        "FieldName" : "MotorID",
+        "OnDelete" : 0,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "RecLogID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "ID записи для этого двигателя в таблице рекламаций"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "RECLAMATIONMOTORS",
         "FieldName" : "LogID",
         "OnDelete" : 0,
         "OnUpdate" : 0
@@ -1137,6 +1317,57 @@
         ]
       }
     },
+    "IndexesList" : [
+    ]
+  },
+  "PRETENSIONS" : {
+    "Description" : "",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "PretensionID",
+      "UserID",
+      "NoticeFromUserDate",
+      "NoticeFromUserNum",
+      "MoneyValue",
+      "NoticeToBuilderDate",
+      "NoticeToBuilderNum",
+      "AnswerFromBuilderDate",
+      "AnswerFromBuilderNum",
+      "AnswerToUserDate",
+      "AnswerToUserNum",
+      "MoneySendDate",
+      "MoneySendValue",
+      "MoneyGetDate",
+      "MoneyGetValue",
+      "Status",
+      "Note"
+    ],
+    "PretensionID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+          "PRETENSIONATTACHMENTS"
+        ],
+        "FieldNames" : [
+          "PretensionID"
+        ]
+      }
+    },
     "UserID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : false,
@@ -1144,7 +1375,6 @@
       "NotNull" : true,
       "DefaultValue" : "0",
       "Description" : [
-        "ID потребителя, направившего претензию"
       ],
       "ExistingValues" : [
       ],
@@ -1165,10 +1395,10 @@
       "FieldType" : "DATETIME",
       "PrimaryKey" : false,
       "Status" : false,
-      "NotNull" : false,
+      "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "Дата претензии от потребителя"
+        "Дата уведомления от потребителя"
       ],
       "ExistingValues" : [
       ],
@@ -1189,10 +1419,10 @@
       "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
-      "NotNull" : false,
+      "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "Номер претензии от потребителя"
+        "Номер уведомления от потребителя"
       ],
       "ExistingValues" : [
       ],
@@ -1213,7 +1443,7 @@
       "FieldType" : "INTEGER",
       "PrimaryKey" : false,
       "Status" : false,
-      "NotNull" : false,
+      "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
         "Сумма к возмещению"
@@ -1288,7 +1518,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Дата ответа от производителя"
+        "Дата ответа производителя"
       ],
       "ExistingValues" : [
       ],
@@ -1312,7 +1542,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Номер ответа от производителя"
+        "Номер ответа производителя"
       ],
       "ExistingValues" : [
       ],
@@ -1384,7 +1614,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Дата возмещения потребителю"
+        "Дата компенсации потребителю"
       ],
       "ExistingValues" : [
       ],
@@ -1408,7 +1638,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Сумма возмещения потребителю"
+        "Сумма компенсации потребителю"
       ],
       "ExistingValues" : [
       ],
@@ -1432,7 +1662,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Дата возмещения от производителя"
+        "Дата возмещения производителем"
       ],
       "ExistingValues" : [
       ],
@@ -1456,7 +1686,7 @@
       "NotNull" : false,
       "DefaultValue" : "",
       "Description" : [
-        "Сумма возмещения от производителя"
+        "Сумма возмещения производителем"
       ],
       "ExistingValues" : [
       ],
@@ -1480,7 +1710,7 @@
       "NotNull" : true,
       "DefaultValue" : "0",
       "Description" : [
-        "Статус претензионной работы: 0 - не указан, 1 - согласование, 2- согласовано, 3 - завершена, 4 - отказ"
+        "Статус претензионной работы: 0 - не указан, 1 - согласование, 2- согласовано (на возмещении), 3 - завершена, 4 - отказ"
       ],
       "ExistingValues" : [
       ],
@@ -1524,30 +1754,14 @@
     "IndexesList" : [
     ]
   },
-  "LOGRECLAMATION" : {
-    "Description" : "Список рекламаций",
+  "RECLAMATIONATTACHMENTS" : {
+    "Description" : "Приложения к рекламации",
     "Notes" : [
     ],
     "FieldsList" : [
       "ID",
       "LogID",
-      "LocationID",
-      "UserID",
-      "Mileage",
-      "NoticeFromUserDate",
-      "NoticeFromUserNum",
-      "NoticeToBuilderDate",
-      "NoticeToBuilderNum",
-      "AnswerFromBuilderDate",
-      "AnswerFromBuilderNum",
-      "AnswerToUserDate",
-      "AnswerToUserNum",
-      "CancelDate",
-      "CancelNum",
-      "ReportDate",
-      "ReportNum",
-      "Status",
-      "Note"
+      "AttachmentName"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -1579,12 +1793,11 @@
       "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "ID двигателя в списке рекламационно-претензионной работы"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "LOGMOTORS",
+        "TableName" : "RECLAMATIONMOTORS",
         "FieldName" : "LogID",
         "OnDelete" : 0,
         "OnUpdate" : 0
@@ -1596,21 +1809,99 @@
         ]
       }
     },
-    "LocationID" : {
-      "FieldType" : "INTEGER",
+    "AttachmentName" : {
+      "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : true,
-      "DefaultValue" : "0",
+      "DefaultValue" : "",
       "Description" : [
-        "ID предприятия, где был обнаружен дефект"
+        "Имя файла приложения"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "LOCATIONS",
-        "FieldName" : "LocationID",
-        "OnDelete" : 2,
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "IndexesList" : [
+    ]
+  },
+  "RECLAMATIONMOTORS" : {
+    "Description" : "Список двигателей рекламации",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "LogID",
+      "ReclamationID",
+      "MotorID",
+      "Mileage",
+      "NoticeToBuilderDate",
+      "NoticeToBuilderNum",
+      "AnswerFromBuilderDate",
+      "AnswerFromBuilderNum",
+      "AnswerToUserDate",
+      "AnswerToUserNum",
+      "CancelDate",
+      "CancelNum",
+      "ReportDate",
+      "ReportNum",
+      "Status",
+      "Note"
+    ],
+    "LogID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+          "RECLAMATIONATTACHMENTS",
+          "REPAIRMOTORS",
+          "PRETENSIONMOTORS"
+        ],
+        "FieldNames" : [
+          "LogID",
+          "RecLogID",
+          "RecLogID"
+        ]
+      }
+    },
+    "ReclamationID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "ID рекламации"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "RECLAMATIONS",
+        "FieldName" : "ReclamationID",
+        "OnDelete" : 0,
         "OnUpdate" : 0
       },
       "ReferenceFrom" : {
@@ -1620,21 +1911,21 @@
         ]
       }
     },
-    "UserID" : {
+    "MotorID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : true,
-      "DefaultValue" : "0",
+      "DefaultValue" : "",
       "Description" : [
-        "ID потребителя, направившего уведомление"
+        "ID двигателя"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "USERS",
-        "FieldName" : "UserID",
-        "OnDelete" : 2,
+        "TableName" : "MOTORS",
+        "FieldName" : "MotorID",
+        "OnDelete" : 0,
         "OnUpdate" : 0
       },
       "ReferenceFrom" : {
@@ -1652,54 +1943,6 @@
       "DefaultValue" : "-1",
       "Description" : [
         "Пробег локомотива, км"
-      ],
-      "ExistingValues" : [
-      ],
-      "ReferenceTo" : {
-        "TableName" : "",
-        "FieldName" : "",
-        "OnDelete" : 4,
-        "OnUpdate" : 4
-      },
-      "ReferenceFrom" : {
-        "TableNames" : [
-        ],
-        "FieldNames" : [
-        ]
-      }
-    },
-    "NoticeFromUserDate" : {
-      "FieldType" : "DATETIME",
-      "PrimaryKey" : false,
-      "Status" : false,
-      "NotNull" : false,
-      "DefaultValue" : "",
-      "Description" : [
-        "Дата уведомления от потребителя"
-      ],
-      "ExistingValues" : [
-      ],
-      "ReferenceTo" : {
-        "TableName" : "",
-        "FieldName" : "",
-        "OnDelete" : 4,
-        "OnUpdate" : 4
-      },
-      "ReferenceFrom" : {
-        "TableNames" : [
-        ],
-        "FieldNames" : [
-        ]
-      }
-    },
-    "NoticeFromUserNum" : {
-      "FieldType" : "TEXT",
-      "PrimaryKey" : false,
-      "Status" : false,
-      "NotNull" : false,
-      "DefaultValue" : "",
-      "Description" : [
-        "Номер уведомления от потребителя"
       ],
       "ExistingValues" : [
       ],
@@ -2007,26 +2250,149 @@
     "IndexesList" : [
     ]
   },
-  "LOGREPAIR" : {
-    "Description" : "Список ремонтов",
+  "RECLAMATIONS" : {
+    "Description" : "Список рекламаций",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "ReclamationID",
+      "LocationID",
+      "UserID",
+      "NoticeFromUserDate",
+      "NoticeFromUserNum"
+    ],
+    "ReclamationID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+          "RECLAMATIONMOTORS"
+        ],
+        "FieldNames" : [
+          "ReclamationID"
+        ]
+      }
+    },
+    "LocationID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "0",
+      "Description" : [
+        "ID предприятия, где был обнаружен дефект"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "LOCATIONS",
+        "FieldName" : "LocationID",
+        "OnDelete" : 2,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "UserID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "0",
+      "Description" : [
+        "ID потребителя, направившего уведомление"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "USERS",
+        "FieldName" : "UserID",
+        "OnDelete" : 2,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "NoticeFromUserDate" : {
+      "FieldType" : "DATETIME",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Дата уведомления от потребителя"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "NoticeFromUserNum" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Номер уведомления от потребителя"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "IndexesList" : [
+    ]
+  },
+  "REPAIRATTACHMENTS" : {
+    "Description" : "Приложения к гарантийному ремонту",
     "Notes" : [
     ],
     "FieldsList" : [
       "ID",
       "LogID",
-      "UserID",
-      "NoticeFromUserDate",
-      "NoticeFromUserNum",
-      "NoticeToBuilderDate",
-      "NoticeToBuilderNum",
-      "AnswerFromBuilderDate",
-      "AnswerFromBuilderNum",
-      "AnswerToUserDate",
-      "AnswerToUserNum",
-      "BeginDate",
-      "EndDate",
-      "Status",
-      "Note"
+      "AttachmentName"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -2058,12 +2424,11 @@
       "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "ID двигателя в списке рекламационно-претензионной работы"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "LOGMOTORS",
+        "TableName" : "REPAIRMOTORS",
         "FieldName" : "LogID",
         "OnDelete" : 0,
         "OnUpdate" : 0
@@ -2075,21 +2440,93 @@
         ]
       }
     },
-    "UserID" : {
-      "FieldType" : "INTEGER",
+    "AttachmentName" : {
+      "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : true,
-      "DefaultValue" : "0",
+      "DefaultValue" : "",
       "Description" : [
-        "ID потребителя, направившего запрос на ремонт двигателя"
+        "Имя файла приложения"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "USERS",
-        "FieldName" : "UserID",
-        "OnDelete" : 2,
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "IndexesList" : [
+    ]
+  },
+  "REPAIRMOTORS" : {
+    "Description" : "Список ремонтов",
+    "Notes" : [
+    ],
+    "FieldsList" : [
+      "LogID",
+      "RepairID",
+      "MotorID",
+      "NoticeToBuilderDate",
+      "NoticeToBuilderNum",
+      "AnswerFromBuilderDate",
+      "AnswerFromBuilderNum",
+      "AnswerToUserDate",
+      "AnswerToUserNum",
+      "BeginDate",
+      "EndDate",
+      "Status",
+      "Note",
+      "RecLogID"
+    ],
+    "LogID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : true,
+      "Status" : true,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+          "REPAIRATTACHMENTS"
+        ],
+        "FieldNames" : [
+          "LogID"
+        ]
+      }
+    },
+    "RepairID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        ""
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "REPAIRS",
+        "FieldName" : "RepairID",
+        "OnDelete" : 0,
         "OnUpdate" : 0
       },
       "ReferenceFrom" : {
@@ -2099,46 +2536,21 @@
         ]
       }
     },
-    "NoticeFromUserDate" : {
-      "FieldType" : "DATETIME",
+    "MotorID" : {
+      "FieldType" : "INTEGER",
       "PrimaryKey" : false,
       "Status" : false,
-      "NotNull" : false,
+      "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
-        "Дата запроса ремонта от потребителя"
       ],
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "",
-        "FieldName" : "",
-        "OnDelete" : 4,
-        "OnUpdate" : 4
-      },
-      "ReferenceFrom" : {
-        "TableNames" : [
-        ],
-        "FieldNames" : [
-        ]
-      }
-    },
-    "NoticeFromUserNum" : {
-      "FieldType" : "TEXT",
-      "PrimaryKey" : false,
-      "Status" : false,
-      "NotNull" : false,
-      "DefaultValue" : "",
-      "Description" : [
-        "Номер запроса ремонта от потребителя"
-      ],
-      "ExistingValues" : [
-      ],
-      "ReferenceTo" : {
-        "TableName" : "",
-        "FieldName" : "",
-        "OnDelete" : 4,
-        "OnUpdate" : 4
+        "TableName" : "MOTORS",
+        "FieldName" : "MotorID",
+        "OnDelete" : 0,
+        "OnUpdate" : 0
       },
       "ReferenceFrom" : {
         "TableNames" : [
@@ -2387,18 +2799,44 @@
         ]
       }
     },
+    "RecLogID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "ID записи для этого двигателя в таблице рекламаций"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "RECLAMATIONMOTORS",
+        "FieldName" : "LogID",
+        "OnDelete" : 0,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
     "IndexesList" : [
     ]
   },
-  "MOTORNAMES" : {
-    "Description" : "Наименования двигателей",
+  "REPAIRS" : {
+    "Description" : "Список запросов о ремонте",
     "Notes" : [
     ],
     "FieldsList" : [
-      "MotorNameID",
-      "MotorName"
+      "RepairID",
+      "UserID",
+      "NoticeFromUserDate",
+      "NoticeFromUserNum"
     ],
-    "MotorNameID" : {
+    "RepairID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : true,
       "Status" : true,
@@ -2407,7 +2845,6 @@
       "Description" : [
       ],
       "ExistingValues" : [
-        "0"
       ],
       "ReferenceTo" : {
         "TableName" : "",
@@ -2422,16 +2859,64 @@
         ]
       }
     },
-    "MotorName" : {
+    "UserID" : {
+      "FieldType" : "INTEGER",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "0",
+      "Description" : [
+        "ID потребителя, направившего уведомление"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "USERS",
+        "FieldName" : "UserID",
+        "OnDelete" : 2,
+        "OnUpdate" : 0
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "NoticeFromUserDate" : {
+      "FieldType" : "DATETIME",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Дата уведомления от потребителя"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "NoticeFromUserNum" : {
       "FieldType" : "TEXT",
       "PrimaryKey" : false,
       "Status" : false,
       "NotNull" : true,
       "DefaultValue" : "",
       "Description" : [
+        "Номер уведомления от потребителя"
       ],
       "ExistingValues" : [
-        "<?>"
       ],
       "ReferenceTo" : {
         "TableName" : "",
@@ -2611,13 +3096,11 @@
       },
       "ReferenceFrom" : {
         "TableNames" : [
-          "LOGRECLAMATION",
-          "LOGREPAIR",
-          "LOGPRETENSION",
-          "USERRECEIVERS"
+          "USERRECEIVERS",
+          "RECLAMATIONS",
+          "PRETENSIONS"
         ],
         "FieldNames" : [
-          "UserID",
           "UserID",
           "UserID",
           "UserID"

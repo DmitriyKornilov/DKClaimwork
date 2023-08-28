@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, StdCtrls,
 
-  DK_SQLite3, DK_SQLUtils, DK_Vector, DK_StrUtils, DK_DateUtils,
+  DK_SQLite3, DK_SQLUtils, DK_Vector, DK_Matrix, DK_StrUtils, DK_DateUtils,
+  DK_Dialogs,
 
   UUtils;
 
@@ -34,134 +35,291 @@ type
     function UserNameRLoad(const AUserID: Integer): String;
     function UserTitleLoad(const AUserID: Integer): String;
 
-    //список двигателей в работе
+    //электродвигатели
+    procedure MotorsAllLoad(const AMotorNumLike: String;  //список всех электродвигателей
+                            out AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector);
+    procedure MotorsForReclamationLoad(const AIsWithNoticeLoad: Boolean;  //список электродвигателей для уведомления о рекламации
+                            const AMotorNumLike: String;
+                            const ABusyMotorIDs: TIntVector;
+                            out AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector);
+    procedure MotorsForPretensionLoad(const AMotorNumLike: String;  //список электродвигателей для претензии
+                            const ABusyRecLogIDs: TIntVector;
+                            out ARecLogIDs, AMotorIDs: TIntVector;
+                            out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                            out ARecNoticeDates, AMotorDates: TDateVector);
+    procedure MotorsForRepairLoad(const AMotorNumLike: String;  //список электродвигателей для запроса ремонта
+                            const ABusyRecLogIDs: TIntVector;
+                            out ARecLogIDs, AMotorIDs: TIntVector;
+                            out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                            out ARecNoticeDates, AMotorDates: TDateVector);
+
+    procedure MotorsEmptyLetterLoad(const ALetterType: Byte; //список электродвигателей с пустым письмом
+                            const AMotorNumLike: String;
+                            const ABusyLogIDs: TIntVector;
+                            const AUserID: Integer;
+                            out ALogIDs, AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector;
+                            out ANoticeNums: TStrVector;
+                            out ANoticeDates: TDateVector;
+                            const ALocationID: Integer = 0);
+    procedure MotorsInLetterLoad(const ALetterType: Byte;
+                                  const ALetterNum: String;
+                                  const ALetterDate: TDate;
+                                  out ALogIDs, AMotorIDs: TIntVector;
+                                  out AMotorNames, AMotorNums: TStrVector;
+                                  out AMotorDates: TDateVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector);
+     procedure MotorsInPretensionLetterLoad(const ALetterType: Byte;
+                                  const ALetterNum: String;
+                                  const ALetterDate: TDate;
+                                  out APretensionIDs: TIntVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector;
+                                  out AMoneyValues: TInt64Vector;
+                                  out AMotorNames, AMotorNums: TStrMatrix;
+                                  out AMotorDates: TDateMatrix);
+
+    procedure MotorsEmptyPretensionLetterLoad(const ALetterType: Byte;
+                                  const AMotorNumLike: String;
+                                  const ABusyPretensionIDs: TIntVector;
+                                  const AUserID: Integer;
+                                  out APretensionIDs: TIntVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector;
+                                  out AMoneyValues: TInt64Vector;
+                                  out AMotorNames, AMotorNums: TStrMatrix;
+                                  out AMotorDates: TDateMatrix);
+
+
+
+    //писок электродвигателей
     function MotorLastWritedLogID: Integer;
-    procedure MotorLoad(const ALogID: Integer;
+    procedure MotorLoad(const AMotorID: Integer;
                          out AMotorNameID: Integer;
                          out AMotorName, AMotorNum: String;
                          out AMotorDate: TDate);
-
     procedure MotorAdd(const AMotorNameID: Integer;
                        const AMotorNum: String;
                        const AMotorDate: TDate);
-    procedure MotorUpdate(const ALogID, AMotorNameID: Integer;
+    procedure MotorUpdate(const AMotorID, AMotorNameID: Integer;
                            const AMotorNum: String;
                            const AMotorDate: TDate);
-    procedure MotorDelete(const ALogID: Integer);
+    procedure MotorDelete(const AMotorID: Integer);
     function MotorFind(const AMotorSearchNameID: Integer;
                        const AMotorSearchNum: String;
                        const AMotorSearchDate: TDate;
-                       out ALogID: Integer;
+                       out AMotorID: Integer;
                        out AMotorName, AMotorNum: String;
                        out AMotorDate: TDate): Boolean;
 
     //рекламации
-    procedure ReclamationInfoLoad(const ALogID: Integer; out AUserID, ALocationID: Integer);
-    procedure ReclamationNoticeDelete(const ALogID: Integer);
-    procedure ReclamationNoticeUpdate(const ALogIDs: TIntVector;
-                                      const AUserID, ALocationID, AMileage: Integer;
+    procedure ReclamationListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out AReclamationIDs: TIntVector;
+                out AUserNames, AUserTitles: TStrVector;
+                out ALocationNames, ALocationTitles: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AToBuilderDates: TDateMatrix; out AToBuilderNums: TStrMatrix;
+                out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
+                out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
+                out ACancelDates: TDateMatrix; out ACancelNums: TStrMatrix;
+                out AReportDates: TDateMatrix; out AReportNums: TStrMatrix;
+                out ALogIDs, AMileages, AStatuses: TIntMatrix;
+                out ANotes, AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+    procedure ReclamationInfoLoad(const AReclamationID: Integer;
+                                  out AUserID, ALocationID: Integer;
+                                  out ANoticeNum: String;
+                                  out ANoticeDate: TDate);
+    procedure ReclamationMotorsLoad(const AReclamationID: Integer;
+                                  out AMotorIDs: TIntVector;
+                                  out AMotorNames, AMotorNums: TStrVector;
+                                  out AMotorDates: TDateVector);
+    function ReclamationMaxID: Integer;
+
+    procedure ReclamationNoticeDelete(const AReclamationID: Integer);
+    procedure ReclamationNoticeAdd(const AMotorIDs: TIntVector;
+                                      const AUserID, ALocationID: Integer;
                                       const ANoticeNum: String;
                                       const ANoticeDate: TDate);
+    procedure ReclamationNoticeUpdate(const AReclamationID: Integer;
+                                      const AUserID, ALocationID: Integer;
+                                      const ANoticeNum: String;
+                                      const ANoticeDate: TDate;
+                                      const AAddMotorIDs, ADelMotorIDs: TIntVector);
+    procedure ReclamationAnswerToUserDelete(const ALogID: Integer);
     function ReclamationStatusLoad(const ALogID: Integer): Integer;
+    function ReclamationLocationIDLoad(const AReclamationID: Integer): Integer;
 
-    procedure ReclamationCancelNotNeed(const ALogIDs: TIntVector);
-    procedure ReclamationCancelUpdate(const ALogIDs: TIntVector;
+    procedure ReclamationCancelNotNeed(const ALogIDs, ADelLogIDs: TIntVector);
+    procedure ReclamationCancelUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate);
     procedure ReclamationCancelDelete(const ALogID: Integer);
 
-    procedure ReclamationReportNotNeed(const ALogIDs: TIntVector; const AStatus: Integer);
-    procedure ReclamationReportUpdate(const ALogIDs: TIntVector;
+    procedure ReclamationReportNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const AStatus: Integer);
+    procedure ReclamationReportUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
     procedure ReclamationReportDelete(const ALogID: Integer);
-    procedure MotorsReturn(const ALogIDs: TIntVector;   //возврат двигателя на этапе расследования рекламации
+
+    procedure MotorsReturn(const ALogIDs, AMotorIDs: TIntVector;   //возврат двигателя на этапе расследования рекламации
+                           const AUserID: Integer;
                            const ALetterNum: String;
                            const ALetterDate: TDate);
 
-
     //ремонты
-    procedure RepairInfoLoad(const ALogID: Integer; out AUserID: Integer);
-    procedure RepairNoticeDelete(const ALogID: Integer);
-    procedure RepairNoticeUpdate(const ALogIDs: TIntVector;
+    procedure RepairListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out ARepairIDs: TIntVector;
+                out AUserNames, AUserTitles: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AToBuilderDates: TDateMatrix; out AToBuilderNums: TStrMatrix;
+                out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
+                out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
+                out ARepairBeginDates, ARepairEndDates: TDateMatrix;
+                out AReclamationIDs, ALogIDs, AStatuses: TIntMatrix;
+                out ANotes, AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+    procedure RepairInfoLoad(const ARepairID: Integer;
+                             out AUserID: Integer;
+                             out ANoticeNum: String;
+                             out ANoticeDate: TDate);
+    procedure RepairMotorsLoad(const ARepairID: Integer;
+                               out ARecLogIDs, AMotorIDs: TIntVector;
+                               out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                               out ARecNoticeDates, AMotorDates: TDateVector);
+    function RepairMaxID: Integer;
+    procedure RepairNoticeAdd(const ARecLogIDs, AMotorIDs: TIntVector;
+                              const AUserID: Integer;
+                              const ANoticeNum: String;
+                              const ANoticeDate: TDate);
+    procedure RepairNoticeDelete(const ARepairID: Integer);
+    procedure RepairNoticeUpdate(const ARepairID: Integer;
                                   const AUserID: Integer;
                                   const ANoticeNum: String;
-                                  const ANoticeDate: TDate);
+                                  const ANoticeDate: TDate;
+                                  const AAddRecLogIDs, AAddMotorIDs, ADelRecLogIDs: TIntVector);
     procedure RepairDatesLoad(const ALogID: Integer; out ABeginDate, AEndDate: TDate);
     procedure RepairDatesUpdate(const ALogID, AStatus: Integer; const ABeginDate, AEndDate: TDate);
     procedure RepairDatesDelete(const ALogID: Integer);
     function RepairStatusLoad(const ALogID: Integer): Integer;
-    procedure RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+    procedure RepairAnswerToUserDelete(const ALogID: Integer);
+    procedure RepairAnswersToUserUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
 
-
     //претензии
-    procedure PretensionInfoLoad(const ALogID: Integer; out AUserID: Integer; out AMoneyValue: Int64);
-    procedure PretensionNoticeDelete(const ALogID: Integer);
-    procedure PretensionNoticeUpdate(const ALogIDs: TIntVector;
+    procedure PretensionListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out APretensionIDs, AStatuses: TIntVector;
+                out AUserNames, AUserTitles, ANotes: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AMoneyValues, ASendValues, AGetValues: TInt64Vector;
+                out ASendDates, AGetDates: TDateVector;
+                out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
+                out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
+                out AToUserDates: TDateVector; out AToUserNums: TStrVector;
+                out AReclamationIDs, ALogIDs: TIntMatrix;
+                out AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+    function PretensionMaxID: Integer;
+    procedure PretensionInfoLoad(const APretensionID: Integer;
+                                 out AUserID: Integer;
+                                 out AMoneyValue: Int64;
+                                 out ANoticeNum: String;
+                                 out ANoticeDate: TDate);
+    procedure PretensionMotorsLoad(const APretensionID: Integer;
+                               out ARecLogIDs, AMotorIDs: TIntVector;
+                               out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                               out ARecNoticeDates, AMotorDates: TDateVector);
+    procedure PretensionNoticeAdd(const ARecLogIDs, AMotorIDs: TIntVector;
+                              const AUserID: Integer;
+                              const AMoneyValue: Int64;
+                              const ANoticeNum: String;
+                              const ANoticeDate: TDate);
+    procedure PretensionNoticeDelete(const APretensionID: Integer);
+    procedure PretensionNoticeUpdate(const APretensionID: Integer;
                                      const AUserID: Integer;
                                      const AMoneyValue: Int64;
                                      const ANoticeNum: String;
-                                     const ANoticeDate: TDate);
-    procedure PretensionMoneyLoad(const ALogID: Integer; out AStatus: Integer;
-                                 out AMoneySendValue: Int64; out AMoneySendDate: TDate;
-                                 out AMoneyGetValue: Int64; out AMoneyGetDate: TDate);
-    procedure PretensionMoneyUpdate(const ALogID, AStatus: Integer;
-                                   const AMoneySendValue: Int64; const AMoneySendDate: TDate;
-                                   const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
-    procedure PretensionMoneyDelete(const ALogID: Integer);
-    function PretensionStatusLoad(const ALogID: Integer): Integer;
-    procedure PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
+                                     const ANoticeDate: TDate;
+                                     const AAddRecLogIDs, AAddMotorIDs, ADelRecLogIDs: TIntVector);
+    procedure PretensionMoneyDatesLoad(const APretensionID: Integer;
+                                     out ASendValue, AGetValue: Int64;
+                                     out ASendDate, AGetDate: TDate);
+    procedure PretensionMoneyDatesUpdate(const APretensionID, AStatus: Integer;
+                                   const ASendValue, AGetValue: Int64;
+                                   const ASendDate, AGetDate: TDate);
+    procedure PretensionMoneyDatesDelete(const APretensionID: Integer);
+    function PretensionStatusByLogIDLoad(const ALogID: Integer): Integer;
+    function PretensionStatusLoad(const APretensionID: Integer): Integer;
+    procedure PretensionLetterLoad(const APretensionID: Integer;
+                                   const ALetterType: Byte;
+                                   out ALetterNum: String;
+                                   out ALetterDate: TDate);
+
+    procedure PretensionLetterCustomUpdate(const APretensionIDs: TIntVector; //no commit
+                                           const ALetterType: Byte;
+                                           const ALetterNum: String;
+                                           const ALetterDate: TDate;
+                                           const AStatus: Integer = -1);
+    procedure PretensionLetterDelete(const APretensionID: Integer; const ALetterType: Byte);
+    procedure PretensionLetterNotNeed(const APretensionIDs, ADelPretensionIDs: TIntVector; const ALetterType: Byte);
+    procedure PretensionLetterUpdate(const APretensionIDs, ADelPretensionIDs: TIntVector;
+                                     const ALetterType: Byte;
+                                     const ALetterNum: String;
+                                     const ALetterDate: TDate);
+
+    procedure PretensionAnswerToUserDelete(const APretensionID: Integer);
+    procedure PretensionAnswerToUserNotNeed(const APretensionIDs, ADelPretensionIDs: TIntVector;
+                                            const AStatus: Integer);
+    procedure PretensionAnswersToUserUpdate(const APretensionIDs, ADelPretensionIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
 
-    //двигатели и письма для ответа
-    procedure MotorsWithoutNoticeLoad(const AThisLogID: Integer;
-                                      const ALetterType: Byte;
-                                      const ANeedOtherMotors: Boolean;
-                                      out ALogIDs: TIntVector;
-                                      out AMotorNames, AMotorNums: TStrVector;
-                                      out AMotorDates: TDateVector);
 
-    procedure MotorNoticeAnswerLoad(const ALogID, ALocationID, AUserID: Integer;
-                                    const ALetterType: Byte;
-                                    const AOldLetterNum: String;
-                                    const AOldLetterDate: TDate;
-                                    out ALogIDs: TIntVector;
-                                    out AMotorNames, AMotorNums: TStrVector;
-                                    out AMotorDates: TDateVector;
-                                    out ANoticeNums: TStrVector;
-                                    out ANoticeDates: TDateVector;
-                                    out AAnswerNums: TStrVector;
-                                    out AAnswerDates: TDateVector;
-                                    out ALocationTitles, AUserTitles: TStrVector;
-                                    out AMoneyValues: TInt64Vector);
-    procedure MotorNoticeAnswerLoad(const ALogID: Integer;
-                                    const ALetterType: Byte;
-                                    out AMotorName, AMotorNum: String;
-                                    out AMotorDate: TDate;
-                                    out ANoticeNum: String;
-                                    out ANoticeDate: TDate;
-                                    out AAnswerNum: String;
-                                    out AAnswerDate: TDate;
-                                    out ALocationTitle, AUserTitle: String);
+    //уведомления от Потребителя и ответы Производителя для формирования стандартных писем
+    procedure NoticeAndAnswersLoad(const ALetterType: Byte;
+                            const ALogIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector;
+                            out ANoticeNums: TStrVector;
+                            out ANoticeDates: TDateVector;
+                            out AAnswerNums: TStrVector;
+                            out AAnswerDates: TDateVector);
+
+    //списки файлов
+    function FileNamesLoad(const ACategory: Byte; const AReclamationID: Integer): TStrVector;
+    function AllFileNamesLoad(const AReclamationID: Integer): TStrVector;         //все письма, каксающиеся AReclamationID
+    function ReclamationFileNamesLoad(const AReclamationID: Integer): TStrVector; //письма (документы) по рекламации
+    function RepairFileNamesLoad(const ARepairID: Integer): TStrVector;           //письма (документы) по ремонту
+    function PretensionFileNamesLoad(const APretensionID: Integer): TStrVector;   //письма (документы) по претензии
 
     //письма общие
     procedure LetterLoad(const ALogID: Integer; const ALetterType: Byte;
                          out ALetterNum: String;
                          out ALetterDate: TDate);
     procedure LetterDelete(const ALogID: Integer; const ALetterType: Byte);
-    procedure LettersUpdate(const ALogIDs: TIntVector;
+    procedure LettersUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterType: Byte;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer = -1);
-    procedure LettersNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
-
+    procedure LettersNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const ALetterType: Byte);
+    function LetterUserIDLoad(const ALetterType: Byte; const AID: Integer): Integer;
 
     //изображения
     procedure ImageListLoad(out AImageIDs: TIntVector; out AImageNames: TStrVector);
@@ -206,69 +364,19 @@ type
                                     ADelegatePhones, ADelegatePassports: TStrVector);
 
     //примечания
-    procedure NoteLoad(const ALogID: Integer; const ACategory: Byte; out ANote: String);
+    function NoteLoad(const ALogID: Integer; const ACategory: Byte): String;
     procedure NoteUpdate(const ALogID: Integer; const ACategory: Byte; const ANote: String);
     procedure NoteDelete(const ALogID: Integer; const ACategory: Byte);
 
-    //весь список
-    procedure DataLoad(const AMotorNumLike: String;
-                       const AOrderIndex, AViewIndex: Integer;
-                       const ABeginDate, AEndDate: TDate;
-                       out ALogIDs: TIntVector;
-                       out AMotorNames: TStrVector;
-                       out AMotorNums: TStrVector;
-                       out AMotorDates: TDateVector;
-                       out AMileages: TIntVector;
-                       out AReclamationUserNames: TStrVector;
-                       out AReclamationUserTitles: TStrVector;
-                       out AReclamationLocationNames: TStrVector;
-                       out AReclamationLocationTitles: TStrVector;
-                       out AReclamationNoticeFromUserDates: TDateVector;
-                       out AReclamationNoticeFromUserNums: TStrVector;
-                       out AReclamationNoticeToBuilderDates: TDateVector;
-                       out AReclamationNoticeToBuilderNums: TStrVector;
-                       out AReclamationAnswerFromBuilderDates: TDateVector;
-                       out AReclamationAnswerFromBuilderNums: TStrVector;
-                       out AReclamationAnswerToUserDates: TDateVector;
-                       out AReclamationAnswerToUserNums: TStrVector;
-                       out AReclamationCancelDates: TDateVector;
-                       out AReclamationCancelNums: TStrVector;
-                       out AReclamationReportDates: TDateVector;
-                       out AReclamationReportNums: TStrVector;
-                       out AReclamationNotes: TStrVector;
-                       out AReclamationStatuses: TIntVector;
-                       out ARepairUserNames: TStrVector;
-                       out ARepairUserTitles: TStrVector;
-                       out ARepairNoticeFromUserDates: TDateVector;
-                       out ARepairNoticeFromUserNums: TStrVector;
-                       out ARepairNoticeToBuilderDates: TDateVector;
-                       out ARepairNoticeToBuilderNums: TStrVector;
-                       out ARepairAnswerFromBuilderDates: TDateVector;
-                       out ARepairAnswerFromBuilderNums: TStrVector;
-                       out ARepairAnswerToUserDates: TDateVector;
-                       out ARepairAnswerToUserNums: TStrVector;
-                       out ARepairBeginDates: TDateVector;
-                       out ARepairEndDates: TDateVector;
-                       out ARepairNotes: TStrVector;
-                       out ARepairStatuses: TIntVector;
-                       out APretensionUserNames: TStrVector;
-                       out APretensionUserTitles: TStrVector;
-                       out APretensionNoticeFromUserDates: TDateVector;
-                       out APretensionNoticeFromUserNums: TStrVector;
-                       out APretensionMoneyValues: TInt64Vector;
-                       out APretensionNoticeToBuilderDates: TDateVector;
-                       out APretensionNoticeToBuilderNums: TStrVector;
-                       out APretensionAnswerFromBuilderDates: TDateVector;
-                       out APretensionAnswerFromBuilderNums: TStrVector;
-                       out APretensionAnswerToUserDates: TDateVector;
-                       out APretensionAnswerToUserNums: TStrVector;
-                       out APretensionMoneySendDates: TDateVector;
-                       out APretensionMoneySendValues: TInt64Vector;
-                       out APretensionMoneyGetDates: TDateVector;
-                       out APretensionMoneyGetValues: TInt64Vector;
-                       out APretensionNotes: TStrVector;
-                       out APretensionStatuses: TIntVector
-                       );
+    function PretensionNoteLoad(const APretensionID: Integer): String;
+    procedure PretensionNoteUpdate(const APretensionID: Integer; const ANote: String);
+    procedure PretensionNoteDelete(const APretensionID: Integer);
+
+    //пробеги
+    function MileageLoad(const ALogID: Integer): Integer;
+    procedure MileageUpdate(const ALogID: Integer; const AMileage: Integer);
+    procedure MileageDelete(const ALogID: Integer);
+
   end;
 
 var
@@ -312,10 +420,10 @@ end;
 
 function TSQLite.MotorLastWritedLogID: Integer;
 begin
-  Result:= LastWritedInt32ID('LOGMOTORS');
+  Result:= LastWritedInt32ID('MOTORS');
 end;
 
-procedure TSQLite.MotorLoad(const ALogID: Integer;
+procedure TSQLite.MotorLoad(const AMotorID: Integer;
                          out AMotorNameID: Integer;
                          out AMotorName, AMotorNum: String;
                          out AMotorDate: TDate);
@@ -329,12 +437,12 @@ begin
   QSetSQL(
     'SELECT ' +
       't1.MotorNameID, t1.MotorNum, t1.MotorDate, t2.MotorName ' +
-    'FROM LOGMOTORS t1 ' +
+    'FROM MOTORS t1 ' +
     'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID = t2.MotorNameID) ' +
     'WHERE ' +
-        't1.LogID = :LogID'
+        't1.MotorID = :MotorID'
   );
-  QParamInt('LogID', ALogID);
+  QParamInt('MotorID', AMotorID);
   QOpen;
   if not QIsEmpty then
   begin
@@ -350,15 +458,12 @@ end;
 procedure TSQLite.MotorAdd(const AMotorNameID: Integer;
                        const AMotorNum: String;
                        const AMotorDate: TDate);
-var
-  LogID: Integer;
-  i: Byte;
 begin
   QSetQuery(FQuery);
   try
     QSetSQL(
       'INSERT INTO ' +
-        'LOGMOTORS ' +
+        'MOTORS ' +
         '(MotorNameID, MotorNum, MotorDate) ' +
       'VALUES ' +
         '(:MotorNameID, :MotorNum, :MotorDate) '
@@ -367,27 +472,13 @@ begin
     QParamStr('MotorNum', AMotorNum);
     QParamDT('MotorDate', AMotorDate);
     QExec;
-
-    LogID:= MotorLastWritedLogID;
-    for i:= 1 to 3 do
-    begin
-      QSetSQL(
-        'INSERT INTO ' + SqlEsc(LogTableNameGet(i)) +
-          '(LogID) ' +
-        'VALUES ' +
-          '(:LogID) '
-      );
-      QParamInt('LogID', LogID);
-      QExec;
-    end;
-
     QCommit;
   except
     QRollback;
   end;
 end;
 
-procedure TSQLite.MotorUpdate(const ALogID, AMotorNameID: Integer;
+procedure TSQLite.MotorUpdate(const AMotorID, AMotorNameID: Integer;
                            const AMotorNum: String;
                            const AMotorDate: TDate);
 begin
@@ -395,13 +486,13 @@ begin
   try
     QSetSQL(
       'UPDATE ' +
-        'LOGMOTORS ' +
+        'MOTORS ' +
       'SET ' +
         'MotorNameID = :MotorNameID, MotorNum = :MotorNum, MotorDate = :MotorDate ' +
       'WHERE ' +
-        'LogID = :LogID'
+        'MotorID = :MotorID'
     );
-    QParamInt('LogID', ALogID);
+    QParamInt('MotorID', AMotorID);
     QParamInt('MotorNameID', AMotorNameID);
     QParamStr('MotorNum', AMotorNum);
     QParamDT('MotorDate', AMotorDate);
@@ -412,28 +503,28 @@ begin
   end;
 end;
 
-procedure TSQLite.MotorDelete(const ALogID: Integer);
+procedure TSQLite.MotorDelete(const AMotorID: Integer);
 begin
-  Delete('LOGMOTORS', 'LogID', ALogID);
+  Delete('MOTORS', 'MotorID', AMotorID);
 end;
 
 function TSQLite.MotorFind(const AMotorSearchNameID: Integer;
                        const AMotorSearchNum: String;
                        const AMotorSearchDate: TDate;
-                       out ALogID: Integer;
+                       out AMotorID: Integer;
                        out AMotorName, AMotorNum: String;
                        out AMotorDate: TDate): Boolean;
 begin
   Result:= False;
-  ALogID:= 0;
+  AMotorID:= 0;
   AMotorName:= EmptyStr;
   AMotorNum:= EmptyStr;
   AMotorDate:= 0;
   QSetSQL(
     'SELECT ' +
-      't1.LogID, t1.MotorNameID, t1.MotorNum, t1.MotorDate, t2.MotorName ' +
+      't1.MotorID, t1.MotorNameID, t1.MotorNum, t1.MotorDate, t2.MotorName ' +
     'FROM ' +
-      'LOGMOTORS t1 ' +
+      'MOTORS t1 ' +
     'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ' +
     'WHERE' +
       '(t1.MotorNameID=:MotorNameID) AND (UPPER(MotorNum)=:MotorNum) AND ' +
@@ -448,10 +539,151 @@ begin
   begin
     QFirst;
     Result:= True;
-    ALogID:= QFieldInt('LogID');
+    AMotorID:= QFieldInt('MotorID');
     AMotorName:= QFieldStr('MotorName');
     AMotorNum:= QFieldStr('MotorNum');
     AMotorDate:= QFieldDT('MotorDate');
+  end;
+  QClose;
+end;
+
+procedure TSQLite.ReclamationListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out AReclamationIDs: TIntVector;
+                out AUserNames, AUserTitles: TStrVector;
+                out ALocationNames, ALocationTitles: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AToBuilderDates: TDateMatrix; out AToBuilderNums: TStrMatrix;
+                out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
+                out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
+                out ACancelDates: TDateMatrix; out ACancelNums: TStrMatrix;
+                out AReportDates: TDateMatrix; out AReportNums: TStrMatrix;
+                out ALogIDs, AMileages, AStatuses: TIntMatrix;
+                out ANotes, AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+var
+  S: String;
+  OldID, NewID, n: Integer;
+begin
+  AReclamationIDs:= nil;
+  AUserNames:= nil;
+  AUserTitles:= nil;
+  ALocationNames:= nil;
+  ALocationTitles:= nil;
+  ANoticeDates:= nil;
+  ANoticeNums:= nil;
+  AToBuilderDates:= nil;
+  AToBuilderNums:= nil;
+  AFromBuilderDates:= nil;
+  AFromBuilderNums:= nil;
+  AToUserDates:= nil;
+  AToUserNums:= nil;
+  ACancelDates:= nil;
+  ACancelNums:= nil;
+  AReportDates:= nil;
+  AReportNums:= nil;
+  ALogIDs:= nil;
+  AMileages:= nil;
+  AStatuses:= nil;
+  ANotes:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.*, '+
+      't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, ' +
+      't5.LocationName, t5.LocationTitle, ' +
+      't6.UserNameI, t6.UserTitle ' +
+    'FROM ' +
+      'RECLAMATIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN RECLAMATIONS t4 ON (t1.ReclamationID=t4.ReclamationID) ' +
+    'INNER JOIN LOCATIONS t5 ON (t4.LocationID=t5.LocationID) ' +
+    'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+    'WHERE ' +
+      '(t1.ReclamationID>0) ';
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
+  else begin
+    if (ABeginDate>0) and (AEndDate>0) then
+      S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
+    if AViewIndex>0 then
+      S:= S + ' AND (t1.Status = :Status) ';
+  end;
+  S:= S +
+    'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  QParamDT('BD', ABeginDate);
+  QParamDT('ED', AEndDate);
+  QParamInt('Status', AViewIndex);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    OldID:= 0;
+    while not QEOF do
+    begin
+      NewID:= QFieldInt('ReclamationID');
+      if NewID<>OldID then
+      begin
+        VAppend(AReclamationIDs, NewID);
+        VAppend(AUserNames, QFieldStr('UserNameI'));
+        VAppend(AUserTitles, QFieldStr('UserTitle'));
+        VAppend(ALocationNames, QFieldStr('LocationName'));
+        VAppend(ALocationTitles, QFieldStr('LocationTitle'));
+        VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+        VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+
+        MAppend(AToBuilderDates, VCreateDate([QFieldDT('NoticeToBuilderDate')]));
+        MAppend(AToBuilderNums, VCreateStr([QFieldStr('NoticeToBuilderNum')]));
+        MAppend(AFromBuilderDates, VCreateDate([QFieldDT('AnswerFromBuilderDate')]));
+        MAppend(AFromBuilderNums, VCreateStr([QFieldStr('AnswerFromBuilderNum')]));
+        MAppend(AToUserDates, VCreateDate([QFieldDT('AnswerToUserDate')]));
+        MAppend(AToUserNums, VCreateStr([QFieldStr('AnswerToUserNum')]));
+        MAppend(ACancelDates, VCreateDate([QFieldDT('CancelDate')]));
+        MAppend(ACancelNums, VCreateStr([QFieldStr('CancelNum')]));
+        MAppend(AReportDates, VCreateDate([QFieldDT('ReportDate')]));
+        MAppend(AReportNums, VCreateStr([QFieldStr('ReportNum')]));
+        MAppend(AMileages, VCreateInt([QFieldInt('Mileage')]));
+        MAppend(ANotes, VCreateStr([QFieldStr('Note')]));
+        MAppend(AStatuses, VCreateInt([QFieldInt('Status')]));
+        MAppend(ALogIDs, VCreateInt([QFieldInt('LogID')]));
+        MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
+        MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
+        MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
+        OldID:= NewID;
+      end
+      else begin
+        n:= High(AReclamationIDs);
+        VAppend(AToBuilderDates[n], QFieldDT('NoticeToBuilderDate'));
+        VAppend(AToBuilderNums[n], QFieldStr('NoticeToBuilderNum'));
+        VAppend(AFromBuilderDates[n], QFieldDT('AnswerFromBuilderDate'));
+        VAppend(AFromBuilderNums[n], QFieldStr('AnswerFromBuilderNum'));
+        VAppend(AToUserDates[n], QFieldDT('AnswerToUserDate'));
+        VAppend(AToUserNums[n], QFieldStr('AnswerToUserNum'));
+        VAppend(ACancelDates[n], QFieldDT('CancelDate'));
+        VAppend(ACancelNums[n], QFieldStr('CancelNum'));
+        VAppend(AReportDates[n], QFieldDT('ReportDate'));
+        VAppend(AReportNums[n], QFieldStr('ReportNum'));
+        VAppend(AMileages[n], QFieldInt('Mileage'));
+        VAppend(ANotes[n], QFieldStr('Note'));
+        VAppend(AStatuses[n], QFieldInt('Status'));
+        VAppend(ALogIDs[n], QFieldInt('LogID'));
+        VAppend(AMotorNames[n], QFieldStr('MotorName'));
+        VAppend(AMotorNums[n], QFieldStr('MotorNum'));
+        VAppend(AMotorDates[n], QFieldDT('MotorDate'));
+      end;
+      QNext;
+    end;
   end;
   QClose;
 end;
@@ -481,117 +713,653 @@ begin
   Result:= ValueStrInt32ID('USERS', 'UserTitle', 'UserID', AUserID);
 end;
 
-procedure TSQLite.ReclamationInfoLoad(const ALogID: Integer;
-                                      out AUserID, ALocationID: Integer);
+procedure TSQLite.MotorsAllLoad(const AMotorNumLike: String;
+                            out AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector);
+var
+  S: String;
+begin
+  AMotorIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.MotorID, t1.MotorNum, t1.MotorDate, t2.MotorName ' +
+    'FROM ' +
+      'MOTORS t1 ' +
+      'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ';
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'WHERE (UPPER(t1.MotorNum) LIKE :NumberLike) ';
+
+  S:= S + 'ORDER BY t1.MotorNum, t1.MotorDate, t2.MotorName ';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsForReclamationLoad(const AIsWithNoticeLoad: Boolean;
+                            const AMotorNumLike: String;
+                            const ABusyMotorIDs: TIntVector;
+                            out AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector);
+var
+  S: String;
+begin
+  AMotorIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.MotorID, t1.MotorNum, t1.MotorDate, t2.MotorName, t3.LogID ' +
+    'FROM ' +
+      'MOTORS t1 ' +
+      'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ' +
+      'LEFT OUTER JOIN RECLAMATIONMOTORS t3 ON (t1.MotorID=t3.MotorID) '+
+      'LEFT OUTER JOIN RECLAMATIONS t4 ON (t3.ReclamationID=t4.ReclamationID) ' +
+    'WHERE ' +
+      '(t1.MotorID>0) ';
+
+  //один и тот же мотор может словить рекламацию не один раз
+  if not AIsWithNoticeLoad then
+    S:= S + 'AND (t3.LogID IS NULL) ';
+
+  if not VIsNil(ABusyMotorIDs) then
+    S:= S + 'AND' + SqlNOTIN('t1','MotorID', Length(ABusyMotorIDs));
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t1.MotorNum) LIKE :NumberLike) ';
+
+  S:= S + ' ORDER BY t1.MotorNum, t1.MotorDate, t2.MotorName ';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  if not VIsNil(ABusyMotorIDs) then QParamsInt(ABusyMotorIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsForRepairLoad(const AMotorNumLike: String;  //список электродвигателей для запроса ремонта
+                            const ABusyRecLogIDs: TIntVector;
+                            out ARecLogIDs, AMotorIDs: TIntVector;
+                            out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                            out ARecNoticeDates, AMotorDates: TDateVector);
+var
+  S: String;
+begin
+  ARecLogIDs:= nil;
+  AMotorIDs:= nil;
+  ARecNoticeNums:= nil;
+  ARecNoticeDates:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.LogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      'RECLAMATIONMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN RECLAMATIONS t4 ON (t1.ReclamationID=t4.ReclamationID) ' +
+      'LEFT OUTER JOIN REPAIRMOTORS t5 ON (t1.LogID=t5.RecLogID) ' +
+    'WHERE ' +
+      '(t5.RecLogID IS NULL) ';
+
+
+  if not VIsNil(ABusyRecLogIDs) then
+    S:= S + 'AND' + SqlNOTIN('t1','LogID', Length(ABusyRecLogIDs));
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
+
+  S:= S + ' ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName, t4.NoticeFromUserDate, t4.NoticeFromUserNum ';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  if not VIsNil(ABusyRecLogIDs) then QParamsInt(ABusyRecLogIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ARecLogIDs, QFieldInt('LogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      VAppend(ARecNoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ARecNoticeDates, QFieldDT('NoticeFromUserDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsForPretensionLoad(const AMotorNumLike: String;
+                            const ABusyRecLogIDs: TIntVector;
+                            out ARecLogIDs, AMotorIDs: TIntVector;
+                            out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                            out ARecNoticeDates, AMotorDates: TDateVector);
+var
+  S: String;
+begin
+  ARecLogIDs:= nil;
+  AMotorIDs:= nil;
+  ARecNoticeNums:= nil;
+  ARecNoticeDates:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.LogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      'RECLAMATIONMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'LEFT OUTER JOIN RECLAMATIONS t4 ON (t1.ReclamationID=t4.ReclamationID) ' +
+      'LEFT OUTER JOIN PRETENSIONMOTORS t5 ON (t1.LogID=t5.RecLogID) ' +
+    'WHERE ' +
+      '(t5.RecLogID IS NULL) ';
+
+
+  if not VIsNil(ABusyRecLogIDs) then
+    S:= S + 'AND' + SqlNOTIN('t1','LogID', Length(ABusyRecLogIDs));
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
+
+  S:= S + ' ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName, t4.NoticeFromUserDate, t4.NoticeFromUserNum ';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  if not VIsNil(ABusyRecLogIDs) then QParamsInt(ABusyRecLogIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ARecLogIDs, QFieldInt('LogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      VAppend(ARecNoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ARecNoticeDates, QFieldDT('NoticeFromUserDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsEmptyLetterLoad(const ALetterType: Byte; //список электродвигателей с пустым письмом
+                            const AMotorNumLike: String;
+                            const ABusyLogIDs: TIntVector;
+                            const AUserID: Integer;
+                            out ALogIDs, AMotorIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector;
+                            out ANoticeNums: TStrVector;
+                            out ANoticeDates: TDateVector;
+                            const ALocationID: Integer = 0);
+var
+  S, LogNoticeTableName, LogMotorsTableName: String;
+  DateField, NumField, IDField: String;
+  Category: Byte;
+begin
+  ALogIDs:= nil;
+  AMotorIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  ANoticeNums:= nil;
+  ANoticeDates:= nil;
+
+  Category:= CategoryFromLetterType(ALetterType);
+  LogNoticeTableName:= SqlEsc(LogNoticeTableNameGet(Category));
+  IDField:= SqlEsc(LogNoticeIDFieldNameGet(Category));
+
+  LetterDBNamesGet(ALetterType, LogMotorsTableName, DateField, NumField);
+  LogMotorsTableName:= SqlEsc(LogMotorsTableName);
+  DateField:= SqlEsc(DateField);
+  NumField:= SqlEsc(NumField);
+
+  S:=
+    'SELECT ' +
+      't1.LogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      LogMotorsTableName + ' t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN '+LogNoticeTableName+' t4 ON (t1.'+IDField+'=t4.'+IDField+') ' +
+    'WHERE ' +
+      '(t4.UserID = :UserID) AND ' +
+      '((t1.'+DateField+' IS NULL) AND (t1.'+NumField+' IS NULL)) ';
+
+  if ALetterType in [2,3,4,8,9] then
+  begin
+    LetterDBNamesGet(ALetterType-1, LogMotorsTableName, DateField, NumField);
+    S:= S +
+      ' AND (t1.'+NumField+' IS NOT NULL) '; //DateField может NULL, если NumField=NOT_NEED_MARK
+  end;
+
+  if ALocationID>0 then
+    S:= S + 'AND (t4.LocationID = :LocationID) ';
+
+  if not VIsNil(ABusyLogIDs) then
+    S:= S + 'AND' + SqlNOTIN('t1','LogID', Length(ABusyLogIDs));
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
+
+  S:= S + ' ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName ';
+
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamInt('UserID', AUserID);
+  QParamInt('LocationID', ALocationID);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  if not VIsNil(ABusyLogIDs) then QParamsInt(ABusyLogIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+      VAppend(ALogIDs, QFieldInt('LogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsInLetterLoad(const ALetterType: Byte;
+                                  const ALetterNum: String;
+                                  const ALetterDate: TDate;
+                                  out ALogIDs, AMotorIDs: TIntVector;
+                                  out AMotorNames, AMotorNums: TStrVector;
+                                  out AMotorDates: TDateVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector);
+var
+  LogMotorTableName, LogNoticeTableName, DateField, NumField, IDFieldName: String;
+  Category: Byte;
+begin
+  ALogIDs:= nil;
+  AMotorIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  ANoticeNums:= nil;
+  ANoticeDates:= nil;
+
+  LetterDBNamesGet(ALetterType, LogMotorTableName, DateField, NumField);
+  LogMotorTableName:= SqlEsc(LogMotorTableName);
+  DateField:= SqlEsc(DateField);
+  NumField:= SqlEsc(NumField);
+  Category:= CategoryFromLetterType(ALetterType);
+  LogNoticeTableName:= SqlEsc(LogNoticeTableNameGet(Category));
+  IDFieldName:=  SqlEsc(LogNoticeIDFieldNameGet(Category));
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't1.LogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      LogMotorTableName +' t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN '+ LogNoticeTableName+ ' t4 ON (t1.'+ IDFieldName + '=t4.' + IDFieldName + ') ' +
+    'WHERE ' +
+      '(t1.' + DateField + ' = :DateValue) AND (t1.' + NumField + ' = :NumValue) ' +
+    'ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName'
+  );
+  QParamDT('DateValue', ALetterDate);
+  QParamStr('NumValue', ALetterNum);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+      VAppend(ALogIDs, QFieldInt('LogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+
+procedure TSQLite.MotorsEmptyPretensionLetterLoad(const ALetterType: Byte;
+                                  const AMotorNumLike: String;
+                                  const ABusyPretensionIDs: TIntVector;
+                                  const AUserID: Integer;
+                                  out APretensionIDs: TIntVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector;
+                                  out AMoneyValues: TInt64Vector;
+                                  out AMotorNames, AMotorNums: TStrMatrix;
+                                  out AMotorDates: TDateMatrix);
+var
+  S, DateField, NumField: String;
+  OldID, NewID, n: Integer;
+begin
+  LetterDBNamesGet(ALetterType, S, DateField, NumField);
+  DateField:= SqlEsc(DateField);
+  NumField:= SqlEsc(NumField);
+
+  APretensionIDs:= nil;
+
+  S:=
+    'SELECT DISTINCT ' +
+      't1.PretensionID ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'WHERE ' +
+      '(t4.UserID = :UserID) AND ' +
+      '((t4.'+DateField+' IS NULL) AND (t4.'+NumField+' IS NULL)) ';
+
+  if ALetterType = 12 then
+    S:= S + ' AND (t4.NoticeToBuilderNum IS NOT NULL) ' //DateField может NULL, если NumField=NOT_NEED_MARK
+  else if ALetterType = 13 then
+    S:= S + ' AND (t4.AnswerFromBuilderNum IS NOT NULL) '; //DateField может NULL, если NumField=NOT_NEED_MARK
+
+  if not VIsNil(ABusyPretensionIDs) then
+    S:= S + 'AND' + SqlNOTIN('t1','PretensionID', Length(ABusyPretensionIDs));
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
+
+   QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamInt('UserID', AUserID);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  if not VIsNil(ABusyPretensionIDs) then QParamsInt(ABusyPretensionIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(APretensionIDs, QFieldInt('PretensionID'));
+      QNext;
+    end;
+  end;
+  QClose;
+
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  ANoticeNums:= nil;
+  ANoticeDates:= nil;
+  AMoneyValues:= nil;
+
+  if VIsNil(APretensionIDs) then Exit;
+
+  S:=
+    'SELECT ' +
+      't1.PretensionID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, t4.MoneyValue ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'WHERE ' +
+      SqlIN('t1','PretensionID', Length(APretensionIDs)) +
+    'ORDER BY ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, t2.MotorNum, t2.MotorDate, t3.MotorName ';
+
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamsInt(APretensionIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    OldID:= 0;
+    while not QEOF do
+    begin
+      NewID:= QFieldInt('PretensionID');
+      if NewID<>OldID then
+      begin
+        VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+        VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+        VAppend(AMoneyValues, QFieldInt64('MoneyValue'));
+        MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
+        MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
+        MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
+        OldID:= NewID;
+      end
+      else begin
+        n:= High(AMotorNames);
+        VAppend(AMotorNames[n], QFieldStr('MotorName'));
+        VAppend(AMotorNums[n], QFieldStr('MotorNum'));
+        VAppend(AMotorDates[n], QFieldDT('MotorDate'));
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.MotorsInPretensionLetterLoad(const ALetterType: Byte;
+                                  const ALetterNum: String;
+                                  const ALetterDate: TDate;
+                                  out APretensionIDs: TIntVector;
+                                  out ANoticeNums: TStrVector;
+                                  out ANoticeDates: TDateVector;
+                                  out AMoneyValues: TInt64Vector;
+                                  out AMotorNames, AMotorNums: TStrMatrix;
+                                  out AMotorDates: TDateMatrix);
+var
+  S, DateField, NumField: String;
+  OldID, NewID, n: Integer;
+begin
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  APretensionIDs:= nil;
+  ANoticeNums:= nil;
+  ANoticeDates:= nil;
+  AMoneyValues:= nil;
+
+  LetterDBNamesGet(ALetterType, S, DateField, NumField);
+  DateField:= SqlEsc(DateField);
+  NumField:= SqlEsc(NumField);
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't1.PretensionID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, t4.MoneyValue ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'WHERE ' +
+      '(t4.'+DateField+' = :DateValue) AND (t4.'+NumField+' = :NumValue) ' +
+    'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum, t2.MotorNum, t2.MotorDate, t3.MotorName '
+  );
+  QParamDT('DateValue', ALetterDate);
+  QParamStr('NumValue', ALetterNum);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    OldID:= 0;
+    while not QEOF do
+    begin
+      NewID:= QFieldInt('PretensionID');
+      if NewID<>OldID then
+      begin
+        VAppend(APretensionIDs, NewID);
+        VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+        VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+        VAppend(AMoneyValues, QFieldInt64('MoneyValue'));
+        MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
+        MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
+        MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
+        OldID:= NewID;
+      end
+      else begin
+        n:= High(APretensionIDs);
+        VAppend(AMotorNames[n], QFieldStr('MotorName'));
+        VAppend(AMotorNums[n], QFieldStr('MotorNum'));
+        VAppend(AMotorDates[n], QFieldDT('MotorDate'));
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.ReclamationInfoLoad(const AReclamationID: Integer;
+                                  out AUserID, ALocationID: Integer;
+                                  out ANoticeNum: String;
+                                  out ANoticeDate: TDate);
 begin
   AUserID:= 0;
   ALocationID:= 0;
+  ANoticeNum:= EmptyStr;
+  ANoticeDate:= 0;
+  if AReclamationID<=0 then Exit;
 
+  QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'UserID, LocationID ' +
+      'UserID, LocationID, NoticeFromUserDate, NoticeFromUserNum ' +
     'FROM ' +
-      'LOGRECLAMATION ' +
+      'RECLAMATIONS ' +
     'WHERE ' +
-      'LogID = :LogID'
+      'ReclamationID = :ReclamationID'
   );
-  QParamInt('LogID', ALogID);
+  QParamInt('ReclamationID', AReclamationID);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
     AUserID:= QFieldInt('UserID');
     ALocationID:= QFieldInt('LocationID');
+    ANoticeNum:= QFieldStr('NoticeFromUserNum');
+    ANoticeDate:= QFieldDT('NoticeFromUserDate');
   end;
   QClose;
 end;
 
-procedure TSQLite.ReclamationNoticeUpdate(const ALogIDs: TIntVector;
-                                      const AUserID, ALocationID, AMileage: Integer;
-                                      const ANoticeNum: String;
-                                      const ANoticeDate: TDate);
-var
-  i: Integer;
+procedure TSQLite.ReclamationMotorsLoad(const AReclamationID: Integer;
+                                  out AMotorIDs: TIntVector;
+                                  out AMotorNames, AMotorNums: TStrVector;
+                                  out AMotorDates: TDateVector);
 begin
+  AMotorIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  if AReclamationID<=0 then Exit;
+
   QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'UserID = :UserID, LocationID = :LocationID, Mileage = :Mileage, Status = 1, ' +  {1 - расследование}
-        'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LocationID', ALocationID);
-    QParamInt('UserID', AUserID);
-    QParamInt('Mileage', AMileage);
-    QParamStr('NoticeNum', ANoticeNum);
-    QParamDT('NoticeDate', ANoticeDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-    QCommit;
-  except
-    QRollback;
-  end;
-end;
-
-function TSQLite.ReclamationStatusLoad(const ALogID: Integer): Integer;
-begin
-  Result:= ValueInt32Int32ID('LOGRECLAMATION', 'Status', 'LogID', ALogID);
-end;
-
-procedure TSQLite.ReclamationNoticeDelete(const ALogID: Integer);
-begin
-  QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGRECLAMATION ' +
-      'SET ' +
-        'UserID = 0, LocationID = 0, Mileage = -1, Status = 0, ' +
-        'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QExec;
-    QCommit;
-  except
-    QRollback;
-  end;
-end;
-
-procedure TSQLite.RepairInfoLoad(const ALogID: Integer; out AUserID: Integer);
-begin
-  AUserID:= 0;
-
   QSetSQL(
     'SELECT ' +
-      'UserID ' +
+      't1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName ' +
     'FROM ' +
-      'LOGREPAIR ' +
+      'RECLAMATIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
     'WHERE ' +
-      'LogID = :LogID'
+      't1.ReclamationID = :ReclamationID ' +
+    'ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName'
   );
-  QParamInt('LogID', ALogID);
+  QParamInt('ReclamationID', AReclamationID);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
-    AUserID:= QFieldInt('UserID');
+    while not QEOF do
+    begin
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      QNext;
+    end;
   end;
   QClose;
 end;
 
-procedure TSQLite.RepairNoticeUpdate(const ALogIDs: TIntVector;
-                                  const AUserID: Integer;
-                                  const ANoticeNum: String;
-                                  const ANoticeDate: TDate);
+function TSQLite.ReclamationMaxID: Integer;
+begin
+  Result:= MaxInt32ID('RECLAMATIONS');
+end;
+
+procedure TSQLite.ReclamationNoticeUpdate(const AReclamationID: Integer;
+                                      const AUserID, ALocationID: Integer;
+                                      const ANoticeNum: String;
+                                      const ANoticeDate: TDate;
+                                      const AAddMotorIDs, ADelMotorIDs: TIntVector);
 var
   i: Integer;
 begin
@@ -599,19 +1367,167 @@ begin
   try
     QSetSQL(
       'UPDATE ' +
-        'LOGREPAIR ' +
+        'RECLAMATIONS ' +
       'SET ' +
-        'UserID = :UserID, Status = 1, ' +   {1 - согласование}
-        'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
+        'UserID = :UserID, LocationID = :LocationID, ' +
+        'NoticeFromUserDate = :NoticeFromUserDate, NoticeFromUserNum = :NoticeFromUserNum ' +
       'WHERE ' +
-        'LogID = :LogID'
+        'ReclamationID = :ReclamationID'
     );
+    QParamInt('ReclamationID', AReclamationID);
+    QParamInt('LocationID', ALocationID);
     QParamInt('UserID', AUserID);
-    QParamStr('NoticeNum', ANoticeNum);
-    QParamDT('NoticeDate', ANoticeDate);
-    for i:= 0 to High(ALogIDs) do
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
+    QExec;
+
+    if not VIsNil(AAddMotorIDs) then
     begin
-      QParamInt('LogID', ALogIDs[i]);
+      QSetSQL(
+        'INSERT INTO ' +
+          'RECLAMATIONMOTORS ' +
+          '(ReclamationID, MotorID, Status) ' +
+        'VALUES ' +
+          '(:ReclamationID, :MotorID, 1) '
+      );
+      QParamInt('ReclamationID', AReclamationID);
+      for i:= 0 to High(AAddMotorIDs) do
+      begin
+        QParamInt('MotorID', AAddMotorIDs[i]);
+        QExec;
+      end;
+    end;
+
+    if not VIsNil(ADelMotorIDs) then
+    begin
+      QSetSQL(
+        'DELETE FROM ' +
+          'RECLAMATIONMOTORS ' +
+        'WHERE ' +
+          '(ReclamationID = :ReclamationID) AND ' + SqlIN('','MotorID', Length(ADelMotorIDs))
+      );
+      QParamInt('ReclamationID', AReclamationID);
+      QParamsInt(ADelMotorIDs);
+      QExec;
+    end;
+
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.ReclamationAnswerToUserDelete(const ALogID: Integer);
+begin
+  LettersUpdate(VCreateInt([ALogID]), nil, 3 {ответ на рекл}, EmptyStr, 0, 1{в работе});
+end;
+
+function TSQLite.ReclamationStatusLoad(const ALogID: Integer): Integer;
+begin
+  Result:= ValueInt32Int32ID('RECLAMATIONMOTORS', 'Status', 'LogID', ALogID);
+end;
+
+function TSQLite.ReclamationLocationIDLoad(const AReclamationID: Integer): Integer;
+begin
+  Result:= ValueInt32Int32ID('RECLAMATIONS', 'LocationID', 'ReclamationID', AReclamationID);
+end;
+
+procedure TSQLite.ReclamationNoticeDelete(const AReclamationID: Integer);
+var
+  i, j: Integer;
+  RepairIDs, PretensionIDs: TIntVector;
+
+  function GetIDs(const ATableName, AIDFieldName: String): TIntVector;
+  begin
+    Result:= nil;
+    QSetQuery(FQuery);
+    QSetSQL(
+      'SELECT DISTINCT ' +
+        't1.' + SqlEsc(AIDFieldName) +
+      'FROM ' +
+        SqlEsc(ATableName) + ' t1 ' +
+      'INNER JOIN RECLAMATIONMOTORS t2 ON (t1.RecLogID=t2.LogID) ' +
+      'WHERE ' +
+        't2.ReclamationID = :ReclamationID '
+    );
+    QParamInt('ReclamationID', AReclamationID);
+    QOpen;
+    if not QIsEmpty then
+    begin
+      QFirst;
+      while not QEOF do
+      begin
+        VAppend(Result, QFieldInt(AIDFieldName));
+        QNext;
+      end;
+    end;
+    QClose;
+  end;
+
+begin
+  //получаем список RepairID из REPAIRMOTORS с этими ReclamationID
+  RepairIDs:= GetIDs('REPAIRMOTORS', 'RepairID');
+  //получаем список PretensionID из PRETENSIONMOTORS с этими ReclamationID
+  PretensionIDs:= GetIDs('PRETENSIONMOTORS', 'PretensionID');
+  try
+    //удаляем данные по рекламации
+    Delete('RECLAMATIONS', 'ReclamationID', AReclamationID, False {no commit});
+    //удаляем оставшиеся пустыми записи из REPAIRS
+    for i:= 0 to High(RepairIDs) do
+    begin
+      j:= ValueInt32Int32ID('REPAIRMOTORS', 'LogID', 'RepairID', RepairIDs[i]);
+      if j=0 then
+        Delete('REPAIRS', 'RepairID', RepairIDs[i], False {no commit});
+    end;
+    //удаляем оставшиеся пустыми записи из PRETENSIONS
+    for i:= 0 to High(PretensionIDs) do
+    begin
+      j:= ValueInt32Int32ID('PRETENSIONMOTORS', 'LogID', 'PretensionID', PretensionIDs[i]);
+      if j=0 then
+        Delete('PRETENSIONS', 'PretensionID', PretensionIDs[i], False {no commit});
+    end;
+
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.ReclamationNoticeAdd(const AMotorIDs: TIntVector;
+                                      const AUserID, ALocationID: Integer;
+                                      const ANoticeNum: String;
+                                      const ANoticeDate: TDate);
+var
+  i, ReclamationID: Integer;
+begin
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'INSERT INTO ' +
+        'RECLAMATIONS ' +
+        '(UserID, LocationID, NoticeFromUserDate, NoticeFromUserNum) ' +
+      'VALUES ' +
+        '(:UserID, :LocationID, :NoticeFromUserDate, :NoticeFromUserNum) '
+    );
+    QParamInt('LocationID', ALocationID);
+    QParamInt('UserID', AUserID);
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
+    QExec;
+    ReclamationID:= ReclamationMaxID;
+
+    QSetQuery(FQuery);
+    QSetSQL(
+      'INSERT INTO ' +
+        'RECLAMATIONMOTORS ' +
+        '(ReclamationID, MotorID, Status) ' +
+      'VALUES ' +
+        '(:ReclamationID, :MotorID, 1) '
+    );
+    QParamInt('ReclamationID', ReclamationID);
+    for i:= 0 to High(AMotorIDs) do
+    begin
+      QParamInt('MotorID', AMotorIDs[i]);
       QExec;
     end;
     QCommit;
@@ -620,25 +1536,75 @@ begin
   end;
 end;
 
-procedure TSQLite.RepairNoticeDelete(const ALogID: Integer);
+procedure TSQLite.RepairNoticeDelete(const ARepairID: Integer);
+begin
+  Delete('REPAIRS', 'RepairID', ARepairID);
+end;
+
+procedure TSQLite.RepairNoticeUpdate(const ARepairID: Integer;
+                                      const AUserID: Integer;
+                                      const ANoticeNum: String;
+                                      const ANoticeDate: TDate;
+                                      const AAddRecLogIDs, AAddMotorIDs, ADelRecLogIDs: TIntVector);
+var
+  i: Integer;
 begin
   QSetQuery(FQuery);
   try
     QSetSQL(
       'UPDATE ' +
-        'LOGREPAIR ' +
+        'REPAIRS ' +
       'SET ' +
-        'UserID = 0, Status = 0, ' +  {0 - не указано}
-        'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
+        'UserID = :UserID, ' +
+        'NoticeFromUserDate = :NoticeFromUserDate, NoticeFromUserNum = :NoticeFromUserNum ' +
       'WHERE ' +
-        'LogID = :LogID'
+        'RepairID = :RepairID'
     );
-    QParamInt('LogID', ALogID);
+    QParamInt('RepairID', ARepairID);
+    QParamInt('UserID', AUserID);
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
     QExec;
+
+    if not VIsNil(AAddRecLogIDs) then
+    begin
+      QSetSQL(
+        'INSERT INTO ' +
+          'REPAIRMOTORS ' +
+          '(RepairID, MotorID, RecLogID, Status) ' +
+        'VALUES ' +
+          '(:RepairID, :MotorID, :RecLogID, 1) '
+      );
+      QParamInt('RepairID', ARepairID);
+      for i:= 0 to High(AAddRecLogIDs) do
+      begin
+        QParamInt('RecLogID', AAddRecLogIDs[i]);
+        QParamInt('MotorID', AAddMotorIDs[i]);
+        QExec;
+      end;
+    end;
+
+    if not VIsNil(ADelRecLogIDs) then
+    begin
+      QSetSQL(
+        'DELETE FROM ' +
+          'REPAIRMOTORS ' +
+        'WHERE ' +
+          '(RepairID = :RepairID) AND ' + SqlIN('','RecLogID', Length(ADelRecLogIDs))
+      );
+      QParamInt('RepairID', ARepairID);
+      QParamsInt(ADelRecLogIDs);
+      QExec;
+    end;
     QCommit;
   except
     QRollback;
   end;
+end;
+
+procedure TSQLite.RepairAnswerToUserDelete(const ALogID: Integer);
+begin
+  LettersUpdate(VCreateInt([ALogID]), nil, 9 {ответ за запр ремонта}, EmptyStr, 0, 1{в работе});
 end;
 
 procedure TSQLite.RepairDatesLoad(const ALogID: Integer;  out ABeginDate, AEndDate: TDate);
@@ -650,7 +1616,7 @@ begin
     'SELECT ' +
       'BeginDate, EndDate ' +
     'FROM ' +
-      'LOGREPAIR ' +
+      'REPAIRMOTORS ' +
     'WHERE ' +
         'LogID = :LogID'
   );
@@ -671,7 +1637,7 @@ begin
   try
     QSetSQL(
       'UPDATE ' +
-        'LOGREPAIR ' +
+        'REPAIRMOTORS ' +
       'SET ' +
         'Status = :Status, ' +
         'BeginDate = :BeginDate, ' +
@@ -688,127 +1654,140 @@ begin
   except
     QRollback;
   end;
-
-
-  //S:=
-  //  'UPDATE ' +
-  //    'LOGREPAIR ' +
-  //  'SET ' +
-  //    'Status = :Status, ';
-  //if ABeginDate = 0 then
-  //  S:= S + 'BeginDate = NULL, '
-  //else
-  //  S:= S + 'BeginDate = :BeginDate, ';
-  //if AEndDate = 0 then
-  //  S:= S + 'EndDate = NULL '
-  //else
-  //  S:= S + 'EndDate = :EndDate ';
-  //S:= S +
-  //  'WHERE ' +
-  //      'LogID = :LogID';
-  //
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(S);
-  //  QParamInt('LogID', ALogID);
-  //  QParamInt('Status', AStatus);
-  //  if ABeginDate>0 then
-  //    QParamDT('BeginDate', ABeginDate);
-  //  if AEndDate>0 then
-  //    QParamDT('EndDate', AEndDate);
-  //  QExec;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
 end;
 
 procedure TSQLite.RepairDatesDelete(const ALogID: Integer);
-var
-  UserID, Status: Integer;
 begin
-  RepairInfoLoad(ALogID, UserID);
-  Status:= 2*Ord(UserID>0); {если задан потребитель, то 2 - согласовано, если не задан - то 0 - не указано}
-  RepairDatesUpdate(ALogID, Status, 0, 0);
+  RepairDatesUpdate(ALogID, 2 {согласовано}, 0, 0);
 end;
 
 function TSQLite.RepairStatusLoad(const ALogID: Integer): Integer;
 begin
-  Result:= ValueInt32Int32ID('LOGREPAIR', 'Status', 'LogID', ALogID);
+  Result:= ValueInt32Int32ID('REPAIRMOTORS', 'Status', 'LogID', ALogID);
 end;
 
-procedure TSQLite.PretensionInfoLoad(const ALogID: Integer;
-                   out AUserID: Integer; out AMoneyValue: Int64);
+procedure TSQLite.PretensionInfoLoad(const APretensionID: Integer;
+                                 out AUserID: Integer;
+                                 out AMoneyValue: Int64;
+                                 out ANoticeNum: String;
+                                 out ANoticeDate: TDate);
 begin
   AUserID:= 0;
   AMoneyValue:= 0;
+  ANoticeNum:= EmptyStr;
+  ANoticeDate:= 0;
+  if APretensionID<=0 then Exit;
 
+  QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'UserID, MoneyValue ' +
+      'UserID, MoneyValue, NoticeFromUserDate, NoticeFromUserNum ' +
     'FROM ' +
-      'LOGPRETENSION ' +
+      'PRETENSIONS ' +
     'WHERE ' +
-      'LogID = :LogID'
+      'PretensionID = :PretensionID'
   );
-  QParamInt('LogID', ALogID);
+  QParamInt('PretensionID', APretensionID);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
     AUserID:= QFieldInt('UserID');
     AMoneyValue:= QFieldInt64('MoneyValue');
+    ANoticeNum:= QFieldStr('NoticeFromUserNum');
+    ANoticeDate:= QFieldDT('NoticeFromUserDate');
   end;
   QClose;
 end;
 
-procedure TSQLite.PretensionNoticeDelete(const ALogID: Integer);
+procedure TSQLite.PretensionMotorsLoad(const APretensionID: Integer;
+                               out ARecLogIDs, AMotorIDs: TIntVector;
+                               out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                               out ARecNoticeDates, AMotorDates: TDateVector);
 begin
+  ARecLogIDs:= nil;
+  AMotorIDs:= nil;
+  ARecNoticeNums:= nil;
+  ARecNoticeDates:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  if APretensionID<=0 then Exit;
+
   QSetQuery(FQuery);
-  try
-    QSetSQL(
-      'UPDATE ' +
-        'LOGPRETENSION ' +
-      'SET ' +
-        'UserID = 0, MoneyValue = NULL, Status = 0, ' +  {0 - не указано}
-        'NoticeFromUserDate = NULL, NoticeFromUserNum = NULL ' +
-      'WHERE ' +
-        'LogID = :LogID'
-    );
-    QParamInt('LogID', ALogID);
-    QExec;
-    QCommit;
-  except
-    QRollback;
+  QSetSQL(
+    'SELECT ' +
+      't1.RecLogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't5.NoticeFromUserDate, t5.NoticeFromUserNum ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN RECLAMATIONMOTORS t4 ON (t1.RecLogID=t4.LogID) ' +
+    'INNER JOIN RECLAMATIONS t5 ON (t4.ReclamationID=t5.ReclamationID) ' +
+    'WHERE ' +
+      't1.PretensionID = :PretensionID ' +
+    'ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName'
+  );
+  QParamInt('PretensionID', APretensionID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ARecLogIDs, QFieldInt('RecLogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      VAppend(ARecNoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ARecNoticeDates, QFieldDT('NoticeFromUserDate'));
+      QNext;
+    end;
   end;
+  QClose;
 end;
 
-procedure TSQLite.PretensionNoticeUpdate(const ALogIDs: TIntVector;
-                                      const AUserID: Integer;
-                                      const AMoneyValue: Int64;
-                                      const ANoticeNum: String;
-                                      const ANoticeDate: TDate);
+procedure TSQLite.PretensionNoticeAdd(const ARecLogIDs, AMotorIDs: TIntVector;
+                              const AUserID: Integer;
+                              const AMoneyValue: Int64;
+                              const ANoticeNum: String;
+                              const ANoticeDate: TDate);
 var
-  i: Integer;
+  i, PretensionID: Integer;
 begin
   QSetQuery(FQuery);
   try
     QSetSQL(
-      'UPDATE ' +
-        'LOGPRETENSION ' +
-      'SET ' +
-        'UserID = :UserID, MoneyValue = :MoneyValue, Status = 1, ' +   {1 - в работе}
-        'NoticeFromUserDate = :NoticeDate, NoticeFromUserNum = :NoticeNum ' +
-      'WHERE ' +
-        'LogID = :LogID'
+      'INSERT INTO ' +
+        'PRETENSIONS ' +
+        '(UserID, MoneyValue, Status, ' +
+        'NoticeFromUserDate, NoticeFromUserNum) ' +
+      'VALUES ' +
+        '(:UserID, :MoneyValue, 1, ' +  {1 - согласование}
+        ':NoticeFromUserDate, :NoticeFromUserNum) '
     );
-    QParamInt64('MoneyValue', AMoneyValue);
     QParamInt('UserID', AUserID);
-    QParamStr('NoticeNum', ANoticeNum);
-    QParamDT('NoticeDate', ANoticeDate);
-    for i:= 0 to High(ALogIDs) do
+    QParamInt64('MoneyValue', AMoneyValue);
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
+    QExec;
+    PretensionID:= PretensionMaxID;
+
+    QSetQuery(FQuery);
+    QSetSQL(
+      'INSERT INTO ' +
+        'PRETENSIONMOTORS ' +
+        '(PretensionID, MotorID, RecLogID) ' +
+      'VALUES ' +
+        '(:PretensionID, :MotorID, :RecLogID) '
+    );
+    QParamInt('PretensionID', PretensionID);
+    for i:= 0 to High(AMotorIDs) do
     begin
-      QParamInt('LogID', ALogIDs[i]);
+      QParamInt('RecLogID', ARecLogIDs[i]);
+      QParamInt('MotorID', AMotorIDs[i]);
       QExec;
     end;
     QCommit;
@@ -817,47 +1796,115 @@ begin
   end;
 end;
 
-procedure TSQLite.PretensionMoneyLoad(const ALogID: Integer; out AStatus: Integer;
-                                         out AMoneySendValue: Int64; out AMoneySendDate: TDate;
-                                         out AMoneyGetValue: Int64; out AMoneyGetDate: TDate);
+procedure TSQLite.PretensionNoticeDelete(const APretensionID: Integer);
 begin
-  AMoneySendValue:= 0;
-  AMoneySendDate:= 0;
-  AMoneyGetValue:= 0;
-  AMoneyGetDate:= 0;
-  AStatus:= 0;
+  Delete('PRETENSIONS', 'PretensionID', APretensionID);
+end;
+
+procedure TSQLite.PretensionNoticeUpdate(const APretensionID: Integer;
+                                      const AUserID: Integer;
+                                      const AMoneyValue: Int64;
+                                      const ANoticeNum: String;
+                                      const ANoticeDate: TDate;
+                                      const AAddRecLogIDs, AAddMotorIDs, ADelRecLogIDs: TIntVector);
+var
+  i: Integer;
+begin
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'UPDATE ' +
+        'PRETENSIONS ' +
+      'SET ' +
+        'UserID = :UserID, MoneyValue = :MoneyValue, ' +
+        'NoticeFromUserDate = :NoticeFromUserDate, NoticeFromUserNum = :NoticeFromUserNum ' +
+      'WHERE ' +
+        'PretensionID = :PretensionID'
+    );
+    QParamInt('PretensionID', APretensionID);
+    QParamInt('UserID', AUserID);
+    QParamInt64('MoneyValue', AMoneyValue);
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
+    QExec;
+
+    if not VIsNil(AAddRecLogIDs) then
+    begin
+      QSetSQL(
+        'INSERT INTO ' +
+          'PRETENSIONMOTORS ' +
+          '(PretensionID, MotorID, RecLogID) ' +
+        'VALUES ' +
+          '(:PretensionID, :MotorID, :RecLogID) '
+      );
+      QParamInt('PretensionID', APretensionID);
+      for i:= 0 to High(AAddRecLogIDs) do
+      begin
+        QParamInt('RecLogID', AAddRecLogIDs[i]);
+        QParamInt('MotorID', AAddMotorIDs[i]);
+        QExec;
+      end;
+    end;
+
+    if not VIsNil(ADelRecLogIDs) then
+    begin
+      QSetSQL(
+        'DELETE FROM ' +
+          'PRETENSIONMOTORS ' +
+        'WHERE ' +
+          '(PretensionID = :PretensionID) AND ' + SqlIN('','RecLogID', Length(ADelRecLogIDs))
+      );
+      QParamInt('PretensionID', APretensionID);
+      QParamsInt(ADelRecLogIDs);
+      QExec;
+    end;
+
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.PretensionMoneyDatesLoad(const APretensionID: Integer;
+                                     out ASendValue, AGetValue: Int64;
+                                     out ASendDate, AGetDate: TDate);
+begin
+  ASendValue:= 0;
+  ASendDate:= 0;
+  AGetValue:= 0;
+  AGetDate:= 0;
+
   QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'MoneySendDate, MoneySendValue, MoneyGetDate, MoneyGetValue, Status ' +
+      'MoneySendDate, MoneySendValue, MoneyGetDate, MoneyGetValue ' +
     'FROM ' +
-      'LOGPRETENSION ' +
+      'PRETENSIONS ' +
     'WHERE ' +
-        'LogID = :LogID'
+        'PretensionID = :PretensionID'
   );
-  QParamInt('LogID', ALogID);
+  QParamInt('PretensionID', APretensionID);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
-    AStatus:= QFieldInt('Status');
-    AMoneySendDate:= QFieldDT('MoneySendDate');
-    AMoneySendValue:= QFieldInt64('MoneySendValue');
-    AMoneyGetDate:= QFieldDT('MoneyGetDate');
-    AMoneyGetValue:= QFieldInt64('MoneyGetValue');
+    ASendDate:= QFieldDT('MoneySendDate');
+    ASendValue:= QFieldInt64('MoneySendValue');
+    AGetDate:= QFieldDT('MoneyGetDate');
+    AGetValue:= QFieldInt64('MoneyGetValue');
   end;
   QClose;
 end;
 
-procedure TSQLite.PretensionMoneyUpdate(const ALogID, AStatus: Integer;
-             const AMoneySendValue: Int64; const AMoneySendDate: TDate;
-             const AMoneyGetValue: Int64; const AMoneyGetDate: TDate);
+procedure TSQLite.PretensionMoneyDatesUpdate(const APretensionID, AStatus: Integer;
+                                   const ASendValue, AGetValue: Int64;
+                                   const ASendDate, AGetDate: TDate);
 var
   S: String;
 begin
   S:=
     'UPDATE ' +
-      'LOGPRETENSION ' +
+      'PRETENSIONS ' +
     'SET ' +
     'MoneySendDate  = :MoneySendDate, ' +
     'MoneySendValue = :MoneySendValue, ' +
@@ -868,189 +1915,175 @@ begin
       ', Status = :Status ';
   S:= S +
     'WHERE ' +
-        'LogID = :LogID';
+        'PretensionID = :PretensionID';
 
   QSetQuery(FQuery);
   try
     QSetSQL(S);
-    QParamInt('LogID', ALogID);
-    QParamDT('MoneySendDate', AMoneySendDate, AMoneySendDate>0);
-    QParamInt64('MoneySendValue', AMoneySendValue, AMoneySendValue>0);
-    QParamDT('MoneyGetDate', AMoneyGetDate, AMoneyGetDate>0);
-    QParamInt64('MoneyGetValue', AMoneyGetValue, AMoneyGetValue>0);
-    if AStatus>0 then
-      QParamInt('Status', AStatus);
+    QParamInt('PretensionID', APretensionID);
+    QParamDT('MoneySendDate', ASendDate, ASendDate>0);
+    QParamInt64('MoneySendValue', ASendValue, ASendValue>0);
+    QParamDT('MoneyGetDate', AGetDate, AGetDate>0);
+    QParamInt64('MoneyGetValue', AGetValue, AGetValue>0);
+    QParamInt('Status', AStatus);
     QExec;
     QCommit;
   except
     QRollback;
   end;
-  //S:=
-  //  'UPDATE ' +
-  //    'LOGPRETENSION ' +
-  //  'SET ';
-  //if AStatus>0 then
-  //  S:= S +
-  //    'Status = :Status, ';
-  //
-  //if AMoneySendDate = 0 then
-  //  S:= S + 'MoneySendDate = NULL, '
-  //else
-  //  S:= S + 'MoneySendDate = :MoneySendDate, ';
-  //if AMoneySendValue = 0 then
-  //  S:= S + 'MoneySendValue = NULL, '
-  //else
-  //  S:= S + 'MoneySendValue = :MoneySendValue, ';
-  //
-  //if AMoneyGetDate = 0 then
-  //  S:= S + 'MoneyGetDate = NULL, '
-  //else
-  //  S:= S + 'MoneyGetDate = :MoneyGetDate, ';
-  //if AMoneyGetValue = 0 then
-  //  S:= S + 'MoneyGetValue = NULL '
-  //else
-  //  S:= S + 'MoneyGetValue = :MoneyGetValue ';
-  //
-  //S:= S +
-  //  'WHERE ' +
-  //      'LogID = :LogID';
-  //
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(S);
-  //  QParamInt('LogID', ALogID);
-  //  if AStatus>0 then
-  //    QParamInt('Status', AStatus);
-  //  if AMoneySendDate>0 then
-  //    QParamDT('MoneySendDate', AMoneySendDate);
-  //  if AMoneySendValue > 0 then
-  //    QParamInt64('MoneySendValue', AMoneySendValue);
-  //  if AMoneyGetDate>0 then
-  //    QParamDT('MoneyGetDate', AMoneyGetDate);
-  //  if AMoneyGetValue > 0 then
-  //    QParamInt64('MoneyGetValue', AMoneyGetValue);
-  //  QExec;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
 end;
 
-procedure TSQLite.PretensionMoneyDelete(const ALogID: Integer);
-var
-  UserID, Status: Integer;
-  MoneyValue: Int64;
+procedure TSQLite.PretensionMoneyDatesDelete(const APretensionID: Integer);
 begin
-  PretensionInfoLoad(ALogID, UserID, MoneyValue);
-  Status:= Ord(UserID>0);
-  PretensionMoneyUpdate(ALogID, Status, 0, 0, 0, 0);
+  PretensionMoneyDatesUpdate(APretensionID, 2{согласовано}, 0, 0, 0, 0);
 end;
 
-function TSQLite.PretensionStatusLoad(const ALogID: Integer): Integer;
+function TSQLite.PretensionStatusByLogIDLoad(const ALogID: Integer): Integer;
 begin
-  Result:= ValueInt32Int32ID('LOGPRETENSION', 'Status', 'LogID', ALogID);
-end;
-
-procedure TSQLite.MotorsWithoutNoticeLoad(const AThisLogID: Integer;
-                                      const ALetterType: Byte;
-                                      const ANeedOtherMotors: Boolean;
-                                      out ALogIDs: TIntVector;
-                                      out AMotorNames, AMotorNums: TStrVector;
-                                      out AMotorDates: TDateVector);
-var
-  S, TableName: String;
-  FieldDate, FieldNum: String;
-  MotorNameID: Integer;
-  MotorName, MotorNum, LetterNum: String;
-  MotorDate, LetterDate: TDate;
-  IsNoticeNotEmpty: Boolean;
-begin
-  ALogIDs:= nil;
-  AMotorNames:= nil;
-  AMotorNums:= nil;
-  AMotorDates:= nil;
-
-  MotorLoad(AThisLogID, MotorNameID, MotorName, MotorNum, MotorDate);
-  VAppend(ALogIDs, AThisLogID);
-  VAppend(AMotorNames, MotorName);
-  VAppend(AMotorNums, MotorNum);
-  VAppend(AMotorDates, MotorDate);
-
-  if not ANeedOtherMotors then Exit;
-
-  LetterDBNamesGet(ALetterType, TableName, FieldDate, FieldNum);
-  FieldDate:= SqlEsc(FieldDate);
-  FieldNum:= SqlEsc(FieldNum);
-
-  LetterLoad(AThisLogID, ALetterType, LetterNum, LetterDate);
-
-  IsNoticeNotEmpty:= not IsDocumentEmpty(LetterDate, LetterNum);
-
-  S:= 'SELECT ' +
-      't1.LogID, t1.MotorNum, t1.MotorDate, t2.MotorName, ' +
-      't3.' + FieldDate + ', t3.' + FieldNum +
-    'FROM LOGMOTORS t1 ' +
-    'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ' +
-    'INNER JOIN '+ SqlEsc(TableName) + ' t3 ON (t1.LogID=t3.LogID) ' +
-    'WHERE ' +
-        '(t1.LogID>0) AND (t1.LogID <> :LogID) ';
-  if IsNoticeNotEmpty then
-    S:= S + 'AND (' +
-        '((t3.' + FieldDate + ' = :DateValue) AND (t3.' + FieldNum  + ' = :NumValue)) ' +
-        ' OR ' +
-        '((t3.' + FieldDate + ' IS NULL) AND (t3.' + FieldNum  + ' IS NULL))' +
-        ')'
-  else
-    S:= S + ' AND ((t3.' + FieldDate + ' IS NULL) AND (t3.' + FieldNum  + ' IS NULL))';
+  Result:= 0;
 
   QSetQuery(FQuery);
-  QSetSQL(S);
-  QParamInt('LogID', AThisLogID);
-  if IsNoticeNotEmpty then
-  begin
-    QParamDT('DateValue', LetterDate);
-    QParamStr('NumValue', LetterNum);
-  end;
+  QSetSQL(
+    'SELECT ' +
+      't2.Status ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+      'INNER JOIN PRETENSIONS t2 ON (t1.PretensionID=t2.PretensionID) ' +
+    'WHERE ' +
+      't1.LogID = :LogID '
+  );
+  QParamInt('LogID', ALogID);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
-    while not QEOF do
-    begin
-      VAppend(ALogIDs, QFieldInt('LogID'));
-      VAppend(AMotorNames, QFieldStr('MotorName'));
-      VAppend(AMotorNums, QFieldStr('MotorNum'));
-      VAppend(AMotorDates, QFieldDT('MotorDate'));
-      QNext;
-    end;
+    Result:= QFieldInt('Status');
   end;
   QClose;
 end;
 
-procedure TSQLite.MotorNoticeAnswerLoad(const ALogID, ALocationID, AUserID: Integer;
-                                    const ALetterType: Byte;
-                                    const AOldLetterNum: String;
-                                    const AOldLetterDate: TDate;
-                                    out ALogIDs: TIntVector;
-                                    out AMotorNames, AMotorNums: TStrVector;
-                                    out AMotorDates: TDateVector;
-                                    out ANoticeNums: TStrVector;
-                                    out ANoticeDates: TDateVector;
-                                    out AAnswerNums: TStrVector;
-                                    out AAnswerDates: TDateVector;
-                                    out ALocationTitles, AUserTitles: TStrVector;
-                                    out AMoneyValues: TInt64Vector);
-var
-  TableName: String;
-  ThisDateField, ThisNumField: String;
-  NoticeDateField, NoticeNumField: String;
-  AnswerDateField, AnswerNumField: String;
-  S: String;
-  NoticeLetterType, AnswerLetterType: Byte;
-  NeedAnswers, NeedLocation, NeedMoney: Boolean;
-  IsLetterNotEmpty: Boolean;
+function TSQLite.PretensionStatusLoad(const APretensionID: Integer): Integer;
 begin
-  ALogIDs:= nil;
+  Result:= ValueInt32Int32ID('PRETENSIONS', 'Status', 'PretensionID', APretensionID);
+end;
+
+procedure TSQLite.PretensionLetterLoad(const APretensionID: Integer;
+                                   const ALetterType: Byte;
+                                   out ALetterNum: String;
+                                   out ALetterDate: TDate);
+var
+  S, DateField, NumField: String;
+begin
+  ALetterNum:= EmptyStr;
+  ALetterDate:= 0;
+
+  LetterDBNamesGet(ALetterType, S, DateField, NumField);
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      SqlEsc(DateField) + ', ' + SqlEsc(NumField) + ' ' +
+    'FROM ' +
+      'PRETENSIONS ' +
+    'WHERE ' +
+        'PretensionID = :PretensionID'
+  );
+  QParamInt('PretensionID', APretensionID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    ALetterNum:= QFieldStr(NumField);
+    ALetterDate:= QFieldDT(DateField);
+  end;
+  QClose;
+end;
+
+procedure TSQLite.PretensionLetterCustomUpdate(const APretensionIDs: TIntVector;
+                                               const ALetterType: Byte;
+                                               const ALetterNum: String;
+                                               const ALetterDate: TDate;
+                                               const AStatus: Integer = -1);
+var
+  S, DateField, NumField: String;
+begin
+  if VIsNil(APretensionIDs) then Exit;
+
+  LetterDBNamesGet(ALetterType, S, DateField, NumField);
+  DateField:= SqlEsc(DateField);
+  NumField:= SqlEsc(NumField);
+
+  S:=
+    'UPDATE ' +
+      'PRETENSIONS ' +
+    'SET ' +
+      DateField + ' = :DateValue, '+ NumField+ ' = :NumValue ';
+  if AStatus>=0 then
+    S:= S +
+      ', Status = :Status ';
+  S:= S +
+    'WHERE ' +
+      SqlIN('','PretensionID', Length(APretensionIDs));
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamsInt(APretensionIDs);
+  QParamStr('NumValue', ALetterNum, not SEmpty(ALetterNum));
+  QParamDT('DateValue', ALetterDate, ALetterDate>0);
+  QParamInt('Status', AStatus);
+  QExec;
+end;
+
+procedure TSQLite.PretensionLetterDelete(const APretensionID: Integer; const ALetterType: Byte);
+begin
+  PretensionLetterUpdate(VCreateInt([APretensionID]), nil, ALetterType, EmptyStr, 0);
+end;
+
+procedure TSQLite.PretensionLetterNotNeed(const APretensionIDs, ADelPretensionIDs: TIntVector;
+                                               const ALetterType: Byte);
+begin
+  PretensionLetterUpdate(APretensionIDs, ADelPretensionIDs, ALetterType, LETTER_NOTNEED_MARK, 0);
+end;
+
+procedure TSQLite.PretensionLetterUpdate(const APretensionIDs, ADelPretensionIDs: TIntVector;
+                                     const ALetterType: Byte;
+                                     const ALetterNum: String;
+                                     const ALetterDate: TDate);
+var
+  S, DateField, NumField: String;
+begin
+  try
+    PretensionLetterCustomUpdate(APretensionIDs, ALetterType, ALetterNum, ALetterDate);
+    PretensionLetterCustomUpdate(ADelPretensionIDs, ALetterType, EmptyStr, 0);
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.PretensionAnswerToUserNotNeed(const APretensionIDs, ADelPretensionIDs: TIntVector; const AStatus: Integer);
+begin
+  PretensionAnswersToUserUpdate(APretensionIDs, ADelPretensionIDs, LETTER_NOTNEED_MARK, 0, AStatus);
+end;
+
+procedure TSQLite.PretensionAnswerToUserDelete(const APretensionID: Integer);
+begin
+  PretensionAnswersToUserUpdate(VCreateInt([APretensionID]), nil, EmptyStr, 0, 1);
+end;
+
+procedure TSQLite.NoticeAndAnswersLoad(const ALetterType: Byte;
+                            const ALogIDs: TIntVector;
+                            out AMotorNames, AMotorNums: TStrVector;
+                            out AMotorDates: TDateVector;
+                            out ANoticeNums: TStrVector;
+                            out ANoticeDates: TDateVector;
+                            out AAnswerNums: TStrVector;
+                            out AAnswerDates: TDateVector);
+var
+  S, LogNoticeTableName, LogMotorsTableName: String;
+  NoticeDateField, NoticeNumField, AnswerDateField, AnswerNumField, IDField: String;
+  Category, LetterType: Byte;
+  NeedAnswers: Boolean;
+begin
   AMotorNames:= nil;
   AMotorNums:= nil;
   AMotorDates:= nil;
@@ -1058,203 +2091,62 @@ begin
   ANoticeDates:= nil;
   AAnswerNums:= nil;
   AAnswerDates:= nil;
-  ALocationTitles:= nil;
-  AUserTitles:= nil;
-  AMoneyValues:= nil;
 
-  IsLetterNotEmpty:= not IsDocumentEmpty(AOldLetterDate, AOldLetterNum);
+  Category:= CategoryFromLetterType(ALetterType);
+  LogNoticeTableName:= SqlEsc(LogNoticeTableNameGet(Category));
+  IDField:= SqlEsc(LogNoticeIDFieldNameGet(Category));
 
-  NeedMoney:= ALetterType in [11,13];
-  NeedLocation:= ALocationID>0;
   NeedAnswers:= ALetterType in [3,9,13];
-  NoticeLetterType:= NoticeLetterTypeGet(ALetterType);
-  if NeedAnswers then {3,9,13 - ответы потребителю}
-    AnswerLetterType:= ALetterType - 1
-  else
-    AnswerLetterType:= 0; // 0 - ответы не нужны
 
+  LetterType:= NoticeLetterTypeGet(ALetterType);
+  LetterDBNamesGet(LetterType, LogMotorsTableName, NoticeDateField, NoticeNumField);
 
-  LetterDBNamesGet(ALetterType, TableName, ThisDateField, ThisNumField);
-  LetterDBNamesGet(NoticeLetterType, TableName, NoticeDateField, NoticeNumField);
   if NeedAnswers then
-    LetterDBNamesGet(AnswerLetterType, TableName, AnswerDateField, AnswerNumField);
+  begin
+    LetterType:= ALetterType-1;
+    LetterDBNamesGet(LetterType, LogMotorsTableName, AnswerDateField, AnswerNumField);
+  end;
+
+  LogMotorsTableName:= SqlEsc(LogMotorsTableName);
 
   S:=
     'SELECT ' +
-      't1.LogID, t1.MotorNum, t1.MotorDate, t2.MotorName, t4.UserTitle, ' +
-      't3.' + SqlEsc(NoticeDateField) + ', t3.' + SqlEsc(NoticeNumField);
+      't1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.' + SqlEsc(NoticeDateField) + ', t4.' + SqlEsc(NoticeNumField) + ' ';
   if NeedAnswers then
-    S:= S + ', ' +
-      't3.' + SqlEsc(AnswerDateField) + ', t3.' + SqlEsc(AnswerNumField);
-  if NeedMoney then
-    S:= S + ', ' +
-      't3.MoneyValue ';
-  if NeedLocation then
-    S:= S + ', ' +
-       't5.LocationTitle ';
-  S:= S +
-    'FROM LOGMOTORS t1 ' +
-    'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ' +
-    'INNER JOIN '+ SqlEsc(TableName) + ' t3 ON (t1.LogID=t3.LogID) ' +
-    'INNER JOIN USERS t4 ON (t3.UserID=t4.UserID) ';
-  if NeedLocation then
     S:= S +
-      'INNER JOIN LOCATIONS t5 ON (t3.LocationID=t5.LocationID) ';
+      ', t1.' + SqlEsc(AnswerDateField) + ', t1.' + SqlEsc(AnswerNumField) + ' ';
   S:= S +
+    'FROM ' +
+      LogMotorsTableName + ' t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN '+LogNoticeTableName+' t4 ON (t1.'+IDField+'=t4.'+IDField+') ' +
     'WHERE ' +
-        '(t1.LogID>0) AND (t1.LogID <> :LogID) AND (t3.UserID = :UserID) AND ' +
-        '((t3.' + SqlEsc(NoticeDateField) + ' IS NOT NULL) AND (t3.' + SqlEsc(NoticeNumField)  + ' IS NOT NULL)) ';
-  if IsLetterNotEmpty then
-    S:= S + ' AND (' +
-        '((t3.' + SqlEsc(ThisDateField) + ' = :DateValue) AND (t3.' + SqlEsc(ThisNumField)  + ' = :NumValue)) ' +
-        ' OR ' +
-        '((t3.' + SqlEsc(ThisDateField) + ' IS NULL) AND (t3.' + SqlEsc(ThisNumField)  + ' IS NULL))' +
-        ')'
-  else
-    S:= S + ' AND ((t3.' + SqlEsc(ThisDateField) + ' IS NULL) AND (t3.' + SqlEsc(ThisNumField)  + ' IS NULL))';
-
-
-
-  if NeedAnswers then
-    S:= S +
-        ' AND (t3.' + SqlEsc(AnswerNumField)  + ' IS NOT NULL) ' ; // AnswerDateField может быть NULL, если ответ не требуется
-
-  if NeedLocation then
-    S:= S + ' AND (t3.LocationID = :LocationID) ';
-
-  S:= S + 'ORDER BY t3.' + SqlEsc(NoticeDateField) + ', t3.' + SqlEsc(NoticeNumField);
+      SqlIN('t1','LogID', Length(ALogIDs)) +
+    'ORDER BY '+
+      't2.MotorNum, t2.MotorDate, t3.MotorName ';
 
   QSetQuery(FQuery);
   QSetSQL(S);
-
-  QParamInt('UserID', AUserID);
-  QParamInt('LogID', ALogID);
-  if ALocationID>0 then
-    QParamInt('LocationID', ALocationID);
-  if IsLetterNotEmpty then
-  begin
-    QParamDT('DateValue', AOldLetterDate);
-    QParamStr('NumValue', AOldLetterNum);
-  end;
+  QParamsInt(ALogIDs);
   QOpen;
   if not QIsEmpty then
   begin
     QFirst;
     while not QEOF do
     begin
-      VAppend(ALogIDs, QFieldInt('LogID'));
       VAppend(AMotorNames, QFieldStr('MotorName'));
       VAppend(AMotorNums, QFieldStr('MotorNum'));
       VAppend(AMotorDates, QFieldDT('MotorDate'));
-      VAppend(AUserTitles, QFieldStr('UserTitle'));
-      if NeedLocation then
-        VAppend(ALocationTitles, QFieldStr('LocationTitle'))
-      else
-        VAppend(ALocationTitles, EmptyStr);
       VAppend(ANoticeNums, QFieldStr(NoticeNumField));
       VAppend(ANoticeDates, QFieldDT(NoticeDateField));
       if NeedAnswers then
       begin
         VAppend(AAnswerNums, QFieldStr(AnswerNumField));
         VAppend(AAnswerDates, QFieldDT(AnswerDateField));
-      end
-      else begin
-        VAppend(AAnswerNums, EmptyStr);
-        VAppend(AAnswerDates, 0);
       end;
-      if NeedMoney then
-        VAppend(AMoneyValues, QFieldInt64('MoneyValue'))
-      else
-        VAppend(AMoneyValues, 0);
       QNext;
-    end;
-  end;
-  QClose;
-end;
-
-procedure TSQLite.MotorNoticeAnswerLoad(const ALogID: Integer;
-                                    const ALetterType: Byte;
-                                    out AMotorName, AMotorNum: String;
-                                    out AMotorDate: TDate;
-                                    out ANoticeNum: String;
-                                    out ANoticeDate: TDate;
-                                    out AAnswerNum: String;
-                                    out AAnswerDate: TDate;
-                                    out ALocationTitle, AUserTitle: String);
-var
-  TableName: String;
-  ThisDateField, ThisNumField: String;
-  NoticeDateField, NoticeNumField: String;
-  AnswerDateField, AnswerNumField: String;
-  S: String;
-  NoticeLetterType, AnswerLetterType: Byte;
-  NeedAnswer, NeedLocation: Boolean;
-begin
-  AMotorName:= EmptyStr;
-  AMotorNum:= EmptyStr;
-  AMotorDate:= 0;
-  ANoticeNum:= EmptyStr;
-  ANoticeDate:= 0;
-  AAnswerNum:= EmptyStr;
-  AAnswerDate:= 0;
-  ALocationTitle:= EmptyStr;
-  AUserTitle:= EmptyStr;
-
-  NeedAnswer:= ALetterType in [3,9,13];
-  NoticeLetterType:= NoticeLetterTypeGet(ALetterType);
-  if NeedAnswer then {3,9,13 - ответы потребителю}
-    AnswerLetterType:= ALetterType - 1
-  else   {1,7,11 - уведомления производителю}
-    AnswerLetterType:= 0; // 0 - ответы не нужны
-
-  LetterDBNamesGet(ALetterType, TableName, ThisDateField, ThisNumField);
-  LetterDBNamesGet(NoticeLetterType, TableName, NoticeDateField, NoticeNumField);
-  if NeedAnswer then
-    LetterDBNamesGet(AnswerLetterType, TableName, AnswerDateField, AnswerNumField);
-
-  NeedLocation:= ALetterType in [1,2,3,4];
-
-  S:=
-    'SELECT ' +
-      't1.MotorNum, t1.MotorDate, t2.MotorName, t4.UserTitle, ' +
-      't3.' + SqlEsc(NoticeDateField) + ', t3.' + SqlEsc(NoticeNumField);
-  if NeedAnswer then
-    S:= S + ', ' +
-      't3.' + SqlEsc(AnswerDateField) + ', t3.' + SqlEsc(AnswerNumField);
-  if NeedLocation then
-    S:= S + ', ' +
-       't5.LocationTitle ';
-  S:= S +
-    'FROM LOGMOTORS t1 ' +
-    'INNER JOIN MOTORNAMES t2 ON (t1.MotorNameID=t2.MotorNameID) ' +
-    'INNER JOIN '+ SqlEsc(TableName) + ' t3 ON (t1.LogID=t3.LogID) ' +
-    'INNER JOIN USERS t4 ON (t3.UserID=t4.UserID) ';
-  if NeedLocation then
-    S:= S +
-      'INNER JOIN LOCATIONS t5 ON (t3.LocationID=t5.LocationID) ';
-  S:= S +
-    'WHERE ' +
-        '(t1.LogID = :LogID) ';
-
-  QSetQuery(FQuery);
-  QSetSQL(S);
-  QParamInt('LogID', ALogID);
-  QOpen;
-  if not QIsEmpty then
-  begin
-    QFirst;
-    AMotorName:= QFieldStr('MotorName');
-    AMotorNum:= QFieldStr('MotorNum');
-    AMotorDate:= QFieldDT('MotorDate');
-    AUserTitle:= QFieldStr('UserTitle');
-    if NeedLocation then
-      ALocationTitle:= QFieldStr('LocationTitle');
-    ANoticeNum:= QFieldStr(NoticeNumField);
-    ANoticeDate:= QFieldDT(NoticeDateField);
-    if NeedAnswer then
-    begin
-      AAnswerNum:= QFieldStr(AnswerNumField);
-      AAnswerDate:= QFieldDT(AnswerDateField);
     end;
   end;
   QClose;
@@ -1290,34 +2182,12 @@ begin
   QClose;
 end;
 
-
 procedure TSQLite.LetterDelete(const ALogID: Integer; const ALetterType: Byte);
-//var
-//  TableName, DateField, NumField: String;
 begin
-  LettersUpdate(VCreateInt([ALogID]), ALetterType, EmptyStr, 0);
-  //LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-  //
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      SqlEsc(TableName) +
-  //    'SET ' +
-  //      SqlEsc(NumField)  + ' = NULL, ' +
-  //      SqlEsc(DateField) + ' = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('LogID', ALogID);
-  //  QExec;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(VCreateInt([ALogID]), nil, ALetterType, EmptyStr, 0);
 end;
 
-procedure TSQLite.LettersUpdate(const ALogIDs: TIntVector;
+procedure TSQLite.LettersUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterType: Byte;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
@@ -1326,226 +2196,96 @@ var
   TableName, DateField, NumField, S: String;
   i: Integer;
 begin
+  if VIsNil(ALogIDs) then Exit;
+
   LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-  S:=
-    'UPDATE ' +
-      SqlEsc(TableName) +
-    'SET ' +
-      SqlEsc(NumField)  + ' = :NumValue, ' +
-      SqlEsc(DateField) + ' = :DateValue ';
-  if AStatus>=0 then
-    S:= S + ', Status = :Status ';
-  S:= S +
-    'WHERE ' +
-        'LogID = :LogID';
   QSetQuery(FQuery);
   try
+    S:=
+      'UPDATE ' +
+        SqlEsc(TableName) +
+      'SET ' +
+        SqlEsc(NumField)  + ' = :NumValue, ' +
+        SqlEsc(DateField) + ' = :DateValue ';
+    if AStatus>=0 then
+      S:= S + ', Status = :Status ';
+    S:= S +
+      'WHERE ' +
+        SqlIN('','LogID', Length(ALogIDs));
     QSetSQL(S);
     QParamStr('NumValue', ALetterNum, not SEmpty(ALetterNum));
     QParamDT('DateValue', ALetterDate, ALetterDate>0);
-    if AStatus>=0 then
-      QParamInt('Status', AStatus);
-    for i:= 0 to High(ALogIDs) do
+    QParamInt('Status', AStatus);
+    QParamsInt(ALogIDs);
+    QExec;
+
+    if not VIsNil(ADelLogIDs) then
     begin
-      QParamInt('LogID', ALogIDs[i]);
+      S:=
+        'UPDATE ' +
+          SqlEsc(TableName) +
+        'SET ' +
+          SqlEsc(NumField)  + ' = NULL, ' +
+          SqlEsc(DateField) + ' = NULL, ' +
+          'Status = 1 ';
+      S:= S +
+        'WHERE ' +
+          SqlIN('','LogID', Length(ADelLogIDs));
+      QSetSQL(S);
+      QParamsInt(ADelLogIDs);
       QExec;
     end;
+
     QCommit;
   except
     QRollback;
   end;
 end;
 
-procedure TSQLite.LettersNotNeed(const ALogIDs: TIntVector; const ALetterType: Byte);
-//var
-//  i: Integer;
-//  TableName, DateField, NumField: String;
+procedure TSQLite.LettersNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const ALetterType: Byte);
 begin
-  LettersUpdate(ALogIDs, ALetterType, LETTER_NOTNEED_MARK, 0);
-
-  //LetterDBNamesGet(ALetterType, TableName, DateField, NumField);
-  //
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      SqlEsc(TableName) +
-  //    'SET ' +
-  //      SqlEsc(NumField)  + ' = :NumValue, ' +
-  //      SqlEsc(DateField) + ' = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(ALogIDs, ADelLogIDs, ALetterType, LETTER_NOTNEED_MARK, 0);
 end;
 
-procedure TSQLite.ReclamationCancelNotNeed(const ALogIDs: TIntVector);
-//var
-//  i: Integer;
+function TSQLite.LetterUserIDLoad(const ALetterType: Byte; const AID: Integer): Integer;
+var
+  Category: Byte;
+  TableName, IDFieldName: String;
 begin
-  LettersUpdate(ALogIDs, 5 {отзыв рекл}, LETTER_NOTNEED_MARK, 0, 1{в работе});
-
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = 1, ' +   {1 - в работе}
-  //      'CancelNum = :NumValue, ' +
-  //      'CancelDate = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  Category:= CategoryFromLetterType(ALetterType);
+  TableName:= LogNoticeTableNameGet(Category);
+  IDFieldName:= LogNoticeIDFieldNameGet(Category);
+  Result:= ValueInt32Int32ID(TableName, 'UserID', IDFieldName, AID);
 end;
 
-procedure TSQLite.ReclamationCancelUpdate(const ALogIDs: TIntVector;
+procedure TSQLite.ReclamationCancelNotNeed(const ALogIDs, ADelLogIDs: TIntVector);
+begin
+  LettersUpdate(ALogIDs, ADelLogIDs, 5 {отзыв рекл}, LETTER_NOTNEED_MARK, 0, 1{в работе});
+end;
+
+procedure TSQLite.ReclamationCancelUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate);
-//var
-//  i: Integer;
 begin
-  LettersUpdate(ALogIDs, 5 {отзыв рекл}, ALetterNum, ALetterDate, 4{отозвана});
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = 4, '  + {4 - отозвана}
-  //      'CancelNum = :NumValue, ' +
-  //      'CancelDate = :DateValue ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamStr('NumValue', ALetterNum);
-  //  QParamDT('DateValue', ALetterDate);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(ALogIDs, ADelLogIDs, 5 {отзыв рекл}, ALetterNum, ALetterDate, 4{отозвана});
 end;
 
 procedure TSQLite.ReclamationCancelDelete(const ALogID: Integer);
-var
-  LetterNum: String;
-  LetterDate: TDate;
-  Status: Integer;
 begin
-  Status:= 0 {не указана};
-  LetterLoad(ALogID, 0 {уведомл. о неиспр.}, LetterNum, LetterDate);
-  if not IsDocumentEmpty(LetterDate, LetterNum) then
-    Status:= 1 {в работе};
-
-  LettersUpdate(VCreateInt([ALogID]), 5 {отзыв рекл}, EmptyStr, 0, Status);
-
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'CancelNum = NULL, ' +
-  //      'CancelDate = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('LogID', ALogID);
-  //  QParamInt('Status', Status);
-  //  QExec;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(VCreateInt([ALogID]), nil, 5 {отзыв рекл}, EmptyStr, 0, 1{в работе});
 end;
 
-procedure TSQLite.ReclamationReportNotNeed(const ALogIDs: TIntVector; const AStatus: Integer);
-//var
-//  i: Integer;
+procedure TSQLite.ReclamationReportNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const AStatus: Integer);
 begin
-  LettersUpdate(ALogIDs, 4 {акт осмотра}, LETTER_NOTNEED_MARK, 0, AStatus);
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'ReportNum = :NumValue, ' +
-  //      'ReportDate = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('Status', AStatus);
-  //  QParamStr('NumValue', LETTER_NOTNEED_MARK);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(ALogIDs, ADelLogIDs, 4 {акт осмотра}, LETTER_NOTNEED_MARK, 0, AStatus);
 end;
 
-procedure TSQLite.ReclamationReportUpdate(const ALogIDs: TIntVector;
+procedure TSQLite.ReclamationReportUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
-//var
-//  i: Integer;
 begin
-  LettersUpdate(ALogIDs, 4 {акт осмотра}, ALetterNum, ALetterDate, AStatus);
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'ReportNum = :NumValue, ' +
-  //      'ReportDate = :DateValue ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('Status', AStatus);
-  //  QParamStr('NumValue', ALetterNum);
-  //  QParamDT('DateValue', ALetterDate);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(ALogIDs, ADelLogIDs, 4 {акт осмотра}, ALetterNum, ALetterDate, AStatus);
 end;
 
 procedure TSQLite.ReclamationReportDelete(const ALogID: Integer);
@@ -1554,91 +2294,287 @@ var
   LetterDate: TDate;
   Status: Integer;
 begin
-  Status:= 0 {не указана};
   LetterLoad(ALogID, 5 {отзыв рекл.}, LetterNum, LetterDate);
   if not IsDocumentEmpty(LetterDate, LetterNum) then
     Status:= 4 {отозвана}
-  else begin
-    LetterLoad(ALogID, 0 {уведомл. о неиспр.}, LetterNum, LetterDate);
-    if not IsDocumentEmpty(LetterDate, LetterNum) then
-      Status:= 1 {в работе}
-  end;
+  else
+    Status:= 1 {в работе};
 
-  LettersUpdate(VCreateInt([ALogID]), 4 {акт осмотра}, EmptyStr, 0, Status);
-
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGRECLAMATION ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'ReportNum = NULL, ' +
-  //      'ReportDate = NULL ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('LogID', ALogID);
-  //  QParamInt('Status', Status);
-  //  QExec;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(VCreateInt([ALogID]), nil, 4 {акт осмотра}, EmptyStr, 0, Status);
 end;
 
-procedure TSQLite.MotorsReturn(const ALogIDs: TIntVector;
-  const ALetterNum: String; const ALetterDate: TDate);
+function TSQLite.FileNamesLoad(const ACategory: Byte; const AReclamationID: Integer): TStrVector;
 var
-  i, UserID, LocationID: Integer;
+  i: Integer;
+  LetterType1, LeterType2: Byte;
+  NoticeTableName, MotorTableName, IDFieldName, S: String;
+  LetterDate, MotorDate: TDate;
+  FileName, LetterNum, MotorName, MotorNum, DateField, NumField: String;
 begin
-  //получаем UserID - он у всех одинаковый
-  ReclamationInfoLoad(ALogIDs[0], UserID, LocationID);
+  Result:= nil;
+
+  LetterTypesFromCategory(ACategory, LetterType1, LeterType2);
+  NoticeTableName:= SqlEsc(LogNoticeTableNameGet(ACategory));
+  MotorTableName:= SqlEsc(LogMotorTableNameGet(ACategory));
+  IDFieldName:= SqlEsc(LogNoticeIDFieldNameGet(ACategory));
+
+  S:=
+    'SELECT ' +
+      't1.*, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      MotorTableName + ' t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN '+ NoticeTableName + ' t4 ON (t1.' + IDFieldName + '=t4.' + IDFieldName + ') ';
+  if ACategory>1 then
+    S:= S +
+      'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ';
+  S:= S + 'WHERE ';
+  if ACategory>1 then
+    S:= S + '(t5.ReclamationID = :ReclamationID) '
+  else
+    S:= S + '(t1.ReclamationID = :ReclamationID) ';
 
   QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamInt('ReclamationID', AReclamationID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      MotorDate:= QFieldDT('MotorDate');
+      MotorName:= QFieldStr('MotorName');
+      MotorNum:= QFieldStr('MotorNum');
+
+      for i:= LetterType1 to LeterType2 do
+      begin
+        LetterFieldNamesGet(i, DateField, NumField);
+        LetterDate:= QFieldDT(DateField);
+        LetterNum:= QFieldStr(NumField);
+        if IsDocumentExists(LetterDate, LetterNum) then
+        begin
+          FileName:= FileNameFullGet(i, LetterDate, LetterNum,
+                                     MotorDate, MotorName, MotorNum);
+          VAppend(Result, FileName);
+        end;
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+function TSQLite.ReclamationFileNamesLoad(const AReclamationID: Integer): TStrVector;
+begin
+  Result:= FileNamesLoad(1, AReclamationID);
+end;
+
+function TSQLite.RepairFileNamesLoad(const ARepairID: Integer): TStrVector;
+var
+  i: Integer;
+  LetterDate, MotorDate: TDate;
+  FileName, LetterNum, MotorName, MotorNum, DateField, NumField: String;
+begin
+  Result:= nil;
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't1.*, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      'REPAIRMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN REPAIRS t4 ON (t1.RepairID=t4.RepairID) ' +
+    'WHERE ' +
+      '(t1.RepairID = :RepairID) '
+  );
+  QParamInt('RepairID', ARepairID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      MotorDate:= QFieldDT('MotorDate');
+      MotorName:= QFieldStr('MotorName');
+      MotorNum:= QFieldStr('MotorNum');
+
+      for i:= 6 to 9 do
+      begin
+        LetterFieldNamesGet(i, DateField, NumField);
+        LetterDate:= QFieldDT(DateField);
+        LetterNum:= QFieldStr(NumField);
+        if IsDocumentExists(LetterDate, LetterNum) then
+        begin
+          FileName:= FileNameFullGet(i, LetterDate, LetterNum,
+                                     MotorDate, MotorName, MotorNum);
+          VAppend(Result, FileName);
+        end;
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+function TSQLite.PretensionFileNamesLoad(const APretensionID: Integer): TStrVector;
+var
+  i: Integer;
+  LetterDate, MotorDate: TDate;
+  FileName, LetterNum, MotorName, MotorNum, DateField, NumField: String;
+begin
+  Result:= nil;
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't4.*, t2.MotorNum, t2.MotorDate, t3.MotorName ' +
+     // 't4.NoticeFromUserDate, t4.NoticeFromUserNum ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+      'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+      'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+      'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'WHERE ' +
+      '(t1.PretensionID = :PretensionID) '
+  );
+  QParamInt('PretensionID', APretensionID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      MotorDate:= QFieldDT('MotorDate');
+      MotorName:= QFieldStr('MotorName');
+      MotorNum:= QFieldStr('MotorNum');
+
+      for i:= 10 to 13 do
+      begin
+        LetterFieldNamesGet(i, DateField, NumField);
+        LetterDate:= QFieldDT(DateField);
+        LetterNum:= QFieldStr(NumField);
+        if IsDocumentExists(LetterDate, LetterNum) then
+        begin
+          FileName:= FileNameFullGet(i, LetterDate, LetterNum,
+                                     MotorDate, MotorName, MotorNum);
+          VAppend(Result, FileName);
+        end;
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+function TSQLite.AllFileNamesLoad(const AReclamationID: Integer): TStrVector;
+var
+  i: Integer;
+begin
+  Result:= nil;
+  for i:= 1 to 3 do
+    Result:= VAdd(Result, FileNamesLoad(i, AReclamationID));
+end;
+
+procedure TSQLite.MotorsReturn(const ALogIDs, AMotorIDs: TIntVector;   //возврат двигателя на этапе расследования рекламации
+                           const AUserID: Integer;
+                           const ALetterNum: String;
+                           const ALetterDate: TDate);
+var
+  i, j: Integer;
+  RepairIDs: TIntVector;
+begin
+  QSetQuery(FQuery);
   try
+    //1. Получаем список RepairID, для которых в REPAIRMOTORS есть записи соот рекламационным моторам ALogIDs
+    RepairIDs:= nil;
+    QSetSQL(
+      'SELECT ' +
+        'RepairID ' +
+      'FROM ' +
+        'REPAIRMOTORS ' +
+      'WHERE ' +
+        SqlIN('','RecLogID', Length(ALogIDs))
+    );
+    QParamsInt(ALogIDs);
+    QOpen;
+    if not QIsEmpty then
+    begin
+      QFirst;
+      while not QEOF do
+      begin
+        VAppend(RepairIDs, QFieldInt('RepairID'));
+        QNext;
+      end;
+    end;
+    QClose;
+    if not VIsNil(RepairIDs) then
+    begin
+      //2. Удаляем из ремонтной таблицы моторов записи с RecLogID соотв этим  ALogIDs
+      QSetSQL(
+        'DELETE FROM ' +
+          'REPAIRMOTORS ' +
+        'WHERE ' +
+          SqlIN('','RecLogID', Length(ALogIDs))
+      );
+      QParamsInt(ALogIDs);
+      QExec;
+      //3.Удаляем оставшиеся пустыми записи из REPAIRS
+      for i:= 0 to High(RepairIDs) do
+      begin
+        j:= ValueInt32Int32ID('REPAIRMOTORS', 'LogID', 'RepairID', RepairIDs[i]);
+        if j=0 then
+          Delete('REPAIRS', 'RepairID', RepairIDs[i], False {no commit});
+      end;
+    end;
+    //4. Записываем ответ потребителю по рекламации и меняем статус на принята
     QSetSQL(
       'UPDATE ' +
-        'LOGRECLAMATION ' +
+        'RECLAMATIONMOTORS ' +
       'SET ' +
         'Status = 2, ' +  {2 - принята}
         'AnswerToUserNum = :NumValue, ' +
         'AnswerToUserDate = :DateValue ' +
       'WHERE ' +
-        'LogID = :LogID'
+        SqlIN('','LogID', Length(ALogIDs))
     );
     QParamStr('NumValue', ALetterNum);
     QParamDT('DateValue', ALetterDate);
-    for i:= 0 to High(ALogIDs) do
-    begin
-      QParamInt('LogID', ALogIDs[i]);
-      QExec;
-    end;
-
+    QParamsInt(ALogIDs);
+    QExec;
+    //5. Записываем в REPAIRS один новый запрос с LETTER_NOTNEED_MARK на все эти моторы
     QSetSQL(
-      'UPDATE ' +
-        'LOGREPAIR ' +
-      'SET ' +
-        'UserID = :UserID, ' +
-        'Status = 2, ' +  {2 - в пути}
-        'NoticeFromUserDate = NULL, ' +
-        'NoticeFromUserNum = :NumValue, ' +
-        'NoticeToBuilderDate = NULL, ' +
-        'NoticeToBuilderNum = :NumValue, ' +
-        'AnswerFromBuilderDate = NULL, ' +
-        'AnswerFromBuilderNum = :NumValue, ' +
-        'AnswerToUserDate = NULL, ' +
-        'AnswerToUserNum = :NumValue, ' +
-        'Note = :Note ' +
-      'WHERE ' +
-        'LogID = :LogID'
+      'INSERT INTO ' +
+        'REPAIRS ' +
+        '(UserID, NoticeFromUserDate, NoticeFromUserNum) ' +
+      'VALUES ' +
+        '(:UserID, 0, :NoticeFromUserNum) '
     );
-    QParamInt('UserID', UserID);
+    QParamInt('UserID', AUserID);
+    QParamStr('NoticeFromUserNum', LETTER_NOTNEED_MARK);
+    QExec;
+    //6. Получаем записанный RepairID
+    j:= RepairMaxID;
+    //7. записываем моторы в REPAIRMOTORS
+    QSetSQL(
+      'INSERT INTO ' +
+        'REPAIRMOTORS ' +
+        '(RepairID, RecLogID, MotorID, Note, Status, ' +
+        ' NoticeToBuilderNum, AnswerFromBuilderNum, AnswerToUserNum) ' +
+      'VALUES ' +
+        '(:RepairID, :RecLogID, :MotorID, :Note, 2, ' +  {2 - в пути}
+        ' :NumValue, :NumValue, :NumValue) '
+    );
+    QParamInt('RepairID', j);
     QParamStr('NumValue', LETTER_NOTNEED_MARK);
     QParamStr('Note', 'Производителем принято решение о возврате на этапе расследования');
     for i:= 0 to High(ALogIDs) do
     begin
-      QParamInt('LogID', ALogIDs[i]);
+      QParamInt('RecLogID', ALogIDs[i]);
+      QParamInt('MotorID', AMotorIDs[i]);
       QExec;
     end;
 
@@ -1646,75 +2582,416 @@ begin
   except
     QRollback;
   end;
-
 end;
 
-procedure TSQLite.RepairAnswersToUserUpdate(const ALogIDs: TIntVector;
+procedure TSQLite.RepairListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out ARepairIDs: TIntVector;
+                out AUserNames, AUserTitles: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AToBuilderDates: TDateMatrix; out AToBuilderNums: TStrMatrix;
+                out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
+                out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
+                out ARepairBeginDates, ARepairEndDates: TDateMatrix;
+                out AReclamationIDs, ALogIDs, AStatuses: TIntMatrix;
+                out ANotes, AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+var
+  S: String;
+  OldID, NewID, n: Integer;
+begin
+  ARepairIDs:= nil;
+  AUserNames:= nil;
+  AUserTitles:= nil;
+  ANoticeDates:= nil;
+  ANoticeNums:= nil;
+  AToBuilderDates:= nil;
+  AToBuilderNums:= nil;
+  AFromBuilderDates:= nil;
+  AFromBuilderNums:= nil;
+  AToUserDates:= nil;
+  AToUserNums:= nil;
+  ARepairBeginDates:= nil;
+  ARepairEndDates:= nil;
+  AReclamationIDs:= nil;
+  ALogIDs:= nil;
+  AStatuses:= nil;
+  ANotes:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.*, '+
+      't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, ' +
+      't5.ReclamationID, ' +
+      't6.UserNameI, t6.UserTitle ' +
+    'FROM ' +
+      'REPAIRMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN REPAIRS t4 ON (t1.RepairID=t4.RepairID) ' +
+    'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
+    'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+    'WHERE ' +
+      '(t1.RepairID>0) ';
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
+  else begin
+    if (ABeginDate>0) and (AEndDate>0) then
+      S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
+    if AViewIndex>0 then
+      S:= S + ' AND (t1.Status = :Status) ';
+  end;
+  S:= S +
+    'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  QParamDT('BD', ABeginDate);
+  QParamDT('ED', AEndDate);
+  QParamInt('Status', AViewIndex);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    OldID:= 0;
+    while not QEOF do
+    begin
+      NewID:= QFieldInt('RepairID');
+      if NewID<>OldID then
+      begin
+        VAppend(ARepairIDs, NewID);
+        VAppend(AUserNames, QFieldStr('UserNameI'));
+        VAppend(AUserTitles, QFieldStr('UserTitle'));
+        VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+        VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+
+        MAppend(AToBuilderDates, VCreateDate([QFieldDT('NoticeToBuilderDate')]));
+        MAppend(AToBuilderNums, VCreateStr([QFieldStr('NoticeToBuilderNum')]));
+        MAppend(AFromBuilderDates, VCreateDate([QFieldDT('AnswerFromBuilderDate')]));
+        MAppend(AFromBuilderNums, VCreateStr([QFieldStr('AnswerFromBuilderNum')]));
+        MAppend(AToUserDates, VCreateDate([QFieldDT('AnswerToUserDate')]));
+        MAppend(AToUserNums, VCreateStr([QFieldStr('AnswerToUserNum')]));
+        MAppend(ARepairBeginDates, VCreateDate([QFieldDT('BeginDate')]));
+        MAppend(ARepairEndDates, VCreateDate([QFieldDT('EndDate')]));
+        MAppend(ANotes, VCreateStr([QFieldStr('Note')]));
+        MAppend(AStatuses, VCreateInt([QFieldInt('Status')]));
+        MAppend(AReclamationIDs, VCreateInt([QFieldInt('ReclamationID')]));
+        MAppend(ALogIDs, VCreateInt([QFieldInt('LogID')]));
+        MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
+        MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
+        MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
+        OldID:= NewID;
+      end
+      else begin
+        n:= High(ARepairIDs);
+        VAppend(AToBuilderDates[n], QFieldDT('NoticeToBuilderDate'));
+        VAppend(AToBuilderNums[n], QFieldStr('NoticeToBuilderNum'));
+        VAppend(AFromBuilderDates[n], QFieldDT('AnswerFromBuilderDate'));
+        VAppend(AFromBuilderNums[n], QFieldStr('AnswerFromBuilderNum'));
+        VAppend(AToUserDates[n], QFieldDT('AnswerToUserDate'));
+        VAppend(AToUserNums[n], QFieldStr('AnswerToUserNum'));
+        VAppend(ARepairBeginDates[n], QFieldDT('BeginDate'));
+        VAppend(ARepairEndDates[n], QFieldDT('EndDate'));
+        VAppend(ANotes[n], QFieldStr('Note'));
+        VAppend(AStatuses[n], QFieldInt('Status'));
+        VAppend(AReclamationIDs[n], QFieldInt('ReclamationID'));
+        VAppend(ALogIDs[n], QFieldInt('LogID'));
+        VAppend(AMotorNames[n], QFieldStr('MotorName'));
+        VAppend(AMotorNums[n], QFieldStr('MotorNum'));
+        VAppend(AMotorDates[n], QFieldDT('MotorDate'));
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.RepairInfoLoad(const ARepairID: Integer;
+                             out AUserID: Integer;
+                             out ANoticeNum: String;
+                             out ANoticeDate: TDate);
+begin
+  AUserID:= 0;
+  ANoticeNum:= EmptyStr;
+  ANoticeDate:= 0;
+  if ARepairID<=0 then Exit;
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      'UserID, NoticeFromUserDate, NoticeFromUserNum ' +
+    'FROM ' +
+      'REPAIRS ' +
+    'WHERE ' +
+      'RepairID = :RepairID'
+  );
+  QParamInt('RepairID', ARepairID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    AUserID:= QFieldInt('UserID');
+    ANoticeNum:= QFieldStr('NoticeFromUserNum');
+    ANoticeDate:= QFieldDT('NoticeFromUserDate');
+  end;
+  QClose;
+end;
+
+procedure TSQLite.RepairMotorsLoad(const ARepairID: Integer;
+                               out ARecLogIDs, AMotorIDs: TIntVector;
+                               out ARecNoticeNums, AMotorNames, AMotorNums: TStrVector;
+                               out ARecNoticeDates, AMotorDates: TDateVector);
+begin
+  ARecLogIDs:= nil;
+  AMotorIDs:= nil;
+  ARecNoticeNums:= nil;
+  ARecNoticeDates:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  if ARepairID<=0 then Exit;
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't1.RecLogID, t1.MotorID, t2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't5.NoticeFromUserDate, t5.NoticeFromUserNum ' +
+    'FROM ' +
+      'REPAIRMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN RECLAMATIONMOTORS t4 ON (t1.RecLogID=t4.LogID) ' +
+    'INNER JOIN RECLAMATIONS t5 ON (t4.ReclamationID=t5.ReclamationID) ' +
+    'WHERE ' +
+      't1.RepairID = :RepairID ' +
+    'ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName'
+  );
+  QParamInt('RepairID', ARepairID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(ARecLogIDs, QFieldInt('RecLogID'));
+      VAppend(AMotorIDs, QFieldInt('MotorID'));
+      VAppend(AMotorNames, QFieldStr('MotorName'));
+      VAppend(AMotorNums, QFieldStr('MotorNum'));
+      VAppend(AMotorDates, QFieldDT('MotorDate'));
+      VAppend(ARecNoticeNums, QFieldStr('NoticeFromUserNum'));
+      VAppend(ARecNoticeDates, QFieldDT('NoticeFromUserDate'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+function TSQLite.RepairMaxID: Integer;
+begin
+  Result:= MaxInt32ID('REPAIRS');
+end;
+
+procedure TSQLite.RepairNoticeAdd(const ARecLogIDs, AMotorIDs: TIntVector;
+                              const AUserID: Integer;
+                              const ANoticeNum: String;
+                              const ANoticeDate: TDate);
+var
+  i, RepairID: Integer;
+begin
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'INSERT INTO ' +
+        'REPAIRS ' +
+        '(UserID, NoticeFromUserDate, NoticeFromUserNum) ' +
+      'VALUES ' +
+        '(:UserID, :NoticeFromUserDate, :NoticeFromUserNum) '
+    );
+    QParamInt('UserID', AUserID);
+    QParamStr('NoticeFromUserNum', ANoticeNum);
+    QParamDT('NoticeFromUserDate', ANoticeDate);
+    QExec;
+    RepairID:= RepairMaxID;
+
+    QSetQuery(FQuery);
+    QSetSQL(
+      'INSERT INTO ' +
+        'REPAIRMOTORS ' +
+        '(RepairID, MotorID, RecLogID, Status) ' +
+      'VALUES ' +
+        '(:RepairID, :MotorID, :RecLogID, 1) '
+    );
+    QParamInt('RepairID', RepairID);
+    for i:= 0 to High(AMotorIDs) do
+    begin
+      QParamInt('RecLogID', ARecLogIDs[i]);
+      QParamInt('MotorID', AMotorIDs[i]);
+      QExec;
+    end;
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.RepairAnswersToUserUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
-//var
-//  i: Integer;
 begin
-  LettersUpdate(ALogIDs, 9 {ответ потреб. по ремонту}, ALetterNum, ALetterDate, AStatus);
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGREPAIR ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'AnswerToUserNum = :NumValue, ' +
-  //      'AnswerToUserDate = :DateValue ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('Status', AStatus);
-  //  QParamStr('NumValue', ALetterNum);
-  //  QParamDT('DateValue', ALetterDate);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  LettersUpdate(ALogIDs, ADelLogIDs, 9 {ответ потреб. по ремонту}, ALetterNum, ALetterDate, AStatus);
 end;
 
-procedure TSQLite.PretensionAnswersToUserUpdate(const ALogIDs: TIntVector;
+procedure TSQLite.PretensionListLoad(const AMotorNumLike: String;
+                const ABeginDate, AEndDate: TDate;
+                const AViewIndex: Integer;
+                out APretensionIDs, AStatuses: TIntVector;
+                out AUserNames, AUserTitles, ANotes: TStrVector;
+                out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
+                out AMoneyValues, ASendValues, AGetValues: TInt64Vector;
+                out ASendDates, AGetDates: TDateVector;
+                out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
+                out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
+                out AToUserDates: TDateVector; out AToUserNums: TStrVector;
+                out AReclamationIDs, ALogIDs: TIntMatrix;
+                out AMotorNames, AMotorNums: TStrMatrix;
+                out AMotorDates: TDateMatrix);
+var
+  S: String;
+  OldID, NewID, n: Integer;
+begin
+  APretensionIDs:= nil;
+  AStatuses:= nil;
+  AUserNames:= nil;
+  AUserTitles:= nil;
+  ANotes:= nil;
+  ANoticeDates:= nil;
+  ANoticeNums:= nil;
+  AMoneyValues:= nil;
+  ASendValues:= nil;
+  AGetValues:= nil;
+  ASendDates:= nil;
+  AGetDates:= nil;
+  AToBuilderDates:= nil;
+  AToBuilderNums:= nil;
+  AFromBuilderDates:= nil;
+  AFromBuilderNums:= nil;
+  AToUserDates:= nil;
+  AToUserNums:= nil;
+  AReclamationIDs:= nil;
+  ALogIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+
+  S:=
+    'SELECT ' +
+      't1.*, '+
+      't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.*, ' +
+      't5.ReclamationID, ' +
+      't6.UserNameI, t6.UserTitle ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
+    'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+    'WHERE ' +
+      '(t1.PretensionID>0) ';
+
+  if not SEmpty(AMotorNumLike) then
+    S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
+  else begin
+    if (ABeginDate>0) and (AEndDate>0) then
+      S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
+    if AViewIndex>0 then
+      S:= S + ' AND (t4.Status = :Status) ';
+  end;
+  S:= S +
+    'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
+
+  QSetQuery(FQuery);
+  QSetSQL(S);
+  QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  QParamDT('BD', ABeginDate);
+  QParamDT('ED', AEndDate);
+  QParamInt('Status', AViewIndex);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    OldID:= 0;
+    while not QEOF do
+    begin
+      NewID:= QFieldInt('PretensionID');
+      if NewID<>OldID then
+      begin
+        VAppend(APretensionIDs, NewID);
+        VAppend(AUserNames, QFieldStr('UserNameI'));
+        VAppend(AUserTitles, QFieldStr('UserTitle'));
+        VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
+        VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
+        VAppend(AToBuilderDates, QFieldDT('NoticeToBuilderDate'));
+        VAppend(AToBuilderNums, QFieldStr('NoticeToBuilderNum'));
+        VAppend(AFromBuilderDates, QFieldDT('AnswerFromBuilderDate'));
+        VAppend(AFromBuilderNums, QFieldStr('AnswerFromBuilderNum'));
+        VAppend(AToUserDates, QFieldDT('AnswerToUserDate'));
+        VAppend(AToUserNums, QFieldStr('AnswerToUserNum'));
+        VAppend(AStatuses, QFieldInt('Status'));
+        VAppend(ANotes, QFieldStr('Note'));
+        VAppend(AMoneyValues, QFieldInt64('MoneyValue'));
+        VAppend(ASendValues, QFieldInt64('MoneySendValue'));
+        VAppend(AGetValues, QFieldInt64('MoneyGetValue'));
+        VAppend(ASendDates, QFieldDT('MoneySendDate'));
+        VAppend(AGetDates, QFieldDT('MoneyGetDate'));
+
+        MAppend(AReclamationIDs, VCreateInt([QFieldInt('ReclamationID')]));
+        MAppend(ALogIDs, VCreateInt([QFieldInt('LogID')]));
+        MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
+        MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
+        MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
+        OldID:= NewID;
+      end
+      else begin
+        n:= High(APretensionIDs);
+        VAppend(AReclamationIDs[n], QFieldInt('ReclamationID'));
+        VAppend(ALogIDs[n], QFieldInt('LogID'));
+        VAppend(AMotorNames[n], QFieldStr('MotorName'));
+        VAppend(AMotorNums[n], QFieldStr('MotorNum'));
+        VAppend(AMotorDates[n], QFieldDT('MotorDate'));
+      end;
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+function TSQLite.PretensionMaxID: Integer;
+begin
+  Result:= MaxInt32ID('PRETENSIONS');
+end;
+
+procedure TSQLite.PretensionAnswersToUserUpdate(const APretensionIDs, ADelPretensionIDs: TIntVector;
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
-//var
-//  i: Integer;
 begin
-  LettersUpdate(ALogIDs, 13 {ответ потреб. по претензии}, ALetterNum, ALetterDate, AStatus);
-  //QSetQuery(FQuery);
-  //try
-  //  QSetSQL(
-  //    'UPDATE ' +
-  //      'LOGPRETENSION ' +
-  //    'SET ' +
-  //      'Status = :Status, ' +
-  //      'AnswerToUserNum = :NumValue, ' +
-  //      'AnswerToUserDate = :DateValue ' +
-  //    'WHERE ' +
-  //      'LogID = :LogID'
-  //  );
-  //  QParamInt('Status', AStatus);
-  //  QParamStr('NumValue', ALetterNum);
-  //  QParamDT('DateValue', ALetterDate);
-  //  for i:= 0 to High(ALogIDs) do
-  //  begin
-  //    QParamInt('LogID', ALogIDs[i]);
-  //    QExec;
-  //  end;
-  //  QCommit;
-  //except
-  //  QRollback;
-  //end;
+  try
+    PretensionLetterCustomUpdate(APretensionIDs, 13, ALetterNum, ALetterDate, AStatus);
+    PretensionLetterCustomUpdate(ADelPretensionIDs, 13, EmptyStr, 0, 1);
+    QCommit;
+  except
+    QRollback;
+  end;
 end;
 
 procedure TSQLite.ImageListLoad(out AImageIDs: TIntVector; out AImageNames: TStrVector);
@@ -2193,19 +3470,19 @@ begin
   QClose;
 end;
 
-procedure TSQLite.NoteLoad(const ALogID: Integer; const ACategory: Byte; out ANote: String);
+function TSQLite.NoteLoad(const ALogID: Integer; const ACategory: Byte): String;
 var
   TableName: String;
 begin
-  TableName:= LogTableNameGet(ACategory);
-  ANote:= ValueStrInt32ID(TableName, 'Note', 'LogID', ALogID);
+  TableName:= LogMotorTableNameGet(ACategory);
+  Result:= ValueStrInt32ID(TableName, 'Note', 'LogID', ALogID);
 end;
 
 procedure TSQLite.NoteUpdate(const ALogID: Integer; const ACategory: Byte; const ANote: String);
 var
   TableName: String;
 begin
-  TableName:= LogTableNameGet(ACategory);
+  TableName:= LogMotorTableNameGet(ACategory);
   UpdateInt32ID(TableName, 'Note', 'LogID', ALogID, ANote);
 end;
 
@@ -2214,297 +3491,34 @@ begin
   NoteUpdate(ALogID, ACategory, EmptyStr);
 end;
 
-
-procedure TSQLite.DataLoad(const AMotorNumLike: String;
-                       const AOrderIndex, AViewIndex: Integer;
-                       const ABeginDate, AEndDate: TDate;
-                       out ALogIDs: TIntVector;
-                       out AMotorNames: TStrVector;
-                       out AMotorNums: TStrVector;
-                       out AMotorDates: TDateVector;
-                       out AMileages: TIntVector;
-                       out AReclamationUserNames: TStrVector;
-                       out AReclamationUserTitles: TStrVector;
-                       out AReclamationLocationNames: TStrVector;
-                       out AReclamationLocationTitles: TStrVector;
-                       out AReclamationNoticeFromUserDates: TDateVector;
-                       out AReclamationNoticeFromUserNums: TStrVector;
-                       out AReclamationNoticeToBuilderDates: TDateVector;
-                       out AReclamationNoticeToBuilderNums: TStrVector;
-                       out AReclamationAnswerFromBuilderDates: TDateVector;
-                       out AReclamationAnswerFromBuilderNums: TStrVector;
-                       out AReclamationAnswerToUserDates: TDateVector;
-                       out AReclamationAnswerToUserNums: TStrVector;
-                       out AReclamationCancelDates: TDateVector;
-                       out AReclamationCancelNums: TStrVector;
-                       out AReclamationReportDates: TDateVector;
-                       out AReclamationReportNums: TStrVector;
-                       out AReclamationNotes: TStrVector;
-                       out AReclamationStatuses: TIntVector;
-                       out ARepairUserNames: TStrVector;
-                       out ARepairUserTitles: TStrVector;
-                       out ARepairNoticeFromUserDates: TDateVector;
-                       out ARepairNoticeFromUserNums: TStrVector;
-                       out ARepairNoticeToBuilderDates: TDateVector;
-                       out ARepairNoticeToBuilderNums: TStrVector;
-                       out ARepairAnswerFromBuilderDates: TDateVector;
-                       out ARepairAnswerFromBuilderNums: TStrVector;
-                       out ARepairAnswerToUserDates: TDateVector;
-                       out ARepairAnswerToUserNums: TStrVector;
-                       out ARepairBeginDates: TDateVector;
-                       out ARepairEndDates: TDateVector;
-                       out ARepairNotes: TStrVector;
-                       out ARepairStatuses: TIntVector;
-                       out APretensionUserNames: TStrVector;
-                       out APretensionUserTitles: TStrVector;
-                       out APretensionNoticeFromUserDates: TDateVector;
-                       out APretensionNoticeFromUserNums: TStrVector;
-                       out APretensionMoneyValues: TInt64Vector;
-                       out APretensionNoticeToBuilderDates: TDateVector;
-                       out APretensionNoticeToBuilderNums: TStrVector;
-                       out APretensionAnswerFromBuilderDates: TDateVector;
-                       out APretensionAnswerFromBuilderNums: TStrVector;
-                       out APretensionAnswerToUserDates: TDateVector;
-                       out APretensionAnswerToUserNums: TStrVector;
-                       out APretensionMoneySendDates: TDateVector;
-                       out APretensionMoneySendValues: TInt64Vector;
-                       out APretensionMoneyGetDates: TDateVector;
-                       out APretensionMoneyGetValues: TInt64Vector;
-                       out APretensionNotes: TStrVector;
-                       out APretensionStatuses: TIntVector
-                       );
-var
-  S: String;
+function TSQLite.PretensionNoteLoad(const APretensionID: Integer): String;
 begin
-  ALogIDs:= nil;
-  AMotorNames:= nil;
-  AMotorNums:= nil;
-  AMotorDates:= nil;
+  Result:= ValueStrInt32ID('PRETENSIONS', 'Note', 'PretensionID', APretensionID);
+end;
 
-  AMileages:= nil;
-  AReclamationUserNames:= nil;
-  AReclamationUserTitles:= nil;
-  AReclamationLocationNames:= nil;
-  AReclamationLocationTitles:= nil;
-  AReclamationNoticeFromUserDates:= nil;
-  AReclamationNoticeFromUserNums:= nil;
-  AReclamationNoticeToBuilderDates:= nil;
-  AReclamationNoticeToBuilderNums:= nil;
-  AReclamationAnswerFromBuilderDates:= nil;
-  AReclamationAnswerFromBuilderNums:= nil;
-  AReclamationAnswerToUserDates:= nil;
-  AReclamationAnswerToUserNums:= nil;
-  AReclamationCancelDates:= nil;
-  AReclamationCancelNums:= nil;
-  AReclamationReportDates:= nil;
-  AReclamationReportNums:= nil;
-  AReclamationNotes:= nil;
-  AReclamationStatuses:= nil;
+procedure TSQLite.PretensionNoteUpdate(const APretensionID: Integer; const ANote: String);
+begin
+  UpdateInt32ID('PRETENSIONS', 'Note', 'PretensionID', APretensionID, ANote);
+end;
 
-  ARepairUserNames:= nil;
-  ARepairUserTitles:= nil;
-  ARepairNoticeFromUserDates:= nil;
-  ARepairNoticeFromUserNums:= nil;
-  ARepairNoticeToBuilderDates:= nil;
-  ARepairNoticeToBuilderNums:= nil;
-  ARepairAnswerFromBuilderDates:= nil;
-  ARepairAnswerFromBuilderNums:= nil;
-  ARepairAnswerToUserDates:= nil;
-  ARepairAnswerToUserNums:= nil;
-  ARepairBeginDates:= nil;
-  ARepairEndDates:= nil;
-  ARepairNotes:= nil;
-  ARepairStatuses:= nil;
+procedure TSQLite.PretensionNoteDelete(const APretensionID: Integer);
+begin
+  PretensionNoteUpdate(APretensionID, EmptyStr);
+end;
 
-  APretensionUserNames:= nil;
-  APretensionUserTitles:= nil;
-  APretensionNoticeFromUserDates:= nil;
-  APretensionNoticeFromUserNums:= nil;
-  APretensionMoneyValues:= nil;
-  APretensionNoticeToBuilderDates:= nil;
-  APretensionNoticeToBuilderNums:= nil;
-  APretensionAnswerFromBuilderDates:= nil;
-  APretensionAnswerFromBuilderNums:= nil;
-  APretensionAnswerToUserDates:= nil;
-  APretensionAnswerToUserNums:= nil;
-  APretensionMoneySendDates:= nil;
-  APretensionMoneySendValues:= nil;
-  APretensionMoneyGetDates:= nil;
-  APretensionMoneyGetValues:= nil;
-  APretensionNotes:= nil;
-  APretensionStatuses:= nil;
+function TSQLite.MileageLoad(const ALogID: Integer): Integer;
+begin
+  Result:= ValueInt32Int32ID('RECLAMATIONMOTORS', 'Mileage', 'LogID', ALogID);
+end;
 
-  S:=
-    'SELECT ' +
-      't0.LogID, t0.MotorNum, t0.MotorDate, ' +
+procedure TSQLite.MileageUpdate(const ALogID: Integer; const AMileage: Integer);
+begin
+  UpdateInt32ID('RECLAMATIONMOTORS', 'Mileage', 'LogID', ALogID, AMileage);
+end;
 
-      't1.NoticeFromUserDate    AS ReclamationNoticeFromUserDate, '  +
-      't1.NoticeFromUserNum     AS ReclamationNoticeFromUserNum, ' +
-      't1.NoticeToBuilderDate   AS ReclamationNoticeToBuilderDate, ' +
-      't1.NoticeToBuilderNum    AS ReclamationNoticeToBuilderNum, ' +
-      't1.AnswerFromBuilderDate AS ReclamationAnswerFromBuilderDate, '+
-      't1.AnswerFromBuilderNum  AS ReclamationAnswerFromBuilderNum, ' +
-      't1.AnswerToUserDate      AS ReclamationAnswerToUserDate, ' +
-      't1.AnswerToUserNum       AS ReclamationAnswerToUserNum, ' +
-      't1.Note                  AS ReclamationNote, ' +
-      't1.Status                AS ReclamationStatus, ' +
-      't1.CancelDate, t1.CancelNum, t1.ReportDate, t1.ReportNum, t1.Mileage, ' +
-
-      't2.NoticeFromUserDate    AS RepairNoticeFromUserDate, '  +
-      't2.NoticeFromUserNum     AS RepairNoticeFromUserNum, ' +
-      't2.NoticeToBuilderDate   AS RepairNoticeToBuilderDate, ' +
-      't2.NoticeToBuilderNum    AS RepairNoticeToBuilderNum, ' +
-      't2.AnswerFromBuilderDate AS RepairAnswerFromBuilderDate, '+
-      't2.AnswerFromBuilderNum  AS RepairAnswerFromBuilderNum, ' +
-      't2.AnswerToUserDate      AS RepairAnswerToUserDate, ' +
-      't2.AnswerToUserNum       AS RepairAnswerToUserNum, ' +
-      't2.Note                  AS RepairNote, ' +
-      't2.Status                AS RepairStatus, ' +
-      't2.BeginDate, t2.EndDate, ' +
-
-      't3.NoticeFromUserDate    AS PretensionNoticeFromUserDate, '  +
-      't3.NoticeFromUserNum     AS PretensionNoticeFromUserNum, ' +
-      't3.NoticeToBuilderDate   AS PretensionNoticeToBuilderDate, ' +
-      't3.NoticeToBuilderNum    AS PretensionNoticeToBuilderNum, ' +
-      't3.AnswerFromBuilderDate AS PretensionAnswerFromBuilderDate, '+
-      't3.AnswerFromBuilderNum  AS PretensionAnswerFromBuilderNum, ' +
-      't3.AnswerToUserDate      AS PretensionAnswerToUserDate, ' +
-      't3.AnswerToUserNum       AS PretensionAnswerToUserNum, ' +
-      't3.Note                  AS PretensionNote, ' +
-      't3.Status                AS PretensionStatus, ' +
-      't3.MoneyValue, t3.MoneySendDate, t3.MoneySendValue, t3.MoneyGetDate, t3.MoneyGetValue,  ' +
-
-      't4.MotorName, ' +
-      't5.LocationName, t5.LocationTitle, ' +
-      't6.UserNameI AS ReclamationUserName, t6.UserTitle AS ReclamationUserTitle, '  +
-      't7.UserNameI AS RepairUserName, t7.UserTitle AS RepairUserTitle, '  +
-      't8.UserNameI AS PretensionUserName, t8.UserTitle AS PretensionUserTitle '  +
-    'FROM ' +
-      'LOGMOTORS t0 ' +
-    'INNER JOIN LOGRECLAMATION t1 ON (t0.LogID=t1.LogID) ' +
-    'INNER JOIN LOGREPAIR t2 ON (t0.LogID=t2.LogID) ' +
-    'INNER JOIN LOGPRETENSION t3 ON (t0.LogID=t3.LogID) ' +
-    'INNER JOIN MOTORNAMES t4 ON (t0.MotorNameID=t4.MotorNameID) ' +
-    'INNER JOIN LOCATIONS t5 ON (t1.LocationID=t5.LocationID) ' +
-    'INNER JOIN USERS t6 ON (t1.UserID=t6.UserID) ' +
-    'INNER JOIN USERS t7 ON (t2.UserID=t7.UserID) ' +
-    'INNER JOIN USERS t8 ON (t3.UserID=t8.UserID) ' +
-    'WHERE ' +
-      '(t0.LogID>0) ';
-
-  if not SEmpty(AMotorNumLike) then
-    S:= S + ' AND (UPPER(t0.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
-  else begin
-    case AViewIndex of
-    0: S:= S + ' AND (t1.Status < 2) ';                        //в процессе рекламационной работы
-    1: S:= S + ' AND ((t1.Status = 2) AND (t2.Status < 2)) ';  //ожидающие согласования ремонта
-    2: S:= S + ' AND (t2.Status = 2) ';                        //на этапе транспортировки в ремонт
-    3: S:= S + ' AND (t2.Status = 3) ';                        //в процессе гарантийного ремонта
-    4: S:= S + ' AND ((t3.Status > 0) AND (t3.Status < 3)) ';  //с незавершенной претензионной работой
-    5: S:= S + ' AND (' +                                      //все электродвигатели за период
-                     '(t1.NoticeFromUserDate IS NULL) OR ' +
-                     '(t1.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t2.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t3.NoticeFromUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t1.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t2.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t3.AnswerToUserDate BETWEEN :BD AND :ED) OR ' +
-                     '(t3.MoneySendDate BETWEEN :BD AND :ED) OR ' +
-                     '(t3.MoneyGetDate  BETWEEN :BD AND :ED) OR ' +
-                     '(t2.BeginDate BETWEEN :BD AND :ED) OR ' +
-                     '(t2.EndDate   BETWEEN :BD AND :ED)' +
-                     ') ';
-    end;
-  end;
-
-  S:= S + 'ORDER BY ';
-  case AOrderIndex of
-  0: S:= S + 't1.NoticeFromUserDate, t1.NoticeFromUserNum';
-  1: S:= S + 't2.NoticeFromUserDate, t2.NoticeFromUserNum';
-  2: S:= S + 't3.NoticeFromUserDate, t3.NoticeFromUserNum';
-  3: S:= S + 't6.UserTitle';
-  4: S:= S + 't4.MotorName, t0.MotorNum, t0.MotorDate';
-  5: S:= S + 't0.MotorDate, t0.MotorNum';
-  end;
-
-  QSetQuery(FQuery);
-  QSetSQL(S);
-  if not SEmpty(AMotorNumLike) then
-    QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
-  //else if AViewIndex=5 then
-  //begin
-    QParamDT('BD', ABeginDate);
-    QParamDT('ED', AEndDate);
-  //end;
-
-  QOpen;
-  if not QIsEmpty then
-  begin
-    QFirst;
-    while not QEOF do
-    begin
-      VAppend(ALogIDs, QFieldInt('LogID'));
-      VAppend(AMotorNames, QFieldStr('MotorName'));
-      VAppend(AMotorNums, QFieldStr('MotorNum'));
-      VAppend(AMotorDates, QFieldDT('MotorDate'));
-
-      VAppend(AMileages, QFieldInt('Mileage'));
-      VAppend(AReclamationUserNames, QFieldStr('ReclamationUserName'));
-      VAppend(AReclamationUserTitles, QFieldStr('ReclamationUserTitle'));
-      VAppend(AReclamationLocationNames, QFieldStr('LocationName'));
-      VAppend(AReclamationLocationTitles, QFieldStr('LocationTitle'));
-      VAppend(AReclamationNoticeFromUserDates, QFieldDT('ReclamationNoticeFromUserDate'));
-      VAppend(AReclamationNoticeFromUserNums, QFieldStr('ReclamationNoticeFromUserNum'));
-      VAppend(AReclamationNoticeToBuilderDates, QFieldDT('ReclamationNoticeToBuilderDate'));
-      VAppend(AReclamationNoticeToBuilderNums, QFieldStr('ReclamationNoticeToBuilderNum'));
-      VAppend(AReclamationAnswerFromBuilderDates, QFieldDT('ReclamationAnswerFromBuilderDate'));
-      VAppend(AReclamationAnswerFromBuilderNums, QFieldStr('ReclamationAnswerFromBuilderNum'));
-      VAppend(AReclamationAnswerToUserDates, QFieldDT('ReclamationAnswerToUserDate'));
-      VAppend(AReclamationAnswerToUserNums, QFieldStr('ReclamationAnswerToUserNum'));
-      VAppend(AReclamationCancelDates, QFieldDT('CancelDate'));
-      VAppend(AReclamationCancelNums, QFieldStr('CancelNum'));
-      VAppend(AReclamationReportDates, QFieldDT('ReportDate'));
-      VAppend(AReclamationReportNums, QFieldStr('ReportNum'));
-      VAppend(AReclamationNotes, QFieldStr('ReclamationNote'));
-      VAppend(AReclamationStatuses, QFieldInt('ReclamationStatus'));
-
-      VAppend(ARepairUserNames, QFieldStr('RepairUserName'));
-      VAppend(ARepairUserTitles, QFieldStr('RepairUserTitle'));
-      VAppend(ARepairNoticeFromUserDates, QFieldDT('RepairNoticeFromUserDate'));
-      VAppend(ARepairNoticeFromUserNums, QFieldStr('RepairNoticeFromUserNum'));
-      VAppend(ARepairNoticeToBuilderDates, QFieldDT('RepairNoticeToBuilderDate'));
-      VAppend(ARepairNoticeToBuilderNums, QFieldStr('RepairNoticeToBuilderNum'));
-      VAppend(ARepairAnswerFromBuilderDates, QFieldDT('RepairAnswerFromBuilderDate'));
-      VAppend(ARepairAnswerFromBuilderNums, QFieldStr('RepairAnswerFromBuilderNum'));
-      VAppend(ARepairAnswerToUserDates, QFieldDT('RepairAnswerToUserDate'));
-      VAppend(ARepairAnswerToUserNums, QFieldStr('RepairAnswerToUserNum'));
-      VAppend(ARepairBeginDates, QFieldDT('BeginDate'));
-      VAppend(ARepairEndDates, QFieldDT('EndDate'));
-      VAppend(ARepairNotes, QFieldStr('RepairNote'));
-      VAppend(ARepairStatuses, QFieldInt('RepairStatus'));
-
-      VAppend(APretensionUserNames, QFieldStr('PretensionUserName'));
-      VAppend(APretensionUserTitles, QFieldStr('PretensionUserTitle'));
-      VAppend(APretensionNoticeFromUserDates, QFieldDT('PretensionNoticeFromUserDate'));
-      VAppend(APretensionNoticeFromUserNums, QFieldStr('PretensionNoticeFromUserNum'));
-      VAppend(APretensionMoneyValues, QFieldInt64('MoneyValue'));
-      VAppend(APretensionNoticeToBuilderDates, QFieldDT('PretensionNoticeToBuilderDate'));
-      VAppend(APretensionNoticeToBuilderNums, QFieldStr('PretensionNoticeToBuilderNum'));
-      VAppend(APretensionAnswerFromBuilderDates, QFieldDT('PretensionAnswerFromBuilderDate'));
-      VAppend(APretensionAnswerFromBuilderNums, QFieldStr('PretensionAnswerFromBuilderNum'));
-      VAppend(APretensionAnswerToUserDates, QFieldDT('PretensionAnswerToUserDate'));
-      VAppend(APretensionAnswerToUserNums, QFieldStr('PretensionAnswerToUserNum'));
-      VAppend(APretensionMoneySendDates, QFieldDT('MoneySendDate'));
-      VAppend(APretensionMoneySendValues, QFieldInt64('MoneySendValue'));
-      VAppend(APretensionMoneyGetDates, QFieldDT('MoneyGetDate'));
-      VAppend(APretensionMoneyGetValues, QFieldInt64('MoneyGetValue'));
-      VAppend(APretensionNotes, QFieldStr('PretensionNote'));
-      VAppend(APretensionStatuses, QFieldInt('PretensionStatus'));
-
-      QNext;
-    end;
-  end;
-  QClose;
+procedure TSQLite.MileageDelete(const ALogID: Integer);
+begin
+  MileageUpdate(ALogID, -1);
 end;
 
 end.

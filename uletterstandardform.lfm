@@ -1078,7 +1078,7 @@ object LetterStandardForm: TLetterStandardForm
   end
   object SaveDialog1: TSaveDialog
     Filter = 'Документ PDF|*.pdf'
-    Left = 128
-    Top = 536
+    Left = 592
+    Top = 624
   end
 end

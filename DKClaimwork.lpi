@@ -125,14 +125,6 @@
         <UnitName Value="UImageEditForm"/>
       </Unit>
       <Unit>
-        <Filename Value="unoticeeditform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="NoticeEditForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="UNoticeEditForm"/>
-      </Unit>
-      <Unit>
         <Filename Value="unoteeditform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="NoteEditForm"/>
@@ -195,6 +187,85 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UStatisticForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="umotorlistform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MotorListForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UMotorListForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ureclamationform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ReclamationForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UReclamationForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="urepairform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RepairForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="URepairForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="upretensionform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PretensionForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UPretensionForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ureclamationeditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ReclamationEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UReclamationEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="umileageeditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MileageEditForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UMileageEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="urepaireditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RepairEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="URepairEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="upretensioneditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PretensionEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UPretensionEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="upretensionletterform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PretensionLetterForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UPretensionLetterForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="upretensionletterstandardform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PretensionLetterStandardForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UPretensionLetterStandardForm"/>
       </Unit>
     </Units>
   </ProjectOptions>

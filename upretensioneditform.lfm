@@ -1,10 +1,11 @@
-object LetterEditForm: TLetterEditForm
-  Left = 427
-  Height = 798
-  Top = 141
-  Width = 650
-  ClientHeight = 798
-  ClientWidth = 650
+object PretensionEditForm: TPretensionEditForm
+  Left = 494
+  Height = 759
+  Top = 59
+  Width = 742
+  Caption = 'Претензия'
+  ClientHeight = 759
+  ClientWidth = 742
   DesignTimePPI = 120
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -12,49 +13,44 @@ object LetterEditForm: TLetterEditForm
   OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
-  object LetterNameLabel: TLabel
+  object Label5: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 6
+    Height = 20
+    Top = 6
+    Width = 133
+    BorderSpacing.Left = 6
+    BorderSpacing.Top = 6
+    Caption = 'Электродвигатели'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label4: TLabel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = ChoosePanel
     AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 20
     Top = 432
-    Width = 225
+    Width = 99
     BorderSpacing.Left = 8
     BorderSpacing.Top = 18
-    Caption = 'Уведомление о неисправности'
+    Caption = 'Уведомление'
     Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
   end
-  object NotNeedCheckBox: TCheckBox
+  object Label8: TLabel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = LetterNumEdit
     AnchorSideTop.Side = asrCenter
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
     Left = 8
-    Height = 24
-    Top = 466
-    Width = 115
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 12
-    BorderSpacing.Right = 6
-    Caption = 'Не требуется'
-    OnChange = NotNeedCheckBoxChange
-    TabOrder = 0
-  end
-  object Label1: TLabel
-    AnchorSideLeft.Control = NotNeedCheckBox
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = LetterNumEdit
-    AnchorSideTop.Side = asrCenter
-    AnchorSideRight.Control = LetterNumEdit
-    Left = 153
     Height = 20
     Top = 468
     Width = 48
-    BorderSpacing.Left = 30
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 12
     BorderSpacing.Right = 6
     Caption = 'Номер'
@@ -62,33 +58,33 @@ object LetterEditForm: TLetterEditForm
     ParentFont = False
   end
   object LetterNumEdit: TEdit
-    AnchorSideLeft.Control = Label1
+    AnchorSideLeft.Control = Label8
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = LetterNameLabel
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Label2
-    Left = 207
+    AnchorSideTop.Control = DT1
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Label9
+    Left = 64
     Height = 28
     Top = 464
     Width = 150
-    BorderSpacing.Left = 6
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 12
     BorderSpacing.Right = 12
     MaxLength = 50
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 0
   end
-  object Label2: TLabel
+  object Label9: TLabel
     AnchorSideLeft.Control = LetterNumEdit
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = DT1
     AnchorSideTop.Side = asrCenter
     AnchorSideRight.Control = DT1
-    Left = 369
+    Left = 226
     Height = 20
     Top = 468
     Width = 32
-    BorderSpacing.Left = 6
+    BorderSpacing.Left = 12
     BorderSpacing.Top = 6
     BorderSpacing.Right = 6
     Caption = 'Дата'
@@ -96,13 +92,13 @@ object LetterEditForm: TLetterEditForm
     ParentFont = False
   end
   object DT1: TDateTimePicker
-    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Control = Label9
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = LetterNumEdit
-    AnchorSideTop.Side = asrCenter
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 407
+    Left = 264
     Height = 28
     Top = 464
     Width = 99
@@ -110,7 +106,7 @@ object LetterEditForm: TLetterEditForm
     MaxDate = 2958465
     MinDate = -53780
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 1
     BorderSpacing.Left = 6
     BorderSpacing.Top = 12
     BorderSpacing.Right = 8
@@ -127,94 +123,90 @@ object LetterEditForm: TLetterEditForm
     HideDateTimeParts = []
     MonthNames = 'Long'
   end
-  object LetterStandardCreateButton: TButton
+  object Label10: TLabel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = FileNameEdit
+    AnchorSideTop.Control = LetterNumEdit
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Cursor = crHandPoint
     Left = 8
-    Height = 30
-    Top = 618
-    Width = 229
-    Align = alCustom
-    AutoSize = True
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 12
-    BorderSpacing.Right = 8
-    Caption = 'Создать стандартное письмо'
-    OnClick = LetterStandardCreateButtonClick
-    TabOrder = 3
-    Visible = False
-  end
-  object LetterCustomCreateButton: TButton
-    AnchorSideLeft.Control = LetterStandardCreateButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = LetterStandardCreateButton
-    AnchorSideTop.Side = asrCenter
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Cursor = crHandPoint
-    Left = 245
-    Height = 30
-    Top = 618
-    Width = 244
-    Align = alCustom
-    AutoSize = True
-    BorderSpacing.Top = 12
-    BorderSpacing.Right = 8
-    Caption = 'Создать произвольное письмо'
-    OnClick = LetterCustomCreateButtonClick
-    TabOrder = 4
-    Visible = False
-  end
-  object Label3: TLabel
-    AnchorSideTop.Control = LetterCustomCreateButton
-    AnchorSideTop.Side = asrBottom
-    Left = 6
     Height = 20
-    Top = 663
-    Width = 140
+    Top = 510
+    Width = 39
     BorderSpacing.Left = 8
-    BorderSpacing.Top = 15
-    Caption = 'Статус рекламации'
+    BorderSpacing.Top = 18
+    Caption = 'Файл'
     Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
-    Visible = False
   end
-  object StatusComboBox: TComboBox
+  object NotChangeFileCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label3
+    AnchorSideTop.Control = Label10
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 24
+    Top = 542
+    Width = 336
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    Caption = 'Не заменять существующий файл документа'
+    TabOrder = 2
+  end
+  object FileNameEdit: TEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = NotChangeFileCheckBox
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 28
+    Top = 578
+    Width = 680
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 6
+    ParentFont = False
+    ReadOnly = True
+    TabOrder = 3
+  end
+  object Label11: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = FileNameEdit
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 20
+    Top = 624
+    Width = 94
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 18
+    Caption = 'Отправитель'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object UserNameComboBox: TComboBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label11
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 28
-    Top = 695
-    Width = 250
+    Top = 656
+    Width = 726
+    Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
-    BorderSpacing.Right = 6
+    BorderSpacing.Right = 8
     DropDownCount = 15
     ItemHeight = 20
-    ItemIndex = 0
-    Items.Strings = (
-      'принята'
-      'отклонена'
-    )
     ParentFont = False
     Style = csDropDownList
-    TabOrder = 5
-    Text = 'принята'
-    Visible = False
+    TabOrder = 4
   end
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 734
-    Width = 646
+    Top = 695
+    Width = 738
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 2
@@ -222,15 +214,15 @@ object LetterEditForm: TLetterEditForm
     BorderSpacing.Bottom = 6
     BevelOuter = bvNone
     ClientHeight = 58
-    ClientWidth = 646
-    TabOrder = 6
+    ClientWidth = 738
+    TabOrder = 5
     object CancelButton: TSpeedButton
       AnchorSideTop.Control = DividerBevel1
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = ButtonPanel
       AnchorSideRight.Side = asrBottom
       Cursor = crHandPoint
-      Left = 515
+      Left = 607
       Height = 38
       Top = 20
       Width = 125
@@ -382,7 +374,7 @@ object LetterEditForm: TLetterEditForm
       AnchorSideTop.Side = asrCenter
       AnchorSideRight.Control = CancelButton
       Cursor = crHandPoint
-      Left = 390
+      Left = 482
       Height = 38
       Top = 20
       Width = 125
@@ -532,43 +524,46 @@ object LetterEditForm: TLetterEditForm
       Left = 0
       Height = 20
       Top = 0
-      Width = 646
+      Width = 738
       Align = alTop
       Font.Style = [fsBold]
       ParentFont = False
     end
   end
-  object Label4: TLabel
-    AnchorSideLeft.Control = Owner
+  object MoneyEdit: TCurrencyEdit
+    AnchorSideLeft.Control = Label12
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = LetterNumEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 8
-    Height = 20
-    Top = 510
-    Width = 39
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 18
-    Caption = 'Файл'
-    Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
-  end
-  object FileNameEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = NotChangeFileCheckBox
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = OpenButton
-    Left = 8
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 537
     Height = 28
-    Top = 578
-    Width = 588
-    Anchors = [akTop, akLeft, akRight]
+    Top = 464
+    Width = 150
+    Alignment = taRightJustify
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
+    BorderSpacing.Right = 8
+    DisplayFormat = '0.00'
+    TabOrder = 6
+  end
+  object Label12: TLabel
+    AnchorSideLeft.Control = DT1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = DT1
+    AnchorSideTop.Side = asrCenter
+    AnchorSideRight.Control = DT1
+    Left = 375
+    Height = 20
+    Top = 468
+    Width = 154
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 6
     BorderSpacing.Right = 6
+    Caption = 'Сумма к возмещению'
+    ParentColor = False
     ParentFont = False
-    ReadOnly = True
-    TabOrder = 7
   end
   object OpenButton: TSpeedButton
     AnchorSideTop.Control = FileNameEdit
@@ -577,7 +572,7 @@ object LetterEditForm: TLetterEditForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FileNameEdit
     AnchorSideBottom.Side = asrBottom
-    Left = 602
+    Left = 694
     Height = 36
     Top = 574
     Width = 40
@@ -591,34 +586,6 @@ object LetterEditForm: TLetterEditForm
     ImageIndex = 6
     OnClick = OpenButtonClick
   end
-  object NotChangeFileCheckBox: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label4
-    AnchorSideTop.Side = asrBottom
-    Left = 8
-    Height = 24
-    Top = 542
-    Width = 336
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 12
-    Caption = 'Не заменять существующий файл документа'
-    OnChange = NotChangeFileCheckBoxChange
-    TabOrder = 8
-  end
-  object Label5: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Owner
-    Left = 6
-    Height = 20
-    Top = 6
-    Width = 133
-    BorderSpacing.Left = 6
-    BorderSpacing.Top = 6
-    Caption = 'Электродвигатели'
-    Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
-  end
   object ChoosePanel: TPanel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Label5
@@ -628,7 +595,7 @@ object LetterEditForm: TLetterEditForm
     Left = 6
     Height = 376
     Top = 38
-    Width = 638
+    Width = 730
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
     BorderSpacing.Left = 6
@@ -636,8 +603,8 @@ object LetterEditForm: TLetterEditForm
     BorderSpacing.Right = 6
     BevelOuter = bvNone
     ClientHeight = 376
-    ClientWidth = 638
-    TabOrder = 9
+    ClientWidth = 730
+    TabOrder = 7
     object Label6: TLabel
       AnchorSideLeft.Control = ChoosePanel
       AnchorSideTop.Control = SearchPanel
@@ -645,15 +612,15 @@ object LetterEditForm: TLetterEditForm
       Left = 0
       Height = 20
       Top = 4
-      Width = 75
-      Caption = 'В очереди:'
+      Width = 129
+      Caption = 'Рекламационные: '
       ParentColor = False
     end
     object SearchPanel: TPanel
       AnchorSideTop.Control = ChoosePanel
       AnchorSideRight.Control = VT1
       AnchorSideRight.Side = asrBottom
-      Left = 381
+      Left = 473
       Height = 28
       Top = 0
       Width = 257
@@ -743,7 +710,7 @@ object LetterEditForm: TLetterEditForm
       Left = 0
       Height = 150
       Top = 34
-      Width = 638
+      Width = 730
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Top = 6
       DefaultText = 'Node'
@@ -759,7 +726,7 @@ object LetterEditForm: TLetterEditForm
       AnchorSideTop.Control = VT1
       AnchorSideBottom.Control = VT1
       AnchorSideBottom.Side = asrBottom
-      Left = 638
+      Left = 730
       Height = 150
       Top = 34
       Width = 45
@@ -787,7 +754,7 @@ object LetterEditForm: TLetterEditForm
       Left = 0
       Height = 150
       Top = 226
-      Width = 638
+      Width = 730
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Top = 1
       DefaultText = 'Node'
@@ -804,7 +771,7 @@ object LetterEditForm: TLetterEditForm
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = DelButton
       Cursor = crHandPoint
-      Left = 558
+      Left = 650
       Height = 40
       Top = 185
       Width = 40
@@ -959,7 +926,7 @@ object LetterEditForm: TLetterEditForm
       AnchorSideRight.Control = VT1
       AnchorSideRight.Side = asrBottom
       Cursor = crHandPoint
-      Left = 598
+      Left = 690
       Height = 40
       Top = 185
       Width = 40

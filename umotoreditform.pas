@@ -38,7 +38,7 @@ type
     MotorNameIDs: TIntVector;
     procedure DataLoad;
   public
-    LogID: Integer;
+    MotorID: Integer;
   end;
 
 var
@@ -71,6 +71,7 @@ end;
 procedure TMotorEditForm.FormShow(Sender: TObject);
 begin
   DataLoad;
+  MotorNumEdit.SetFocus;
 end;
 
 procedure TMotorEditForm.SaveButtonClick(Sender: TObject);
@@ -81,7 +82,7 @@ var
 
   CanAdd: Boolean;
 
-  ExistingLogID: Integer;
+  ExistingMotorID: Integer;
   ExistingMotorName, ExistingMotorNum: String;
   ExistingMotorDate: TDate;
 begin
@@ -103,29 +104,29 @@ begin
   MotorNameID:= MotorNameIDs[MotorNameComboBox.ItemIndex];
   MotorDate:= DT1.Date;
 
-  if LogID=0 then  //new
+  if MotorID=0 then  //new
   begin
     CanAdd:= True;
     if SQLite.MotorFind(MotorNameID, MotorNum, MotorDate,
-    ExistingLogID, ExistingMotorName, ExistingMotorNum, ExistingMotorDate) then
-      if not Confirm('В базе есть похожий электродвигатель' +
-        SYMBOL_BREAK +
-        MotorFullName(ExistingMotorName, ExistingMotorNum, ExistingMotorDate) + '!' +
-        SYMBOL_BREAK +
-        'Записать новый электродвигатель' +
-        SYMBOL_BREAK +
-        MotorFullName(ExistingMotorName, MotorNum, MotorDate) + '?') then
-        CanAdd:= False;
+      ExistingMotorID, ExistingMotorName, ExistingMotorNum, ExistingMotorDate) then
+        if not Confirm('В базе есть похожий электродвигатель' +
+          SYMBOL_BREAK +
+          MotorFullName(ExistingMotorName, ExistingMotorNum, ExistingMotorDate) + '!' +
+          SYMBOL_BREAK +
+          'Записать новый электродвигатель' +
+          SYMBOL_BREAK +
+          MotorFullName(ExistingMotorName, MotorNum, MotorDate) + '?') then
+          CanAdd:= False;
     if CanAdd then
     begin
       SQLite.MotorAdd(MotorNameID, MotorNum, MotorDate);
-      LogID:= SQLite.MotorLastWritedLogID;
+      MotorID:= SQLite.MotorLastWritedLogID;
     end
     else
-      LogID:= ExistingLogID;
+      MotorID:= ExistingMotorID;
   end
   else //edit
-    SQLite.MotorUpdate(LogID, MotorNameID, MotorNum, MotorDate);
+    SQLite.MotorUpdate(MotorID, MotorNameID, MotorNum, MotorDate);
 
   CanFormClose:= True;
   ModalResult:= mrOK;
@@ -137,8 +138,8 @@ var
   MotorNum, S: String;
   MotorDate: TDate;
 begin
-  if LogID=0 then Exit;
-  SQLite.MotorLoad(LogID, MotorNameID, S, MotorNum, MotorDate);
+  if MotorID=0 then Exit;
+  SQLite.MotorLoad(MotorID, MotorNameID, S, MotorNum, MotorDate);
   MotorNumEdit.Text:= MotorNum;
   Ind:= VIndexOf(MotorNameIDs, MotorNameID);
   if Ind>=0 then

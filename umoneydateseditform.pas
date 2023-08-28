@@ -43,7 +43,7 @@ type
     procedure MoneyGetControlsEnabled;
     procedure MoneySendControlsEnabled;
   public
-    LogID: Integer;
+    PretensionID: Integer;
   end;
 
 var
@@ -95,43 +95,43 @@ end;
 
 procedure TMoneyDatesEditForm.SaveButtonClick(Sender: TObject);
 var
-  MoneySendValue, MoneyGetValue: Int64;
-  MoneySendDate, MoneyGetDate: TDate;
+  SendValue, GetValue: Int64;
+  SendDate, GetDate: TDate;
   Status: Integer;
 begin
   CanFormClose:= False;
 
-  MoneySendValue:= 0;
-  MoneyGetValue:= 0;
-  MoneySendDate:= 0;
-  MoneyGetDate:= 0;
-  Status:= 0;   //не указано
+  SendValue:= 0;
+  GetValue:= 0;
+  SendDate:= 0;
+  GetDate:= 0;
+  Status:= 2;   //возмещение
 
   if MoneySendCheckBox.Checked then
   begin
-    MoneySendValue:= Trunc(100*MoneySendEdit.Value);
-    if MoneySendValue=0 then
+    SendValue:= Trunc(100*MoneySendEdit.Value);
+    if SendValue=0 then
     begin
       ShowInfo('Не указана сумма компенсации Потребителю!');
       Exit;
     end;
-    MoneySendDate:= DT1.Date;
+    SendDate:= DT1.Date;
   end;
   if MoneyGetCheckBox.Checked then
   begin
-    MoneyGetValue:= Trunc(100*MoneyGetEdit.Value);
-    if MoneyGetValue=0 then
+    GetValue:= Trunc(100*MoneyGetEdit.Value);
+    if GetValue=0 then
     begin
       ShowInfo('Не указана сумма возмещения Производителем!');
       Exit;
     end;
-    MoneyGetDate:= DT1.Date;
+    GetDate:= DT1.Date;
   end;
-  if (MoneySendValue=MoneyValue) and (MoneyGetValue=MoneyValue) then
+  if (SendValue=MoneyValue) and (GetValue=MoneyValue) then
     Status:= 3;  //завершено
 
-  SQLite.PretensionMoneyUpdate(LogID, Status, MoneySendValue, MoneySendDate,
-                                 MoneyGetValue, MoneyGetDate);
+  SQLite.PretensionMoneyDatesUpdate(PretensionID, Status,
+                                    SendValue, GetValue, SendDate, GetDate);
 
   CanFormClose:= True;
   ModalResult:= mrOK;
@@ -139,31 +139,31 @@ end;
 
 procedure TMoneyDatesEditForm.DataLoad;
 var
-  Status: Integer;
-  MoneySendValue, MoneyGetValue: Int64;
-  MoneySendDate, MoneyGetDate: TDate;
+  S: String;
+  i: Integer;
+  SendValue, GetValue: Int64;
+  SendDate, GetDate: TDate;
 begin
   DT1.Date:= Date;
   DT2.Date:= Date;
 
-  SQLite.PretensionInfoLoad(LogID, Status, MoneyValue);
+  SQLite.PretensionInfoLoad(PretensionID, i, MoneyValue, S, SendDate{tmp});
   MoneySendEdit.Text:= PriceIntToStr(MoneyValue);
   MoneyGetEdit.Text:= PriceIntToStr(MoneyValue);
 
-  SQLite.PretensionMoneyLoad(LogID, Status, MoneySendValue, MoneySendDate,
-                             MoneyGetValue, MoneyGetDate);
+  SQLite.PretensionMoneyDatesLoad(PretensionID, SendValue, GetValue, SendDate, GetDate);
 
-  MoneySendCheckBox.Checked:= MoneySendDate>0;
-  if MoneySendDate>0 then
+  MoneySendCheckBox.Checked:= SendDate>0;
+  if SendDate>0 then
   begin
-    DT1.Date:= MoneySendDate;
-    MoneySendEdit.Text:= PriceIntToStr(MoneySendValue);
+    DT1.Date:= SendDate;
+    MoneySendEdit.Text:= PriceIntToStr(SendValue);
   end;
-  MoneyGetCheckBox.Checked:= MoneyGetDate>0;
-  if MoneyGetDate>0 then
+  MoneyGetCheckBox.Checked:= GetDate>0;
+  if GetDate>0 then
   begin
-    DT2.Date:= MoneyGetDate;
-    MoneyGetEdit.Text:= PriceIntToStr(MoneyGetValue);
+    DT2.Date:= GetDate;
+    MoneyGetEdit.Text:= PriceIntToStr(GetValue);
   end;
   MoneySendControlsEnabled;
   MoneyGetControlsEnabled;
