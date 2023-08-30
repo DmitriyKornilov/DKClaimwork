@@ -16,7 +16,8 @@ uses
   URepairDatesEditForm, ULetterCustomForm, UAboutForm, UMoneyDatesEditForm,
   UStatisticForm, UMotorListForm, UReclamationForm, URepairForm,
   UPretensionForm, UReclamationEditForm, UMileageEditForm, URepairEditForm,
-  UPretensionEditForm, UPretensionLetterForm, UPretensionLetterStandardForm
+  UPretensionEditForm, UPretensionLetterForm, UPretensionLetterStandardForm,
+  UAttachmentEditForm
   { you can add units after this };
 
 {$R *.res}

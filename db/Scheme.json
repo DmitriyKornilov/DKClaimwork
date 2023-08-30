@@ -1137,7 +1137,7 @@
     ],
     "FieldsList" : [
       "ID",
-      "PretensionID",
+      "LogID",
       "AttachmentName"
     ],
     "ID" : {
@@ -1163,7 +1163,7 @@
         ]
       }
     },
-    "PretensionID" : {
+    "LogID" : {
       "FieldType" : "INTEGER",
       "PrimaryKey" : false,
       "Status" : false,
@@ -1174,8 +1174,8 @@
       "ExistingValues" : [
       ],
       "ReferenceTo" : {
-        "TableName" : "PRETENSIONS",
-        "FieldName" : "PretensionID",
+        "TableName" : "PRETENSIONMOTORS",
+        "FieldName" : "LogID",
         "OnDelete" : 0,
         "OnUpdate" : 0
       },
@@ -1241,8 +1241,10 @@
       },
       "ReferenceFrom" : {
         "TableNames" : [
+          "PRETENSIONATTACHMENTS"
         ],
         "FieldNames" : [
+          "LogID"
         ]
       }
     },
@@ -1361,10 +1363,8 @@
       },
       "ReferenceFrom" : {
         "TableNames" : [
-          "PRETENSIONATTACHMENTS"
         ],
         "FieldNames" : [
-          "PretensionID"
         ]
       }
     },

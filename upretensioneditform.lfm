@@ -145,10 +145,10 @@ object PretensionEditForm: TPretensionEditForm
     Left = 8
     Height = 24
     Top = 542
-    Width = 336
+    Width = 228
     BorderSpacing.Left = 8
     BorderSpacing.Top = 12
-    Caption = 'Не заменять существующий файл документа'
+    Caption = 'Не заменять файл документа'
     TabOrder = 2
   end
   object FileNameEdit: TEdit

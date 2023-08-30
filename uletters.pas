@@ -119,7 +119,7 @@ type
     procedure WriteInfo(const ANumber: String = ''; const ADate: String = '');
     procedure WriteDestination(const AText: TStrVector);
     procedure WriteAppeal(const AText: String);
-    procedure WriteBody(const AText: TStrVector);
+    procedure WriteBody(const AText: TStrVector; const AFirstIndents: TDblVector = nil); // AFirstIndents: -1 = BODY_INDENT, >=0 = значение
     procedure WritePerformer(const AName, APhone, AMail: String);
     procedure WriteFooter(const AStream: TMemoryStream; const AExtension: String);
 
@@ -438,15 +438,24 @@ begin
   WriteTextRow(AText, saCenter, APPEAL_INTERVAL);
 end;
 
-procedure TLetter.WriteBody(const AText: TStrVector);
+procedure TLetter.WriteBody(const AText: TStrVector; const AFirstIndents: TDblVector = nil);
 var
   i: Integer;
+  Indent: TPDFFloat;
 begin
   WriteSpace(BODY_BEFORE_SPACE);
   SetFont(BODY_FONT_NAME, BODY_FONT_SIZE);
   SetFontColor(clBlack);
-  for i:= 0 to High(AText) do
-    WriteTextParagraph(AText[i], saFit, BODY_INTERVAL, BODY_INDENT);
+  if VIsNil(AFirstIndents) then
+    for i:= 0 to High(AText) do
+      WriteTextParagraph(AText[i], saFit, BODY_INTERVAL, BODY_INDENT)
+  else begin
+    if AFirstIndents[i]>=0 then
+      Indent:= AFirstIndents[i]
+    else
+      Indent:= BODY_INDENT;
+    WriteTextParagraph(AText[i], saFit, BODY_INTERVAL, Indent);
+  end;
 end;
 
 function TLetter.PerformerHeight: TPDFFloat;

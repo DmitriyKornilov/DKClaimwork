@@ -46,6 +46,8 @@ type
   private
     Sheet: TSheetPretension;
     ZoomPercent: Integer;
+    BeginDate, EndDate: TDate;
+    MotorNumLike: String;
 
     //данные из базы
     PretensionIDs: TIntVector;
@@ -74,9 +76,9 @@ type
     procedure DataDelete;
 
   public
-    procedure DataLoad(const AMotorNumLike: String = '';
-                       const ABeginDate: TDate = 0;
-                       const AEndDate: TDate = 0);
+    procedure DataLoad(const AMotorNumLike: String;
+                      const ABeginDate: TDate;
+                      const AEndDate: TDate);
   end;
 
 var
@@ -94,7 +96,7 @@ var
 begin
   if not PretensionEdit(0) then Exit;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   PretensionID:= SQLite.PretensionMaxID;
   NoticeIndex:= VIndexOf(PretensionIDs, PretensionID);
   if NoticeIndex<0 then Exit;
@@ -171,7 +173,7 @@ end;
 
 procedure TPretensionForm.ViewTypeComboBoxChange(Sender: TObject);
 begin
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
 end;
 
 procedure TPretensionForm.ButtonsEnabled;
@@ -187,11 +189,13 @@ begin
   if VIsNil(PretensionIDs) then Exit;
   if not Sheet.IsSelected then Exit;
 
+
   i:= Sheet.SelectedNoticeIndex;
   j:= Sheet.SelectedMotorIndex;
   k:= Sheet.SelectedColIndex;
 
   //EditButton
+  b:= False;
   case k of
   0: b:= True;                                                           // уведомление
   1: b:= (IsDocumentExists(ToBuilderDates[i], ToBuilderNums[i]) or       // письмо производителю
@@ -208,6 +212,7 @@ begin
   EditButton.Enabled:= b;
 
   //DelButton
+  b:= False;
   case k of
   0: b:= True;                                                         // уведомление
   1: b:= not IsDocumentEmpty(ToBuilderDates[i], ToBuilderNums[i]);     // письмо производителю
@@ -219,6 +224,7 @@ begin
   DelButton.Enabled:= b;
 
   //PDFShowButton, PDFCopyButton
+  b:= False;
   case k of
   0: b:= IsDocumentFileExists(10, NoticeDates[i], NoticeNums[i],                  // уведомление
                               MotorDates[i,j], MotorNames[i,j], MotorNums[i,j]);
@@ -269,7 +275,7 @@ begin
 
   if not IsChanged then Exit;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   Sheet.Select(i, j, k);
 
 end;
@@ -336,15 +342,19 @@ begin
   5: SQLite.PretensionNoteDelete(PretensionIDs[i]);          // примечание
   end;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   if k>0 then
     Sheet.Select(i, j, k);
 end;
 
-procedure TPretensionForm.DataLoad(const AMotorNumLike: String = '';
-                       const ABeginDate: TDate = 0;
-                       const AEndDate: TDate = 0);
+procedure TPretensionForm.DataLoad(const AMotorNumLike: String;
+                                    const ABeginDate: TDate;
+                                    const AEndDate: TDate);
 begin
+  BeginDate:= ABeginDate;
+  EndDate:= AEndDate;
+  MotorNumLike:= AMotorNumLike;
+
   Sheet.Unselect;
 
   SQLite.PretensionListLoad(AMotorNumLike, ABeginDate, AEndDate,

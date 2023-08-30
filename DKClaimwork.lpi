@@ -232,6 +232,7 @@
         <Filename Value="umileageeditform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="MileageEditForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UMileageEditForm"/>
       </Unit>
@@ -266,6 +267,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UPretensionLetterStandardForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uattachmenteditform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AttachmentEditForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UAttachmentEditForm"/>
       </Unit>
     </Units>
   </ProjectOptions>

@@ -26,6 +26,7 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
+    Label13: TLabel;
     Label14: TLabel;
     Label15: TLabel;
     Label2: TLabel;
@@ -44,6 +45,7 @@ type
     SenderSignCheckBox: TCheckBox;
     StampCheckBox: TCheckBox;
     SubjectComboBox: TComboBox;
+    TargetComboBox: TComboBox;
     procedure CancelButtonClick(Sender: TObject);
     procedure DT1Change(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -52,6 +54,7 @@ type
     procedure OrganizationComboBoxChange(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure SubjectComboBoxChange(Sender: TObject);
+    procedure TargetComboBoxChange(Sender: TObject);
   private
     CanFormClose: Boolean;
 
@@ -223,11 +226,19 @@ begin
   LetterTextCreate;
 end;
 
+procedure TPretensionLetterStandardForm.TargetComboBoxChange(Sender: TObject);
+begin
+  LetterTextCreate;
+end;
+
 procedure TPretensionLetterStandardForm.DataLoad;
 begin
   Caption:= LETTER_NAMES[LetterType];
   DT1.Date:= Date;
   FileNameLabel.Caption:= EmptyStr;
+
+  Label13.Visible:= LetterType=11;
+  TargetComboBox.Visible:= LetterType=11;
 
   OrganizationsLoad;
   ReceiversLoad;
@@ -359,27 +370,59 @@ end;
 procedure TPretensionLetterStandardForm.LetterTextCreate;
 var
   IsSeveralNotices, IsSeveralMotors: Boolean;
-  Notices, Motors: String;
-  Txt: TStrVector;
+  Notices, Motors, Target: String;
+  MoneySum: Int64;
+  Txt, V: TStrVector;
 begin
-  IsSeveralMotors:= Length(MToVector(MotorNames))>1;
+  V:= MToVector(MotorNames);
+  IsSeveralMotors:= Length(V)>1;
   Notices:= VLetterUniqueFullName(NoticeDates, NoticeNums, IsSeveralNotices);
 
-  if LetterType = 11 then
-    Motors:= VPretensionToString(MotorNames, MotorNums{, MotorDates}, MoneyValues, 'в размере');
-  if LetterType = 13 then
-    Motors:= VPretensionToString(MotorNames, MotorNums{, MotorDates}, MoneyValues, 'на сумму');
-
-  Txt:= nil;
   if SubjectComboBox.Text=LETTER_SUBJECTS[10] then
-    Txt:= Letter10PretensionToBuilder(Motors, UserNameR, IsSeveralMotors, IsSeveralNotices)
+  begin
+    Target:= TargetComboBox.Text;
+    Motors:= VMotorNameNumDateToString(V, MToVector(MotorNums), MToVector(MotorDates));
+    MoneySum:= VSum(MoneyValues);
+    V:= VPretensionToString(MotorNames, MotorNums, MotorDates, MoneyValues, 'в размере');
+    Txt:= Letter10PretensionToBuilder(Motors, UserNameR, Target, MoneySum, V, IsSeveralMotors, IsSeveralNotices);
+  end
   else if SubjectComboBox.Text=LETTER_SUBJECTS[11] then
-    Txt:= Letter11PretensionToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
+  begin
+    MoneySum:= VSum(MoneyValues);
+    V:= VPretensionToString(MotorNames, MotorNums, MotorDates, MoneyValues, 'на сумму');
+    Txt:= Letter11PretensionToUser(Notices, MoneySum, V, {IsSeveralMotors,} IsSeveralNotices);
+  end
   else if SubjectComboBox.Text=LETTER_SUBJECTS[12] then
+  begin
+    Motors:= PretensionToString(MotorNames, MotorNums, MotorDates, MoneyValues, 'на сумму');
     Txt:= Letter12PretensionToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices);
+  end;
+
+
+
+  //if LetterType = 11 then
+  //  Motors:= PretensionToString(MotorNames, MotorNums{, MotorDates}, MoneyValues, 'в размере');
+  //if LetterType = 13 then
+  //  Motors:= PretensionToString(MotorNames, MotorNums{, MotorDates}, MoneyValues, 'на сумму');
+
+  //Txt:= nil;
+  //if SubjectComboBox.Text=LETTER_SUBJECTS[10] then
+  //  Txt:= Letter10PretensionToBuilder(Motors, UserNameR, IsSeveralMotors, IsSeveralNotices)
+  //else if SubjectComboBox.Text=LETTER_SUBJECTS[11] then
+  //  Txt:= Letter11PretensionToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices)
+  //else if SubjectComboBox.Text=LETTER_SUBJECTS[12] then
+  //  Txt:= Letter12PretensionToUser(Notices, Motors, IsSeveralMotors, IsSeveralNotices);
+
 
   LetterTextToStrings(Txt, Memo1.Lines);
 end;
+
+{MoneyValues: TInt64Vector;
+    MotorNames: TStrMatrix;
+    MotorNums: TStrMatrix;
+    MotorDates: TDateMatrix;
+    NoticeNums: TStrVector;
+    NoticeDates: TDateVector;     }
 
 end.
 

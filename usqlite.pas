@@ -84,7 +84,6 @@ type
                                   out AMoneyValues: TInt64Vector;
                                   out AMotorNames, AMotorNums: TStrMatrix;
                                   out AMotorDates: TDateMatrix);
-
     procedure MotorsEmptyPretensionLetterLoad(const ALetterType: Byte;
                                   const AMotorNumLike: String;
                                   const ABusyPretensionIDs: TIntVector;
@@ -300,6 +299,19 @@ type
                             out ANoticeDates: TDateVector;
                             out AAnswerNums: TStrVector;
                             out AAnswerDates: TDateVector);
+
+    //приложения
+    function AttachmentNameLoad(const ACategory: Byte; const AAttachmentID: Integer): String;
+    function AttachmentFind(const ACategory: Byte;
+                            const AAttachmentID: Integer;
+                            const AAttachmentName: String): Boolean;
+    procedure AttachmentInfoLoad(const ACategory: Byte; const AAttachmentID: Integer;
+                                 out AAttachmentName, ANoticeNum: String; out ANoticeDate: TDate;
+                                 out AMotorName, AMotorNum: String; out AMotorDate: TDate);
+    procedure AttachmentListLoad(const ACategory: Byte; const ALogID: Integer;
+                                 out AAttachmentIDs: TIntVector; out AAttachmentNames: TStrVector);
+    procedure AttachmentAdd(const ACategory: Byte; const ALogID: Integer;
+                            const AAttachmentName: String);
 
     //списки файлов
     function FileNamesLoad(const ACategory: Byte; const AReclamationID: Integer): TStrVector;
@@ -1102,11 +1114,19 @@ var
   S, DateField, NumField: String;
   OldID, NewID, n: Integer;
 begin
+  APretensionIDs:= nil;
+  AMotorNames:= nil;
+  AMotorNums:= nil;
+  AMotorDates:= nil;
+  ANoticeNums:= nil;
+  ANoticeDates:= nil;
+  AMoneyValues:= nil;
+
   LetterDBNamesGet(ALetterType, S, DateField, NumField);
   DateField:= SqlEsc(DateField);
   NumField:= SqlEsc(NumField);
 
-  APretensionIDs:= nil;
+
 
   S:=
     'SELECT DISTINCT ' +
@@ -1131,7 +1151,7 @@ begin
   if not SEmpty(AMotorNumLike) then
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
 
-   QSetQuery(FQuery);
+  QSetQuery(FQuery);
   QSetSQL(S);
   QParamInt('UserID', AUserID);
   QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
@@ -1148,12 +1168,7 @@ begin
   end;
   QClose;
 
-  AMotorNames:= nil;
-  AMotorNums:= nil;
-  AMotorDates:= nil;
-  ANoticeNums:= nil;
-  ANoticeDates:= nil;
-  AMoneyValues:= nil;
+
 
   if VIsNil(APretensionIDs) then Exit;
 
@@ -1183,6 +1198,7 @@ begin
     while not QEOF do
     begin
       NewID:= QFieldInt('PretensionID');
+      S:= QFieldStr('MotorNum');
       if NewID<>OldID then
       begin
         VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
@@ -2152,6 +2168,131 @@ begin
   QClose;
 end;
 
+function TSQLite.AttachmentNameLoad(const ACategory: Byte; const AAttachmentID: Integer): String;
+var
+  TableName: String;
+begin
+  TableName:= AttachmentTableNameGet(ACategory);
+  Result:= ValueStrInt32ID(TableName, 'AttachmentName', 'ID', AAttachmentID);
+end;
+
+function TSQLite.AttachmentFind(const ACategory: Byte;
+                                const AAttachmentID: Integer;
+                                const AAttachmentName: String): Boolean;
+var
+  TableName: String;
+begin
+  TableName:= AttachmentTableNameGet(ACategory);
+  Result:= IsValueInTableNotMatchInt32ID(TableName,
+    'AttachmentName', AAttachmentName, 'ID', AAttachmentID, False);
+end;
+
+procedure TSQLite.AttachmentInfoLoad(const ACategory: Byte; const AAttachmentID: Integer;
+                                 out AAttachmentName, ANoticeNum: String; out ANoticeDate: TDate;
+                                 out AMotorName, AMotorNum: String; out AMotorDate: TDate);
+var
+  AttachmentTableName, LogMotorTableName, LogNoticeTableName, IDFieldName: String;
+begin
+  AAttachmentName:= EmptyStr;
+  ANoticeNum:= EmptyStr;
+  ANoticeDate:= 0;
+  AMotorName:= EmptyStr;
+  AMotorNum:= EmptyStr;
+  AMotorDate:= 0;
+
+  AttachmentTableName:= SqlEsc(AttachmentTableNameGet(ACategory));
+  LogMotorTableName:= SqlEsc(LogMotorTableNameGet(ACategory));
+  LogNoticeTableName:= SqlEsc(LogNoticeTableNameGet(ACategory));
+  IDFieldName:= SqlEsc(LogNoticeIDFieldNameGet(ACategory));
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      't1.AttachmentName, t3.NoticeFromUserDate, t3.NoticeFromUserNum, ' +
+      't4.MotorNum, t4.MotorDate, t5.MotorName ' +
+    'FROM ' +
+      AttachmentTableName + ' t1 ' +
+    'INNNER JOIN ' + LogMotorTableName  + ' t2 ON (t1.LogID=t2.LogID) ' +
+    'INNNER JOIN ' + LogNoticeTableName + ' t3 ON (t2.'+IDFieldName+'=t3.'+IDFieldName+') ' +
+    'INNNER JOIN MOTORS t4 ON (t2.MotorID=t4.MotorID) ' +
+    'INNNER JOIN MOTORNAMES t5 ON (t4.MotorNameID=t5.MotorNameID) ' +
+    'WHERE ' +
+      't1.ID = :AttachmentID'
+  );
+  QParamInt('AttachmentID', AAttachmentID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    AAttachmentName:= QFieldStr('AttachmentName');
+    ANoticeNum:= QFieldStr('NoticeFromUserNum');
+    ANoticeDate:= QFieldDT('NoticeFromUserDate');
+    AMotorName:= QFieldStr('MotorName');
+    AMotorNum:= QFieldStr('MotorNum');
+    AMotorDate:= QFieldDT('MotorDate');
+  end;
+  QClose;
+end;
+
+procedure TSQLite.AttachmentListLoad(const ACategory: Byte; const ALogID: Integer;
+                                 out AAttachmentIDs: TIntVector; out AAttachmentNames: TStrVector);
+var
+  TableName: String;
+begin
+  AAttachmentIDs:= nil;
+  AAttachmentNames:= nil;
+
+  TableName:= SqlEsc(AttachmentTableNameGet(ACategory));
+
+  QSetQuery(FQuery);
+  QSetSQL(
+    'SELECT ' +
+      'ID, AttachmentName ' +
+    'FROM ' +
+      TableName +
+    'WHERE ' +
+      'LogID = :LogID'
+  );
+  QParamInt('LogID', ALogID);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
+    while not QEOF do
+    begin
+      VAppend(AAttachmentIDs, QFieldInt('ID'));
+      VAppend(AAttachmentNames, QFieldStr('AttachmentName'));
+      QNext;
+    end;
+  end;
+  QClose;
+end;
+
+procedure TSQLite.AttachmentAdd(const ACategory: Byte; const ALogID: Integer;
+                                const AAttachmentName: String);
+var
+  TableName: String;
+begin
+  TableName:= AttachmentTableNameGet(ACategory);
+
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'INSERT INTO ' +
+        SqlEsc(TableName) +
+        '(LogID, AttachmentName) ' +
+      'VALUES ' +
+        '(:LogID, :AttachmentName) '
+    );
+    QParamInt('LogID', ALogID);
+    QParamStr('AttachmentName', AAttachmentName);
+    QExec;
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
 procedure TSQLite.LetterLoad(const ALogID: Integer; const ALetterType: Byte;
                              out ALetterNum: String;
                              out ALetterDate: TDate);
@@ -2891,13 +3032,9 @@ begin
   AMotorNums:= nil;
   AMotorDates:= nil;
 
-  S:=
-    'SELECT ' +
-      't1.*, '+
-      't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
-      't4.*, ' +
-      't5.ReclamationID, ' +
-      't6.UserNameI, t6.UserTitle ' +
+   S:=
+    'SELECT DISTINCT ' +
+      't1.PretensionID ' +
     'FROM ' +
       'PRETENSIONMOTORS t1 ' +
     'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
@@ -2929,13 +3066,83 @@ begin
   if not QIsEmpty then
   begin
     QFirst;
+    while not QEOF do
+    begin
+      VAppend(APretensionIDs, QFieldInt('PretensionID'));
+      QNext;
+    end;
+  end;
+  QClose;
+
+   if VIsNil(APretensionIDs) then Exit;
+
+  //S:=
+  //  'SELECT ' +
+  //    't1.*, '+
+  //    't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+  //    't4.*, ' +
+  //    't5.ReclamationID, ' +
+  //    't6.UserNameI, t6.UserTitle ' +
+  //  'FROM ' +
+  //    'PRETENSIONMOTORS t1 ' +
+  //  'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+  //  'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+  //  'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+  //  'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
+  //  'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+  //  'WHERE ' +
+  //    '(t1.PretensionID>0) ';
+  //
+  //if not SEmpty(AMotorNumLike) then
+  //  S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
+  //else begin
+  //  if (ABeginDate>0) and (AEndDate>0) then
+  //    S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
+  //  if AViewIndex>0 then
+  //    S:= S + ' AND (t4.Status = :Status) ';
+  //end;
+  //S:= S +
+  //  'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
+  //QSetQuery(FQuery);
+  //QSetSQL(S);
+  //QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
+  //QParamDT('BD', ABeginDate);
+  //QParamDT('ED', AEndDate);
+  //QParamInt('Status', AViewIndex);
+  //QOpen;
+
+
+  S:=
+    'SELECT ' +
+      't1.*, '+
+      't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
+      't4.*, ' +
+      't5.ReclamationID, ' +
+      't6.UserNameI, t6.UserTitle ' +
+    'FROM ' +
+      'PRETENSIONMOTORS t1 ' +
+    'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
+    'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
+    'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
+    'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
+    'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+    'WHERE ' +
+      SqlIN('t1','PretensionID', Length(APretensionIDs)) +
+    'ORDER BY ' +
+      't4.NoticeFromUserDate, t4.NoticeFromUserNum, t2.MotorNum, t2.MotorDate, t3.MotorName ';
+
+  QSetSQL(S);
+  QParamsInt(APretensionIDs);
+  QOpen;
+  if not QIsEmpty then
+  begin
+    QFirst;
     OldID:= 0;
     while not QEOF do
     begin
       NewID:= QFieldInt('PretensionID');
       if NewID<>OldID then
       begin
-        VAppend(APretensionIDs, NewID);
         VAppend(AUserNames, QFieldStr('UserNameI'));
         VAppend(AUserTitles, QFieldStr('UserTitle'));
         VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
@@ -2962,7 +3169,7 @@ begin
         OldID:= NewID;
       end
       else begin
-        n:= High(APretensionIDs);
+        n:= High(AMotorNames);
         VAppend(AReclamationIDs[n], QFieldInt('ReclamationID'));
         VAppend(ALogIDs[n], QFieldInt('LogID'));
         VAppend(AMotorNames[n], QFieldStr('MotorName'));

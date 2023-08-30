@@ -62,6 +62,7 @@ const
                                 out ADateField, ANumField: String);
   procedure LetterDBNamesGet(const ALetterType: Byte;
                             out ATableName, ADateField, ANumField: String);
+  function AttachmentTableNameGet(const ACategory: Byte): String;
   function LogMotorTableNameGet(const ACategory: Byte): String;
   function LogNoticeTableNameGet(const ACategory: Byte): String;
   function LogNoticeIDFieldNameGet(const ACategory: Byte): String;
@@ -133,13 +134,17 @@ const
 
 
   function PretensionToString(const AMotorNames, AMotorNums: TStrVector;
-                               //const AMotorDates: TDateVector;
+                               const AMotorDates: TDateVector;
                                const AMoneyValue: Int64;
                                const AText: String): String;
-  function VPretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
-                              // const AMotorDates: TDateMatrix;
+  function PretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
+                               const AMotorDates: TDateMatrix;
                                const AMoneyValues: TInt64Vector;
                                const AText: String): String;
+  function VPretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
+                               const AMotorDates: TDateMatrix;
+                               const AMoneyValues: TInt64Vector;
+                               const AText: String): TStrVector;
 
 
 
@@ -182,6 +187,12 @@ const
                            const AMotorDate: TDate;
                            const AMotorName, AMotorNum: String): String;
 
+  function AttachmentFileNameGet(const ACategory: Byte; const AAttachmentName: String;
+                            const ALetterDate: TDate; const ALetterNum: String): String;
+   function AttachmentFileFullNameGet(const ACategory: Byte; const AAttachmentName: String;
+                            const ALetterDate: TDate; const ALetterNum: String;
+                            const AMotorDate: TDate;  const AMotorName, AMotorNum: String): String;
+
   //файлы писем
   function DocumentChoose(const AEdit: TEdit = nil): String;  //OpenDialog
   procedure DocumentSet(const AFileName: String; const AEdit: TEdit);
@@ -208,11 +219,12 @@ const
                         const ALetterNum: String;
                         const AMotorDate: TDate;
                         const AMotorName, AMotorNum: String): Boolean;
-  function DocumentCopy(const ALetterType: Byte;   //SaveDialog
+  function DocumentCopy(const ALetterType: Byte;
                         const ALetterDate: TDate;
                         const ALetterNum: String;
                         const AMotorDate: TDate;
                         const AMotorName, AMotorNum: String): Boolean;
+  function DocumentCopy(const ASrcFileName, ADestFileName: String): Boolean; //SaveDialog
   function DocumentSave(const ALetterType: Byte;
                          const ASrcFileName: String;
                          const AMotorDate: TDate;
@@ -257,6 +269,7 @@ const
   function PretensionEdit(const APretensionID: Integer): Boolean;
   function PretensionLetterEdit(const ALetterType: Byte; const APretensionID: Integer): Boolean;
   function PretensionMoneyDatesEdit(const APretensionID: Integer): Boolean;
+  function AttachmentEdit(const ACategory: Byte; const ALogID, AAttachmentID: Integer): Boolean;
 
 
   //текст письма из Memo
@@ -293,10 +306,14 @@ const
   function Letter9RepairToUser(const ANoticesFullName, AMotorsFullName: String;
                              const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 
-  function Letter10PretensionToBuilder(const AMotors, AUserName: String;
-                                  const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
-  function Letter11PretensionToUser(const ANotices, AMotors: String;
-                                  const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
+  function Letter10PretensionToBuilder(const AMotors, AUserName, ATarget: String;
+                                     const AMoneySum: Int64;
+                                     const AMotorsWithMoneys: TStrVector;
+                                     const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
+  function Letter11PretensionToUser(const ANotices{, AMotors}: String;
+                                  const AMoneySum: Int64;
+                                  const AMotorsWithMoneys: TStrVector;
+                                  const {AIsSeveralMotors,} AIsSeveralNotices: Boolean): TStrVector;
   function Letter12PretensionToUser(const ANotices, AMotors: String;
                                   const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 
@@ -307,7 +324,7 @@ implementation
 
 uses ULetterEditForm, UNoteEditForm, UMileageEditForm, UMoneyDatesEditForm,
      URepairDatesEditForm, URepairEditForm, UPretensionEditForm,
-     UPretensionLetterForm, UReclamationEditForm;
+     UPretensionLetterForm, UReclamationEditForm, UAttachmentEditForm;
 
 function LetterTextFromStrings(const AStrings: TStrings): TStrVector;
 var
@@ -659,31 +676,61 @@ begin
   Result:= VCreateStr([S1, S2]);
 end;
 
-function Letter10PretensionToBuilder(const AMotors, AUserName: String;
+function Letter10PretensionToBuilder(const AMotors, AUserName, ATarget: String;
+                                     const AMoneySum: Int64;
+                                     const AMotorsWithMoneys: TStrVector;
                                      const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
 var
   S: String;
+  i: Integer;
 begin
+  //if AIsSeveralNotices then
+  //  S:= 'В связи с поступившими претензиями (копии писем '
+  //else
+  //  S:= 'В связи с поступившей претензией (копию письма ';
+  //S:= S + AUserName + ' прилагаю) ';
+  //S:= S + 'прошу Вас согласовать компенсацию затрат, связанных с ';
+  //    //'<ТРАНСПОРТИРОВКЕ/РЕМОНТУ/ДЕМОНТАЖУ/ДР.> ';
+  //if AIsSeveralMotors then
+  //  S:= S + 'гарантийными электродвигателями '
+  //else
+  //  S:= S + 'гарантийным электродвигателем ';
+  //S:= S + AMotors + '.';
+  //Result:= VCreateStr([S]);
+
   if AIsSeveralNotices then
-    S:= 'В связи с поступившими претензиями (копии писем '
+    S:= 'В связи с поступившими претензиями '
   else
-    S:= 'В связи с поступившей претензией (копию письма ';
-  S:= S + AUserName + ' прилагаю) ';
-  S:= S + 'прошу Вас согласовать компенсацию затрат, связанных с ';
-      //'<ТРАНСПОРТИРОВКЕ/РЕМОНТУ/ДЕМОНТАЖУ/ДР.> ';
+    S:= 'В связи с поступившей претензией ';
+  S:= S + 'о возмещении затрат ' + ATarget;
   if AIsSeveralMotors then
-    S:= S + 'гарантийными электродвигателями '
+    S:= S + ' гарантийных электродвигателей '
   else
-    S:= S + 'гарантийным электродвигателем ';
-  S:= S + AMotors + '.';
+    S:= S + ' гарантийного электродвигателя ';
+  if AIsSeveralNotices then
+    S:= S + '(копии писем '
+  else
+    S:= S + AMotors + ' (копию письма ';
+  S:= S + AUserName + ' прилагаю), прошу Вас согласовать компенсацию затрат в размере ';
+  S:= S + PriceIntToStr(AMoneySum, True) + ' руб.';
 
   Result:= VCreateStr([S]);
+
+  if Length(AMotorsWithMoneys)=1 then Exit;
+
+  Result[0]:= Result[0] + ':';
+  for i:= 0 to High(AMotorsWithMoneys)-1 do
+    VAppend(Result, AMotorsWithMoneys[i] + ',');
+  VAppend(Result, AMotorsWithMoneys[High(AMotorsWithMoneys)]);
 end;
 
-function Letter11PretensionToUser(const ANotices, AMotors: String;
-                                  const AIsSeveralMotors, AIsSeveralNotices: Boolean): TStrVector;
+function Letter11PretensionToUser(const ANotices{, AMotors}: String;
+                                  const AMoneySum: Int64;
+                                  const AMotorsWithMoneys: TStrVector;
+                                  const {AIsSeveralMotors,} AIsSeveralNotices: Boolean): TStrVector;
 var
   S: String;
+  i: Integer;
 begin
   if AIsSeveralNotices then
     S:= 'На Ваши письма №№ '
@@ -692,19 +739,27 @@ begin
   S:= S + ANotices;
   S:= S + ' сообщаю, что возражений по ';
   if AIsSeveralNotices then
-    S:= S + 'претензиям '
+    S:= S + 'всем указанным претензиям '
   else
     S:= S + 'претензии ';
-  S:= S + 'на возмещение затрат, связанных с ';
-  if AIsSeveralMotors then
-    S:= S + 'гарантийными электродвигателями '
-  else
-    S:= S + 'гарантийным электродвигателем ';
-  S:= S + AMotors;
-  S:= S + ', не имеем. Для оплаты прошу Вас направить в наш адрес счет и ' +
-      'документ для отражения в бухгалтерском учете.';
+  S:= S + 'на сумму ' + PriceIntToStr(AMoneySum, True) + ' руб. не имеем';
 
-  Result:= VCreateStr([S]);
+  if Length(AMotorsWithMoneys)=1 then
+  begin
+    S:= S + '.';
+    Result:= VCreateStr([S]);
+  end
+  else begin
+    S:= S + ':';
+    Result:= VCreateStr([S]);
+    for i:= 0 to High(AMotorsWithMoneys)-1 do
+      VAppend(Result, AMotorsWithMoneys[i] + ',');
+    VAppend(Result, AMotorsWithMoneys[High(AMotorsWithMoneys)]);
+  end;
+
+  S:= 'Для оплаты прошу Вас направить в наш адрес счет и ' +
+      'документы для отражения в бухгалтерском учете.';
+  VAppend(Result, S);
 end;
 
 function Letter12PretensionToUser(const ANotices, AMotors: String;
@@ -718,11 +773,11 @@ begin
     S1:= 'На Ваше письмо № ';
   S1:= S1 + ANotices;
   S1:= S1 + ' сообщаю, что в документах, которые представлены для обоснования ' +
-      'затрат, связанных с ';
+      'затрат по ';
   if AIsSeveralMotors then
-    S1:= S1 + ' гарантийными электродвигателями '
+    S1:= S1 + 'гарантийным электродвигателям '
   else
-    S1:= S1 + ' гарантийным электродвигателем ';
+    S1:= S1 + 'гарантийному электродвигателю ';
   S1:= S1 + AMotors + ', ';
   S1:= S1 + '<НЕСООТВЕТСТВИЯ В ДОКУМЕНТАХ>' + '.';
 
@@ -804,6 +859,15 @@ begin
   else
     ATableName:= LogMotorTableNameGet(Category);
   LetterFieldNamesGet(ALetterType, ADateField, ANumField);
+end;
+
+function AttachmentTableNameGet(const ACategory: Byte): String;
+begin
+  case ACategory of
+  1: Result:= 'RECLAMATIONATTACHMENTS';
+  2: Result:= 'REPAIRATTACHMENTS';
+  3: Result:= 'PRETENSIONATTACHMENTS';
+  end;
 end;
 
 function LogMotorTableNameGet(const ACategory: Byte): String;
@@ -1191,16 +1255,16 @@ begin
 end;
 
 function PretensionToString(const AMotorNames, AMotorNums: TStrVector;
-                            //const AMotorDates: TDateVector;
+                            const AMotorDates: TDateVector;
                             const AMoneyValue: Int64;
                             const AText: String): String;
 begin
-  Result:= VMotorNameNumToString(AMotorNames, AMotorNums) + //VMotorNameNumDateToString(AMotorNames, AMotorNums, AMotorDates) +
-         ' ' + AText + ' ' +  PriceIntToStr(AMoneyValue, True) + ' рублей';
+  Result:= VMotorNameNumDateToString(AMotorNames, AMotorNums, AMotorDates) +
+         ' ' + AText + ' ' +  PriceIntToStr(AMoneyValue, True) + ' руб.';
 end;
 
-function VPretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
-                              // const AMotorDates: TDateMatrix;
+function PretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
+                               const AMotorDates: TDateMatrix;
                                const AMoneyValues: TInt64Vector;
                                const AText: String): String;
 var
@@ -1208,10 +1272,25 @@ var
 begin
   Result:= EmptyStr;
   if VIsNil(AMoneyValues) then Exit;
-  Result:= PretensionToString(AMotorNames[0], AMotorNums[0]{, AMotorDates[0]}, AMoneyValues[0], AText);
+  Result:= PretensionToString(AMotorNames[0], AMotorNums[0], AMotorDates[0], AMoneyValues[0], AText);
   for i:= 1 to High(AMoneyValues) do
     Result:= Result + ', ' +
-      PretensionToString(AMotorNames[i], AMotorNums[i]{, AMotorDates[i]}, AMoneyValues[i], AText);
+      PretensionToString(AMotorNames[i], AMotorNums[i], AMotorDates[i], AMoneyValues[i], AText);
+end;
+
+function VPretensionToString(const AMotorNames, AMotorNums: TStrMatrix;
+                               const AMotorDates: TDateMatrix;
+                               const AMoneyValues: TInt64Vector;
+                               const AText: String): TStrVector;
+var
+  i: Integer;
+begin
+  Result:= nil;
+  if VIsNil(AMoneyValues) then Exit;
+  VDim(Result, Length(AMoneyValues));
+  for i:= 0 to High(AMoneyValues) do
+    Result[i]:= PretensionToString(AMotorNames[i], AMotorNums[i], AMotorDates[i],
+                                   AMoneyValues[i], AText);
 end;
 
 procedure ReceiversDBNamesGet(const AOrganizationType: Byte;
@@ -1360,6 +1439,27 @@ begin
            FileNameGet(ALetterType, ALetterDate, ALetterNum) + '.pdf';
 end;
 
+function AttachmentFileNameGet(const ACategory: Byte; const AAttachmentName: String;
+                            const ALetterDate: TDate; const ALetterNum: String): String;
+begin
+  case ACategory of
+  1: Result:= 'К рекламации ';
+  2: Result:= 'К ремонту ';
+  3: Result:= 'К претензии ';
+  end;
+  Result:= Result + LetterFullName(ALetterDate, ALetterNum, True {check bad symbols}) +
+           ' - ' + AAttachmentName;
+end;
+
+function AttachmentFileFullNameGet(const ACategory: Byte; const AAttachmentName: String;
+                            const ALetterDate: TDate; const ALetterNum: String;
+                            const AMotorDate: TDate;  const AMotorName, AMotorNum: String): String;
+begin
+  Result:= MotorNumDirectoryGet(AMotorName, AMotorNum, AMotorDate) +
+           DirectorySeparator +
+           AttachmentFileNameGet(ACategory, AAttachmentName, ALetterDate, ALetterNum) + '.pdf';
+end;
+
 function DocumentChoose(const AEdit: TEdit = nil): String;
 var
   D: TOpenDialog;
@@ -1497,19 +1597,23 @@ function DocumentCopy(const ALetterType: Byte;
                         const AMotorDate: TDate;
                         const AMotorName, AMotorNum: String): Boolean;
 var
-  D: TSaveDialog;
   DestFileName, SrcFileName: String;
 begin
   SrcFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
                                 AMotorDate, AMotorName, AMotorNum);
   DestFileName:= FileNameGet(ALetterType, ALetterDate, ALetterNum);
+  Result:= DocumentCopy(SrcFileName, DestFileName);
+end;
 
+function DocumentCopy(const ASrcFileName, ADestFileName: String): Boolean;
+var
+  D: TSaveDialog;
+begin
   D:= TSaveDialog.Create(nil);
   try
-    D.FileName:= DestFileName;
+    D.FileName:= ADestFileName;
     if not D.Execute then Exit;
-    DestFileName:= D.FileName;
-    Result:= CopyFile(SrcFileName, DestFileName, [cffOverwriteFile]);
+    Result:= CopyFile(ASrcFileName, D.FileName, [cffOverwriteFile]);
   finally
     FreeAndNil(D);
   end;
@@ -1757,6 +1861,22 @@ begin
   finally
     FreeAndNil(MoneyDatesEditForm);
   end;
+end;
+
+function AttachmentEdit(const ACategory: Byte; const ALogID, AAttachmentID: Integer): Boolean;
+var
+  AttachmentEditForm: TAttachmentEditForm;
+begin
+  AttachmentEditForm:= TAttachmentEditForm.Create(nil);
+  try
+    AttachmentEditForm.Category:= ACategory;
+    AttachmentEditForm.LogID:= ALogID;
+    AttachmentEditForm.AttachmentID:= AAttachmentID;
+    Result:= AttachmentEditForm.ShowModal=mrOK;
+  finally
+    FreeAndNil(AttachmentEditForm);
+  end;
+
 end;
 
 

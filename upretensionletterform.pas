@@ -75,8 +75,6 @@ type
     OldPretensionIDs: TIntVector;
     OldMotorNames, OldMotorNums: TStrMatrix;
     OldMotorDates: TDateMatrix;
-    //OldNoticeNums: TStrVector;
-    //OldNoticeDates: TDateVector;
 
     VSTFreeMotorList: TVSTTable;
     FreePretensionIDs: TIntVector;
@@ -338,12 +336,9 @@ begin
   BusyMotorsLoad;
 
   OldPretensionIDs:= VCut(BusyPretensionIDs);
-  //OldNoticeNums:= VCut(BusyNoticeNums);
-  //OldNoticeDates:= VCut(BusyNoticeDates);
   OldMotorNames:= MCut(BusyMotorNames);
   OldMotorNums:= MCut(BusyMotorNums);
   OldMotorDates:= MCut(BusyMotorDates);
-
 end;
 
 procedure TPretensionLetterForm.LetterStandardFormOpen;
@@ -442,7 +437,6 @@ begin
 
   FreeMotors:= VPretensionMotorsStr(FreeMotorNames, FreeMotorNums, FreeMotorDates,
                                     FreeNoticeNums, FreeNoticeDates, FreeMoneyValues);
-
 
   VSTFreeMotorList.UnSelect;
   VSTFreeMotorList.SetColumn('Список', FreeMotors, taLeftJustify);

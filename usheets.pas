@@ -184,8 +184,8 @@ begin
   Result:= VAdd(V1, V2);
 
   {indexes                0  1  2  3  4   5          }
-  FSelCols1:= VCreateInt([3, 6, 7, 8, 9,  13]);
-  FSelCols2:= VCreateInt([5, 6, 7, 8, 12, 13]);
+  FSelCols1:= VCreateInt([3, 6, 7, 8, 9,  13, 1]);
+  FSelCols2:= VCreateInt([5, 6, 7, 8, 12, 13, 2]);
   FMainCol1:= 3;
   FMainCol2:= 5;
   FMainColIndex:= 0;
@@ -304,8 +304,8 @@ begin
   Result:= VAdd(V1, V2);
 
   {indexes                0  1  2  3  4  5     }
-  FSelCols1:= VCreateInt([3, 5, 6, 7, 8, 10]);
-  FSelCols2:= VCreateInt([4, 5, 6, 7, 9, 10]);
+  FSelCols1:= VCreateInt([3, 5, 6, 7, 8, 10, 1]);
+  FSelCols2:= VCreateInt([4, 5, 6, 7, 9, 10, 2]);
   FMainCol1:= 3;
   FMainCol2:= 4;
   FMainColIndex:= 0;
@@ -411,8 +411,8 @@ begin
   Result:= VAdd(V1, V2);
 
   {indexes                0  1  2  3  4  5   6   7       }
-  FSelCols1:= VCreateInt([3, 4, 7, 8, 9, 10, 11, 12]);
-  FSelCols2:= VCreateInt([3, 6, 7, 8, 9, 10, 11, 12]);
+  FSelCols1:= VCreateInt([3, 4, 7, 8, 9, 10, 11, 12, 1]);
+  FSelCols2:= VCreateInt([3, 6, 7, 8, 9, 10, 11, 12, 2]);
   FMainCol1:= 4;
   FMainCol2:= 6;
   FMainColIndex:= 1;
@@ -547,9 +547,7 @@ procedure TSheetCustom.Select(const ANoticeIndex, AMotorIndex, AColIndex: Intege
 var
   n: Integer;
 begin
-  //Unselect;
   if (ANoticeIndex<0) or (AMotorIndex<0) or (AColIndex<0) then Exit;
-  //if not IsLineExists(ANoticeIndex) then Exit;
 
   FSelectedNoticeIndex:= ANoticeIndex;
   FSelectedMotorIndex:=  AMotorIndex;

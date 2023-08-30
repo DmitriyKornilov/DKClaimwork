@@ -46,6 +46,8 @@ type
   private
     Sheet: TSheetRepair;
     ZoomPercent: Integer;
+    BeginDate, EndDate: TDate;
+    MotorNumLike: String;
 
     //данные из базы
     RepairIDs: TIntVector;
@@ -77,9 +79,9 @@ type
     procedure DataEdit;
     procedure DataDelete;
   public
-    procedure DataLoad(const AMotorNumLike: String = '';
-                       const ABeginDate: TDate = 0;
-                       const AEndDate: TDate = 0);
+    procedure DataLoad(const AMotorNumLike: String;
+                      const ABeginDate: TDate;
+                      const AEndDate: TDate);
   end;
 
 var
@@ -106,7 +108,7 @@ var
 begin
   if not RepairEdit(0) then Exit;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   RepairID:= SQLite.RepairMaxID;
   NoticeIndex:= VIndexOf(RepairIDs, RepairID);
   if NoticeIndex<0 then Exit;
@@ -179,7 +181,7 @@ end;
 
 procedure TRepairForm.ViewTypeComboBoxChange(Sender: TObject);
 begin
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
 end;
 
 procedure TRepairForm.ButtonsEnabled;
@@ -200,6 +202,7 @@ begin
   k:= Sheet.SelectedColIndex;
 
   //EditButton
+  b:= False;
   case k of
   0: b:= True;                                                               // уведомление
   1: b:= (IsDocumentExists(ToBuilderDates[i,j], ToBuilderNums[i,j]) or       // письмо производителю
@@ -216,6 +219,7 @@ begin
   EditButton.Enabled:= b;
 
   //DelButton
+  b:= False;
   case k of
   0: b:= True;                                                             // уведомление
   1: b:= not IsDocumentEmpty(ToBuilderDates[i,j], ToBuilderNums[i,j]);     // письмо производителю
@@ -227,6 +231,7 @@ begin
   DelButton.Enabled:= b;
 
   //PDFShowButton, PDFCopyButton
+  b:= False;
   case k of
   0: b:= IsDocumentFileExists(6, NoticeDates[i], NoticeNums[i],                  // уведомление
                               MotorDates[i,j], MotorNames[i,j], MotorNums[i,j]);
@@ -277,7 +282,7 @@ begin
 
   if not IsChanged then Exit;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   Sheet.Select(i, j, k);
 end;
 
@@ -343,19 +348,23 @@ begin
   5: SQLite.NoteDelete(LogIDs[i,j], 2{ремонт});    // примечание
   end;
 
-  DataLoad;
+  DataLoad(MotorNumLike, BeginDate, EndDate);
   if k<>1 then
     Sheet.Select(i, j, k);
 
 end;
 
-procedure TRepairForm.DataLoad(const AMotorNumLike: String = '';
-                       const ABeginDate: TDate = 0;
-                       const AEndDate: TDate = 0);
+procedure TRepairForm.DataLoad(const AMotorNumLike: String;
+                                const ABeginDate: TDate;
+                                const AEndDate: TDate);
 begin
+  BeginDate:= ABeginDate;
+  EndDate:= AEndDate;
+  MotorNumLike:= AMotorNumLike;
+
   Sheet.Unselect;
 
-  SQLite.RepairListLoad(AMotorNumLike, ABeginDate, AEndDate,
+  SQLite.RepairListLoad(AMotorNumLike, BeginDate, EndDate,
                 ViewTypeComboBox.ItemIndex,
                 RepairIDs, UserNames, UserTitles,
                 NoticeDates, NoticeNums, ToBuilderDates, ToBuilderNums,
