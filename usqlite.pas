@@ -217,6 +217,7 @@ type
                            const ALetterNum: String;
                            const ALetterDate: TDate;
                            const AStatus: Integer);
+    procedure RepairAnswerNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const AStatus: Integer);
 
     //претензии
     procedure PretensionListLoad(const AMotorNumLike: String;
@@ -2988,6 +2989,11 @@ procedure TSQLite.RepairAnswersToUserUpdate(const ALogIDs, ADelLogIDs: TIntVecto
                            const AStatus: Integer);
 begin
   LettersUpdate(ALogIDs, ADelLogIDs, 9 {ответ потреб. по ремонту}, ALetterNum, ALetterDate, AStatus);
+end;
+
+procedure TSQLite.RepairAnswerNotNeed(const ALogIDs, ADelLogIDs: TIntVector; const AStatus: Integer);
+begin
+  LettersUpdate(ALogIDs, ADelLogIDs, 9 {ответ потреб. по ремонту}, LETTER_NOTNEED_MARK, 0, AStatus);
 end;
 
 procedure TSQLite.PretensionListLoad(const AMotorNumLike: String;

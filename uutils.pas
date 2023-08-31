@@ -194,6 +194,7 @@ const
                             const AMotorDate: TDate;  const AMotorName, AMotorNum: String): String;
 
   //файлы писем
+  function DocumentDate(const AFileName: String; out ADate: TDate): Boolean;
   function DocumentChoose(const AEdit: TEdit = nil): String;  //OpenDialog
   procedure DocumentSet(const AFileName: String; const AEdit: TEdit);
   procedure DocumentOpen(const ALetterType: Byte;
@@ -406,11 +407,11 @@ begin
     S1:= S1 + ' вышли из строя гарантийные электродвигатели '
   else
     S1:= S1 + ' вышел из строя гарантийный электродвигатель ';
-  S1:= S1 + AMotorsFullName + '. ';
+  S1:= S1 + AMotorsFullName;
   if AIsSeveralNotices then
-    S1:= S1 + '(копии писем '
+    S1:= S1 + ' (копии писем '
   else
-    S1:= S1 + '(копию письма ';
+    S1:= S1 + ' (копию письма ';
   S1:= S1 + AUserName;
   S1:= S1 + ' прилагаю).';
 
@@ -1408,14 +1409,11 @@ function FileNameGet(const ALetterType: Byte;
 var
   S: String;
 begin
-  if (ALetterType = 4) or (ALetterType = 44) then
+  if ALetterType = 4 then
   begin
-    if ALetterType = 4 then
-      Result:= 'Акт осмотра электродвигателя'
-    else
-      Result:= 'Приложение к акту осмотра';
+    Result:= 'Акт осмотра электродвигателя';
     if not SSame('б/н', ALetterNum) then
-      Result:= Result + ' №' + ALetterNum;
+      Result:= Result + ' №' + SFileNameCheck(ALetterNum, SYMBOLS_BADFILENAME);
     Result:= Result + ' от ' + FormatDateTime('dd.mm.yyyy', ALetterDate);
   end
   else begin
@@ -1458,6 +1456,16 @@ begin
   Result:= MotorNumDirectoryGet(AMotorName, AMotorNum, AMotorDate) +
            DirectorySeparator +
            AttachmentFileNameGet(ACategory, AAttachmentName, ALetterDate, ALetterNum) + '.pdf';
+end;
+
+function DocumentDate(const AFileName: String; out ADate: TDate): Boolean;
+var
+  S: String;
+begin
+  Result:= False;
+  S:= SDate(AFileName);
+  if SEmpty(S) then Exit;
+  Result:= TryStrToDate(S, ADate);
 end;
 
 function DocumentChoose(const AEdit: TEdit = nil): String;

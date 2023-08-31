@@ -549,6 +549,8 @@ var
 begin
   if (ANoticeIndex<0) or (AMotorIndex<0) or (AColIndex<0) then Exit;
 
+  if (ANoticeIndex>High(FNotices)) or (AMotorIndex>High(FMotors[ANoticeIndex])) then Exit;
+
   FSelectedNoticeIndex:= ANoticeIndex;
   FSelectedMotorIndex:=  AMotorIndex;
   FSelectedColIndex:= AColIndex;

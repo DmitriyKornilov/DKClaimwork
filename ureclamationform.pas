@@ -379,8 +379,6 @@ end;
 procedure TReclamationForm.DataLoad(const AMotorNumLike: String;
                                     const ABeginDate: TDate;
                                     const AEndDate: TDate);
-var
-  i: Integer;
 begin
   BeginDate:= ABeginDate;
   EndDate:= AEndDate;

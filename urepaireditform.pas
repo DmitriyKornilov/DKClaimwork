@@ -239,8 +239,12 @@ begin
 end;
 
 procedure TRepairEditForm.OpenButtonClick(Sender: TObject);
+var
+  D: TDate;
 begin
   DocumentChoose(FileNameEdit);
+  if DocumentDate(FileNameEdit.Text, D) then
+    DT1.Date:= D;
 end;
 
 procedure TRepairEditForm.DataLoad;

@@ -196,8 +196,12 @@ begin
 end;
 
 procedure TPretensionLetterForm.OpenButtonClick(Sender: TObject);
+var
+  D: TDate;
 begin
   DocumentChoose(FileNameEdit);
+  if DocumentDate(FileNameEdit.Text, D) then
+    DT1.Date:= D;
 end;
 
 procedure TPretensionLetterForm.SaveButtonClick(Sender: TObject);

@@ -886,7 +886,7 @@ object LetterStandardForm: TLetterStandardForm
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = LetterNumEdit
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = Label12
+    AnchorSideBottom.Control = FileNameLabel
     Cursor = crHandPoint
     Left = 565
     Height = 30

@@ -229,8 +229,12 @@ begin
 end;
 
 procedure TPretensionEditForm.OpenButtonClick(Sender: TObject);
+var
+  D: TDate;
 begin
   DocumentChoose(FileNameEdit);
+  if DocumentDate(FileNameEdit.Text, D) then
+    DT1.Date:= D;
 end;
 
 procedure TPretensionEditForm.SearchNumEditButtonClick(Sender: TObject);

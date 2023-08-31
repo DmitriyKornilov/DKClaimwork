@@ -143,8 +143,12 @@ begin
 end;
 
 procedure TLetterEditForm.OpenButtonClick(Sender: TObject);
+var
+  D: TDate;
 begin
   DocumentChoose(FileNameEdit);
+  if DocumentDate(FileNameEdit.Text, D) then
+    DT1.Date:= D;
 end;
 
 procedure TLetterEditForm.SaveButtonClick(Sender: TObject);
@@ -186,6 +190,8 @@ begin
       SQLite.ReclamationCancelNotNeed(BusyLogIDs, DelLogIDs)
     else if LetterType=4 then {Акт осмотра двигателя}
       SQLite.ReclamationReportNotNeed(BusyLogIDs, DelLogIDs, ReclamationStatusGet)
+    else if LetterType=9 then {Ответ на запрос о ремонте Потребителю}
+        SQLite.RepairAnswerNotNeed(BusyLogIDs, DelLogIDs, RepairStatusGet)
     else
       SQLite.LettersNotNeed(BusyLogIDs, DelLogIDs, LetterType);
   end
@@ -200,6 +206,12 @@ begin
     end;
     LetterDate:= DT1.Date;
 
+    //пересохраняем файлы писем, если нужно
+    SrcFileName:= STrim(FileNameEdit.Text);
+    if not DocumentsUpdate(not NotChangeFileCheckBox.Checked, LetterType, SrcFileName,
+                BusyMotorDates, BusyMotorNames, BusyMotorNums,
+                OldLetterDate, OldLetterNum, LetterDate, LetterNum) then Exit;
+
     if MotorReturn then //возврат двигателя на этапе расследования рекламации
     begin
       //удаляем все файлы по согласованию гарантийного ремонта (не требуются)
@@ -210,11 +222,6 @@ begin
       SQLite.MotorsReturn(BusyLogIDs, BusyMotorIDs, UserID, LetterNum, LetterDate);
     end
     else begin // другие письма
-      //пересохраняем файлы писем, если нужно
-      SrcFileName:= STrim(FileNameEdit.Text);
-      if not DocumentsUpdate(not NotChangeFileCheckBox.Checked, LetterType, SrcFileName,
-                  BusyMotorDates, BusyMotorNames, BusyMotorNums,
-                  OldLetterDate, OldLetterNum, LetterDate, LetterNum) then Exit;
       //записываем в базу данные
       if LetterType=5 then {Отзыв рекламации}
         SQLite.ReclamationCancelUpdate(BusyLogIDs, DelLogIDs, LetterNum, LetterDate)
