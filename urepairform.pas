@@ -37,6 +37,7 @@ type
     procedure AddButtonClick(Sender: TObject);
     procedure DelButtonClick(Sender: TObject);
     procedure EditButtonClick(Sender: TObject);
+    procedure ExportButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure LogGridDblClick(Sender: TObject);
@@ -125,6 +126,11 @@ end;
 procedure TRepairForm.EditButtonClick(Sender: TObject);
 begin
   DataEdit;
+end;
+
+procedure TRepairForm.ExportButtonClick(Sender: TObject);
+begin
+  Sheet.Save('Выполнено!');
 end;
 
 procedure TRepairForm.FormDestroy(Sender: TObject);

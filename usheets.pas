@@ -8,6 +8,7 @@ uses
   Classes, SysUtils, Graphics, Controls, fpspreadsheetgrid, fpspreadsheet,
 
   DK_SheetTables, DK_Vector, DK_Matrix, DK_Fonts, DK_SheetWriter, DK_Const,
+  DK_SheetExporter,
 
   Uutils;
 
@@ -81,6 +82,7 @@ type
     property SelectedNoticeIndex: Integer read FSelectedNoticeIndex;
     property SelectedMotorIndex: Integer read FSelectedMotorIndex;
 
+    procedure Save(const ADoneMessage: String);
 
     property IsSelected: Boolean read GetIsSelected;
     property OnSelect: TSheetSelectEvent read FOnSelect write FOnSelect;
@@ -543,6 +545,29 @@ begin
   if Assigned(FOnSelect) then FOnSelect;
 end;
 
+procedure TSheetCustom.Save(const ADoneMessage: String);
+var
+  Exporter: TGridExporter;
+  i,j,k: Integer;
+begin
+  if IsSelected then
+  begin
+    k:= FSelectedColIndex;
+    i:= FSelectedNoticeIndex;
+    j:= FSelectedMotorIndex;
+    Unselect;
+  end;
+
+  Exporter:= TGridExporter.Create(FWriter.Grid);
+  try
+    Exporter.PageSettings(spoLandscape);
+    Exporter.Save(ADoneMessage);
+  finally
+    FreeAndNil(Exporter);
+  end;
+  Select(i,j,k);
+end;
+
 procedure TSheetCustom.Select(const ANoticeIndex, AMotorIndex, AColIndex: Integer);
 var
   n: Integer;
@@ -689,6 +714,7 @@ procedure TSheetCustom.Draw;
 var
   i, R: Integer;
 begin
+  FWriter.Clear;
   if FWriter.HasGrid then
   begin
     FWriter.Grid.Clear;
@@ -707,10 +733,8 @@ begin
       R:= VLast(FSelRows2) + 1;
       for i:= 1 to FWriter.ColCount do
         FWriter.WriteText(R, i, EmptyStr, cbtTop);
+      FWriter.SetFrozenRows(HEADER_ROWS_COUNT);
     end;
-    //DrawData;
-    //FreezeHeader;
-
 
     FWriter.EndEdit;
   finally
