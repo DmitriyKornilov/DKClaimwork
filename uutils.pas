@@ -1423,7 +1423,7 @@ begin
   begin
     Result:= 'Акт осмотра электродвигателя';
     if not SSame('б/н', ALetterNum) then
-      Result:= Result + ' №' + SFileNameCheck(ALetterNum, SYMBOLS_BADFILENAME);
+      Result:= Result + ' №' + SFileNameCheck(ALetterNum, SYMBOL_HYPHEN);
     Result:= Result + ' от ' + FormatDateTime('dd.mm.yyyy', ALetterDate);
   end
   else begin
@@ -1457,7 +1457,7 @@ begin
   3: Result:= 'К претензии ';
   end;
   Result:= Result + LetterFullName(ALetterDate, ALetterNum, True {check bad symbols}) +
-           ' - ' + AAttachmentName;
+           ' - ' + SFileNameCheck(AAttachmentName, SYMBOL_HYPHEN);
 end;
 
 function AttachmentFileFullNameGet(const ACategory: Byte;
@@ -1661,8 +1661,8 @@ begin
       FileName:= FileName + AFileExtension;
     D.FileName:= FileName;
     if not D.Execute then Exit;
-    FileName:= D.FileName;
-    if not SFind(ADestFileName, AFileExtension, False) then
+    FileName:= SFileNameCheck(D.FileName, SYMBOL_HYPHEN);
+    if not SFind(FileName, AFileExtension, False) then
       FileName:= FileName + AFileExtension;
     Result:= CopyFile(ASrcFileName, FileName,
               [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);

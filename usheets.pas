@@ -5,7 +5,7 @@ unit USheets;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, fpspreadsheetgrid, fpspreadsheet,
+  Classes, SysUtils, Graphics, Controls, fpspreadsheetgrid,
 
   DK_SheetTables, DK_Vector, DK_Matrix, DK_Fonts, DK_SheetWriter, DK_Const,
   DK_SheetExporter,
