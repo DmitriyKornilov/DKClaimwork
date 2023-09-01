@@ -722,7 +722,7 @@ begin
     S:= S + '(копии писем '
   else
     S:= S + AMotors + ' (копию письма ';
-  S:= S + AUserName + ' прилагаю), прошу Вас согласовать компенсацию затрат в размере ';
+  S:= S + AUserName + ' прилагаю) прошу Вас согласовать компенсацию затрат в размере ';
   S:= S + PriceIntToStr(AMoneySum, True) + ' руб.';
 
   Result:= VCreateStr([S]);

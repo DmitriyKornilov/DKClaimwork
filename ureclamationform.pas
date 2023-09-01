@@ -126,12 +126,15 @@ procedure TReclamationForm.DataEdit;
 var
   IsChanged: Boolean;
   i, j, k: Integer;
+  SelectedReclamationID: Integer;
 begin
   if not Sheet.IsSelected then Exit;
 
   i:= Sheet.SelectedNoticeIndex;
   j:= Sheet.SelectedMotorIndex;
   k:= Sheet.SelectedColIndex;
+
+  SelectedReclamationID:= ReclamationIDs[i];
 
   case k of
   0: IsChanged:= MileageEdit(LogIDs[i,j]);                       // пробег
@@ -147,7 +150,9 @@ begin
   if not IsChanged then Exit;
 
   DataLoad(MotorNumLike, BeginDate, EndDate);
-  Sheet.Select(i, j, k);
+  i:= VIndexOf(ReclamationIDs, SelectedReclamationID);
+  if i>=0 then
+    Sheet.Select(i, 0, k);
 end;
 
 procedure TReclamationForm.DataDelete;

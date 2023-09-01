@@ -1,10 +1,10 @@
 object MoneyDatesEditForm: TMoneyDatesEditForm
   Left = 588
-  Height = 162
+  Height = 204
   Top = 227
   Width = 600
   Caption = 'Возмещение затрат'
-  ClientHeight = 162
+  ClientHeight = 204
   ClientWidth = 600
   DesignTimePPI = 120
   OnShow = FormShow
@@ -188,7 +188,7 @@ object MoneyDatesEditForm: TMoneyDatesEditForm
   object ButtonPanel: TPanel
     Left = 2
     Height = 58
-    Top = 98
+    Top = 140
     Width = 596
     Align = alBottom
     AutoSize = True
@@ -512,5 +512,19 @@ object MoneyDatesEditForm: TMoneyDatesEditForm
       Font.Style = [fsBold]
       ParentFont = False
     end
+  end
+  object MoneyGetNotNeedCheckBox: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = MoneyGetEdit
+    AnchorSideTop.Side = asrBottom
+    Left = 8
+    Height = 24
+    Top = 92
+    Width = 330
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 12
+    Caption = 'возмещение Производителем не требуется'
+    OnChange = MoneyGetNotNeedCheckBoxChange
+    TabOrder = 7
   end
 end

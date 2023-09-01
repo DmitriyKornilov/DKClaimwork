@@ -275,13 +275,15 @@ end;
 procedure TPretensionForm.DataEdit;
 var
   IsChanged: Boolean;
-  i, j, k: Integer;
+  i, k: Integer;
+  SelectedPretensionID: Integer;
 begin
   if not Sheet.IsSelected then Exit;
 
   i:= Sheet.SelectedNoticeIndex;
-  j:= Sheet.SelectedMotorIndex;
   k:= Sheet.SelectedColIndex;
+
+  SelectedPretensionID:= PretensionIDs[i];
 
   case k of
   0: IsChanged:= PretensionEdit(PretensionIDs[i]);            // уведомление
@@ -295,7 +297,9 @@ begin
   if not IsChanged then Exit;
 
   DataLoad(MotorNumLike, BeginDate, EndDate);
-  Sheet.Select(i, j, k);
+  i:= VIndexOf(PretensionIDs, SelectedPretensionID);
+  if i>=0 then
+    Sheet.Select(i, 0, k);
 
 end;
 

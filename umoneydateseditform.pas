@@ -25,6 +25,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    MoneyGetNotNeedCheckBox: TCheckBox;
     MoneySendEdit: TCurrencyEdit;
     MoneyGetEdit: TCurrencyEdit;
     SaveButton: TSpeedButton;
@@ -34,6 +35,7 @@ type
     procedure CancelButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure MoneyGetCheckBoxChange(Sender: TObject);
+    procedure MoneyGetNotNeedCheckBoxChange(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure MoneySendCheckBoxChange(Sender: TObject);
   private
@@ -88,6 +90,13 @@ begin
   MoneyGetControlsEnabled;
 end;
 
+procedure TMoneyDatesEditForm.MoneyGetNotNeedCheckBoxChange(Sender: TObject);
+begin
+  if not MoneyGetNotNeedCheckBox.Checked then
+    MoneyGetCheckBox.Checked:= False;
+  MoneyGetCheckBox.Enabled:= not MoneyGetNotNeedCheckBox.Checked;
+end;
+
 procedure TMoneyDatesEditForm.MoneySendCheckBoxChange(Sender: TObject);
 begin
   MoneySendControlsEnabled;
@@ -117,6 +126,7 @@ begin
     end;
     SendDate:= DT1.Date;
   end;
+
   if MoneyGetCheckBox.Checked then
   begin
     GetValue:= Trunc(100*MoneyGetEdit.Value);
@@ -127,7 +137,9 @@ begin
     end;
     GetDate:= DT1.Date;
   end;
-  if (SendValue=MoneyValue) and (GetValue=MoneyValue) then
+
+  if (MoneyGetNotNeedCheckBox.Checked and (SendValue=MoneyValue)) or
+     ((SendValue=MoneyValue) and (GetValue=MoneyValue)) then
     Status:= 3;  //завершено
 
   SQLite.PretensionMoneyDatesUpdate(PretensionID, Status,

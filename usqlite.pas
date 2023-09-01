@@ -1170,8 +1170,6 @@ begin
   end;
   QClose;
 
-
-
   if VIsNil(APretensionIDs) then Exit;
 
   S:=
@@ -1197,12 +1195,13 @@ begin
   begin
     QFirst;
     OldID:= 0;
+    APretensionIDs:= nil;
     while not QEOF do
     begin
       NewID:= QFieldInt('PretensionID');
-      S:= QFieldStr('MotorNum');
       if NewID<>OldID then
       begin
+        VAppend(APretensionIDs, NewID);
         VAppend(ANoticeNums, QFieldStr('NoticeFromUserNum'));
         VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));
         VAppend(AMoneyValues, QFieldInt64('MoneyValue'));
@@ -3070,43 +3069,7 @@ begin
   end;
   QClose;
 
-   if VIsNil(APretensionIDs) then Exit;
-
-  //S:=
-  //  'SELECT ' +
-  //    't1.*, '+
-  //    't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
-  //    't4.*, ' +
-  //    't5.ReclamationID, ' +
-  //    't6.UserNameI, t6.UserTitle ' +
-  //  'FROM ' +
-  //    'PRETENSIONMOTORS t1 ' +
-  //  'INNER JOIN MOTORS t2 ON (t1.MotorID=t2.MotorID) ' +
-  //  'INNER JOIN MOTORNAMES t3 ON (t2.MotorNameID=t3.MotorNameID) ' +
-  //  'INNER JOIN PRETENSIONS t4 ON (t1.PretensionID=t4.PretensionID) ' +
-  //  'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
-  //  'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
-  //  'WHERE ' +
-  //    '(t1.PretensionID>0) ';
-  //
-  //if not SEmpty(AMotorNumLike) then
-  //  S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
-  //else begin
-  //  if (ABeginDate>0) and (AEndDate>0) then
-  //    S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
-  //  if AViewIndex>0 then
-  //    S:= S + ' AND (t4.Status = :Status) ';
-  //end;
-  //S:= S +
-  //  'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
-  //QSetQuery(FQuery);
-  //QSetSQL(S);
-  //QParamStr('NumberLike', SUpper(AMotorNumLike)+'%');
-  //QParamDT('BD', ABeginDate);
-  //QParamDT('ED', AEndDate);
-  //QParamInt('Status', AViewIndex);
-  //QOpen;
-
+  if VIsNil(APretensionIDs) then Exit;
 
   S:=
     'SELECT ' +
@@ -3134,11 +3097,13 @@ begin
   begin
     QFirst;
     OldID:= 0;
+    APretensionIDs:= nil;
     while not QEOF do
     begin
       NewID:= QFieldInt('PretensionID');
       if NewID<>OldID then
       begin
+        VAppend(APretensionIDs, NewID);
         VAppend(AUserNames, QFieldStr('UserNameI'));
         VAppend(AUserTitles, QFieldStr('UserTitle'));
         VAppend(ANoticeDates, QFieldDT('NoticeFromUserDate'));

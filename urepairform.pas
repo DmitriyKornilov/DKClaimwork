@@ -285,12 +285,15 @@ procedure TRepairForm.DataEdit;
 var
   IsChanged: Boolean;
   i, j, k: Integer;
+  SelectedRepairID: Integer;
 begin
   if not Sheet.IsSelected then Exit;
 
   i:= Sheet.SelectedNoticeIndex;
   j:= Sheet.SelectedMotorIndex;
   k:= Sheet.SelectedColIndex;
+
+  SelectedRepairID:= RepairIDs[i];
 
   case k of
   0: IsChanged:= RepairEdit(RepairIDs[i]);                  // уведомление
@@ -304,7 +307,9 @@ begin
   if not IsChanged then Exit;
 
   DataLoad(MotorNumLike, BeginDate, EndDate);
-  Sheet.Select(i, j, k);
+  i:= VIndexOf(RepairIDs, SelectedRepairID);
+  if i>=0 then
+    Sheet.Select(i, 0, k);
 end;
 
 procedure TRepairForm.DataDelete;
