@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, StdCtrls,
 
   DK_SQLite3, DK_SQLUtils, DK_Vector, DK_Matrix, DK_StrUtils, DK_DateUtils,
-  DK_Dialogs,
 
   UUtils;
 
@@ -303,16 +302,18 @@ type
 
     //приложения
     function AttachmentNameLoad(const ACategory: Byte; const AAttachmentID: Integer): String;
+    procedure AttachmentDelete(const ACategory: Byte; const AAttachmentID: Integer);
     function AttachmentFind(const ACategory: Byte;
                             const AAttachmentID: Integer;
                             const AAttachmentName: String): Boolean;
-    procedure AttachmentInfoLoad(const ACategory: Byte; const AAttachmentID: Integer;
-                                 out AAttachmentName, ANoticeNum: String; out ANoticeDate: TDate;
-                                 out AMotorName, AMotorNum: String; out AMotorDate: TDate);
     procedure AttachmentListLoad(const ACategory: Byte; const ALogID: Integer;
-                                 out AAttachmentIDs: TIntVector; out AAttachmentNames: TStrVector);
+                                 out AAttachmentIDs: TIntVector;
+                                 out AAttachmentNames, AAttachmentExtensions: TStrVector);
     procedure AttachmentAdd(const ACategory: Byte; const ALogID: Integer;
-                            const AAttachmentName: String);
+                            const AAttachmentName, AAttachmentExtension: String);
+    procedure AttachmentUpdate(const ACategory: Byte; const AAttachmentID: Integer;
+                            const AAttachmentName, AAttachmentExtension: String);
+
 
     //списки файлов
     function FileNamesLoad(const ACategory: Byte; const AReclamationID: Integer): TStrVector;
@@ -2065,8 +2066,6 @@ procedure TSQLite.PretensionLetterUpdate(const APretensionIDs, ADelPretensionIDs
                                      const ALetterType: Byte;
                                      const ALetterNum: String;
                                      const ALetterDate: TDate);
-var
-  S, DateField, NumField: String;
 begin
   try
     PretensionLetterCustomUpdate(APretensionIDs, ALetterType, ALetterNum, ALetterDate);
@@ -2177,6 +2176,14 @@ begin
   Result:= ValueStrInt32ID(TableName, 'AttachmentName', 'ID', AAttachmentID);
 end;
 
+procedure TSQLite.AttachmentDelete(const ACategory: Byte;  const AAttachmentID: Integer);
+var
+  TableName: String;
+begin
+  TableName:= AttachmentTableNameGet(ACategory);
+  Delete(TableName, 'ID', AAttachmentID);
+end;
+
 function TSQLite.AttachmentFind(const ACategory: Byte;
                                 const AAttachmentID: Integer;
                                 const AAttachmentName: String): Boolean;
@@ -2188,67 +2195,22 @@ begin
     'AttachmentName', AAttachmentName, 'ID', AAttachmentID, False);
 end;
 
-procedure TSQLite.AttachmentInfoLoad(const ACategory: Byte; const AAttachmentID: Integer;
-                                 out AAttachmentName, ANoticeNum: String; out ANoticeDate: TDate;
-                                 out AMotorName, AMotorNum: String; out AMotorDate: TDate);
-var
-  AttachmentTableName, LogMotorTableName, LogNoticeTableName, IDFieldName: String;
-begin
-  AAttachmentName:= EmptyStr;
-  ANoticeNum:= EmptyStr;
-  ANoticeDate:= 0;
-  AMotorName:= EmptyStr;
-  AMotorNum:= EmptyStr;
-  AMotorDate:= 0;
-
-  AttachmentTableName:= SqlEsc(AttachmentTableNameGet(ACategory));
-  LogMotorTableName:= SqlEsc(LogMotorTableNameGet(ACategory));
-  LogNoticeTableName:= SqlEsc(LogNoticeTableNameGet(ACategory));
-  IDFieldName:= SqlEsc(LogNoticeIDFieldNameGet(ACategory));
-
-  QSetQuery(FQuery);
-  QSetSQL(
-    'SELECT ' +
-      't1.AttachmentName, t3.NoticeFromUserDate, t3.NoticeFromUserNum, ' +
-      't4.MotorNum, t4.MotorDate, t5.MotorName ' +
-    'FROM ' +
-      AttachmentTableName + ' t1 ' +
-    'INNNER JOIN ' + LogMotorTableName  + ' t2 ON (t1.LogID=t2.LogID) ' +
-    'INNNER JOIN ' + LogNoticeTableName + ' t3 ON (t2.'+IDFieldName+'=t3.'+IDFieldName+') ' +
-    'INNNER JOIN MOTORS t4 ON (t2.MotorID=t4.MotorID) ' +
-    'INNNER JOIN MOTORNAMES t5 ON (t4.MotorNameID=t5.MotorNameID) ' +
-    'WHERE ' +
-      't1.ID = :AttachmentID'
-  );
-  QParamInt('AttachmentID', AAttachmentID);
-  QOpen;
-  if not QIsEmpty then
-  begin
-    QFirst;
-    AAttachmentName:= QFieldStr('AttachmentName');
-    ANoticeNum:= QFieldStr('NoticeFromUserNum');
-    ANoticeDate:= QFieldDT('NoticeFromUserDate');
-    AMotorName:= QFieldStr('MotorName');
-    AMotorNum:= QFieldStr('MotorNum');
-    AMotorDate:= QFieldDT('MotorDate');
-  end;
-  QClose;
-end;
-
 procedure TSQLite.AttachmentListLoad(const ACategory: Byte; const ALogID: Integer;
-                                 out AAttachmentIDs: TIntVector; out AAttachmentNames: TStrVector);
+                                 out AAttachmentIDs: TIntVector;
+                                 out AAttachmentNames, AAttachmentExtensions: TStrVector);
 var
   TableName: String;
 begin
   AAttachmentIDs:= nil;
   AAttachmentNames:= nil;
+  AAttachmentExtensions:= nil;
 
   TableName:= SqlEsc(AttachmentTableNameGet(ACategory));
 
   QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'ID, AttachmentName ' +
+      'ID, AttachmentName, AttachmentExtension ' +
     'FROM ' +
       TableName +
     'WHERE ' +
@@ -2263,6 +2225,7 @@ begin
     begin
       VAppend(AAttachmentIDs, QFieldInt('ID'));
       VAppend(AAttachmentNames, QFieldStr('AttachmentName'));
+      VAppend(AAttachmentExtensions, QFieldStr('AttachmentExtension'));
       QNext;
     end;
   end;
@@ -2270,7 +2233,7 @@ begin
 end;
 
 procedure TSQLite.AttachmentAdd(const ACategory: Byte; const ALogID: Integer;
-                                const AAttachmentName: String);
+                                const AAttachmentName, AAttachmentExtension: String);
 var
   TableName: String;
 begin
@@ -2281,12 +2244,40 @@ begin
     QSetSQL(
       'INSERT INTO ' +
         SqlEsc(TableName) +
-        '(LogID, AttachmentName) ' +
+        '(LogID, AttachmentName, AttachmentExtension) ' +
       'VALUES ' +
-        '(:LogID, :AttachmentName) '
+        '(:LogID, :AttachmentName, :AttachmentExtension) '
     );
     QParamInt('LogID', ALogID);
     QParamStr('AttachmentName', AAttachmentName);
+    QParamStr('AttachmentExtension', AAttachmentExtension);
+    QExec;
+    QCommit;
+  except
+    QRollback;
+  end;
+end;
+
+procedure TSQLite.AttachmentUpdate(const ACategory: Byte; const AAttachmentID: Integer;
+                            const AAttachmentName, AAttachmentExtension: String);
+var
+  TableName: String;
+begin
+  TableName:= AttachmentTableNameGet(ACategory);
+
+  QSetQuery(FQuery);
+  try
+    QSetSQL(
+      'UPDATE ' +
+        SqlEsc(TableName) +
+      'SET ' +
+        'AttachmentName = :AttachmentName, AttachmentExtension = :AttachmentExtension ' +
+      'WHERE ' +
+        'ID = :AttachmentID '
+    );
+    QParamInt('AttachmentID', AAttachmentID);
+    QParamStr('AttachmentName', AAttachmentName);
+    QParamStr('AttachmentExtension', AAttachmentExtension);
     QExec;
     QCommit;
   except
@@ -2336,7 +2327,6 @@ procedure TSQLite.LettersUpdate(const ALogIDs, ADelLogIDs: TIntVector;
                            const AStatus: Integer = -1);
 var
   TableName, DateField, NumField, S: String;
-  i: Integer;
 begin
   if VIsNil(ALogIDs) then Exit;
 

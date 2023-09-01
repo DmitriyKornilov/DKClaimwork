@@ -187,16 +187,23 @@ const
                            const AMotorDate: TDate;
                            const AMotorName, AMotorNum: String): String;
 
-  function AttachmentFileNameGet(const ACategory: Byte; const AAttachmentName: String;
+  function AttachmentFileNameGet(const ACategory: Byte;
+                            const AAttachmentName: String;
                             const ALetterDate: TDate; const ALetterNum: String): String;
-   function AttachmentFileFullNameGet(const ACategory: Byte; const AAttachmentName: String;
+  function AttachmentFileFullNameGet(const ACategory: Byte;
+                             const AAttachmentName, AAttachmentExtension: String;
                             const ALetterDate: TDate; const ALetterNum: String;
                             const AMotorDate: TDate;  const AMotorName, AMotorNum: String): String;
+
+
+  function FileChoose(const AEdit: TEdit = nil): String;  //OpenDialog
 
   //файлы писем
   function DocumentDate(const AFileName: String; out ADate: TDate): Boolean;
   function DocumentChoose(const AEdit: TEdit = nil): String;  //OpenDialog
+
   procedure DocumentSet(const AFileName: String; const AEdit: TEdit);
+  procedure DocumentOpen(const AFileName: String);
   procedure DocumentOpen(const ALetterType: Byte;
                         const ALetterDate: TDate;
                         const ALetterNum: String;
@@ -225,7 +232,9 @@ const
                         const ALetterNum: String;
                         const AMotorDate: TDate;
                         const AMotorName, AMotorNum: String): Boolean;
-  function DocumentCopy(const ASrcFileName, ADestFileName: String): Boolean; //SaveDialog
+  function FileCopy(const ASrcFileName, ADestFileName, AFileExtension: String): Boolean; //SaveDialog
+  function DocumentCopy(const ASrcFileName, ADestFileName: String;
+                        const ASaveDialog: Boolean = True): Boolean; //SaveDialog
   function DocumentSave(const ALetterType: Byte;
                          const ASrcFileName: String;
                          const AMotorDate: TDate;
@@ -234,6 +243,7 @@ const
                          const AOldLetterNum: String;
                          const ALetterDate: TDate;
                          const ALetterNum: String): Boolean;
+  function DocumentRename(const AOldFileName, ANewFileName: String): Boolean;
   function DocumentRename(const ALetterType: Byte;
                          const AMotorDate: TDate;
                          const AMotorName, AMotorNum: String;
@@ -1437,7 +1447,8 @@ begin
            FileNameGet(ALetterType, ALetterDate, ALetterNum) + '.pdf';
 end;
 
-function AttachmentFileNameGet(const ACategory: Byte; const AAttachmentName: String;
+function AttachmentFileNameGet(const ACategory: Byte;
+                            const AAttachmentName: String;
                             const ALetterDate: TDate; const ALetterNum: String): String;
 begin
   case ACategory of
@@ -1449,13 +1460,32 @@ begin
            ' - ' + AAttachmentName;
 end;
 
-function AttachmentFileFullNameGet(const ACategory: Byte; const AAttachmentName: String;
+function AttachmentFileFullNameGet(const ACategory: Byte;
+                            const AAttachmentName, AAttachmentExtension: String;
                             const ALetterDate: TDate; const ALetterNum: String;
                             const AMotorDate: TDate;  const AMotorName, AMotorNum: String): String;
 begin
   Result:= MotorNumDirectoryGet(AMotorName, AMotorNum, AMotorDate) +
            DirectorySeparator +
-           AttachmentFileNameGet(ACategory, AAttachmentName, ALetterDate, ALetterNum) + '.pdf';
+           AttachmentFileNameGet(ACategory, AAttachmentName, ALetterDate, ALetterNum) + AAttachmentExtension;//'.pdf';
+end;
+
+function FileChoose(const AEdit: TEdit): String;
+var
+  D: TOpenDialog;
+begin
+  Result:= EmptyStr;
+  D:= TOpenDialog.Create(nil);
+  try
+    if D.Execute then
+    begin
+      Result:= D.FileName;
+      if Assigned(AEdit) then
+        DocumentSet(Result, AEdit);
+    end;
+  finally
+    FreeAndNil(D);
+  end;
 end;
 
 function DocumentDate(const AFileName: String; out ADate: TDate): Boolean;
@@ -1494,6 +1524,11 @@ begin
   AEdit.ReadOnly:= True;
 end;
 
+procedure DocumentOpen(const AFileName: String);
+begin
+  OpenDocument(AFileName);
+end;
+
 procedure DocumentOpen(const ALetterType: Byte;
                         const ALetterDate: TDate;
                         const ALetterNum: String;
@@ -1504,7 +1539,7 @@ var
 begin
   FileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
                              AMotorDate, AMotorName, AMotorNum);
-  OpenDocument(FileName);
+  DocumentOpen(FileName);
 end;
 
 function DocumentDelete(const AFileName: String): Boolean;
@@ -1613,17 +1648,49 @@ begin
   Result:= DocumentCopy(SrcFileName, DestFileName);
 end;
 
-function DocumentCopy(const ASrcFileName, ADestFileName: String): Boolean;
+function FileCopy(const ASrcFileName, ADestFileName, AFileExtension: String): Boolean;
 var
   D: TSaveDialog;
+  FileName: String;
 begin
   D:= TSaveDialog.Create(nil);
   try
-    D.FileName:= ADestFileName;
+    D.Filter:= 'Файл ' + SUpper(SCutLeft(AFileExtension,1)) + '|*' + AFileExtension;
+    FileName:= ADestFileName;
+    if not SFind(ADestFileName, AFileExtension, False) then
+      FileName:= FileName + AFileExtension;
+    D.FileName:= FileName;
     if not D.Execute then Exit;
-    Result:= CopyFile(ASrcFileName, D.FileName, [cffOverwriteFile]);
+    FileName:= D.FileName;
+    if not SFind(ADestFileName, AFileExtension, False) then
+      FileName:= FileName + AFileExtension;
+    Result:= CopyFile(ASrcFileName, FileName,
+              [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
   finally
     FreeAndNil(D);
+  end;
+end;
+
+function DocumentCopy(const ASrcFileName, ADestFileName: String;
+                      const ASaveDialog: Boolean = True): Boolean;
+var
+  D: TSaveDialog;
+begin
+  if ASaveDialog then
+  begin
+    D:= TSaveDialog.Create(nil);
+    try
+      D.FileName:= ADestFileName;
+      if not D.Execute then Exit;
+      Result:= CopyFile(ASrcFileName, D.FileName,
+                [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
+    finally
+      FreeAndNil(D);
+    end;
+  end
+  else begin
+    Result:= CopyFile(ASrcFileName, ADestFileName,
+                [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
   end;
 end;
 
@@ -1649,6 +1716,21 @@ begin
                         AMotorDate, AMotorName, AMotorNum);
 end;
 
+function DocumentRename(const AOldFileName, ANewFileName: String): Boolean;
+begin
+  Result:= True;
+  if SSame(AOldFileName, ANewFileName) then Exit;
+  if not FileExists(AOldFileName) then Exit;
+
+  Result:= RenameFile(AOldFileName, ANewFileName);
+
+  if not Result then
+    ShowInfo('Не удалось переименовать файл' + SYMBOL_BREAK +
+             AOldFileName + SYMBOL_BREAK +
+             'на' + SYMBOL_BREAK +
+             ANewFileName);
+end;
+
 function DocumentRename(const ALetterType: Byte;
                          const AMotorDate: TDate;
                          const AMotorName, AMotorNum: String;
@@ -1665,17 +1747,23 @@ begin
 
   OldFileName:= FileNameFullGet(ALetterType, AOldLetterDate, AOldLetterNum,
                                AMotorDate, AMotorName, AMotorNum);
-  if not FileExists(OldFileName) then Exit;
-
   NewFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
                                AMotorDate, AMotorName, AMotorNum);
-  Result:=  RenameFile(OldFileName, NewFileName);
+  Result:= DocumentRename(OldFileName, NewFileName);
 
-  if not Result then
-    ShowInfo('Не удалось переименовать файл' + SYMBOL_BREAK +
-             OldFileName + SYMBOL_BREAK +
-             'на' + SYMBOL_BREAK +
-             NewFileName);
+  //OldFileName:= FileNameFullGet(ALetterType, AOldLetterDate, AOldLetterNum,
+  //                             AMotorDate, AMotorName, AMotorNum);
+  //if not FileExists(OldFileName) then Exit;
+  //
+  //NewFileName:= FileNameFullGet(ALetterType, ALetterDate, ALetterNum,
+  //                             AMotorDate, AMotorName, AMotorNum);
+  //Result:=  RenameFile(OldFileName, NewFileName);
+  //
+  //if not Result then
+  //  ShowInfo('Не удалось переименовать файл' + SYMBOL_BREAK +
+  //           OldFileName + SYMBOL_BREAK +
+  //           'на' + SYMBOL_BREAK +
+  //           NewFileName);
 end;
 
 function DocumentUpdate(const ANeedChangeFile: Boolean;

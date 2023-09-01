@@ -9,9 +9,11 @@ uses
   Buttons, StdCtrls, Menus, BCButton, fpspreadsheetgrid, DividerBevel,
   VirtualTrees,
 
-  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const, DK_VSTTables,
+  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const, DK_CtrlUtils,
 
-  USQLite, UUtils, USheets;
+  USQLite, UUtils, USheets,
+
+  UAttachmentForm;
 
 type
 
@@ -19,19 +21,10 @@ type
 
   TReclamationForm = class(TForm)
     AddButton: TSpeedButton;
-    AddAttButton: TSpeedButton;
     AttachmentPanel: TPanel;
-    DelAttButton: TSpeedButton;
-    DividerBevel3: TDividerBevel;
-    EditAttButton: TSpeedButton;
-    AttachmentLabel: TLabel;
-    ListTypePanel1: TPanel;
     PDFCopyButton: TSpeedButton;
-    PDFCopyAttButton: TSpeedButton;
     PDFShowButton: TSpeedButton;
-    PDFShowAttButton: TSpeedButton;
     Splitter1: TSplitter;
-    AttachmentToolPanel: TPanel;
     ViewTypeComboBox: TComboBox;
     DelButton: TSpeedButton;
     DividerBevel1: TDividerBevel;
@@ -44,10 +37,9 @@ type
     ListTypePanel: TPanel;
     StatisticButton: TBCButton;
     ToolPanel: TPanel;
-    VT1: TVirtualStringTree;
     ZoomBevel: TBevel;
     ZoomPanel: TPanel;
-    procedure AddAttButtonClick(Sender: TObject);
+
     procedure AddButtonClick(Sender: TObject);
     procedure DelButtonClick(Sender: TObject);
     procedure EditButtonClick(Sender: TObject);
@@ -59,15 +51,12 @@ type
     procedure PDFShowButtonClick(Sender: TObject);
     procedure ViewTypeComboBoxChange(Sender: TObject);
   private
+    AttachmentForm: TForm;
+
     Sheet: TSheetReclamation;
     ZoomPercent: Integer;
     BeginDate, EndDate: TDate;
     MotorNumLike: String;
-
-    VSTAttachmentList: TVSTTable;
-    AttachmentIDs: TIntVector;
-    AttachmentNames: TStrVector;
-    SelectedReclamationIndex, SelectedMotorIndex: Integer;
 
     //данные из базы
     ReclamationIDs: TIntVector;
@@ -103,9 +92,7 @@ type
     procedure DataEdit;
     procedure DataDelete;
 
-    procedure AttachmentShow;
-    procedure AttachmentLoad;
-    procedure AttachmentSelect;
+    procedure AttachmentsLoad;
   public
     procedure DataLoad(const AMotorNumLike: String;
                         const ABeginDate: TDate;
@@ -133,15 +120,6 @@ begin
   if NoticeIndex<0 then Exit;
 
   Sheet.Select(NoticeIndex, 0, Sheet.MainColIndex);
-end;
-
-procedure TReclamationForm.AddAttButtonClick(Sender: TObject);
-var
-  LogID: Integer;
-begin
-  LogID:= LogIDs[Sheet.SelectedNoticeIndex, Sheet.SelectedMotorIndex];
-  if AttachmentEdit(1{рекл}, LogID, 0 {new}) then
-    AttachmentLoad;
 end;
 
 procedure TReclamationForm.DataEdit;
@@ -249,42 +227,20 @@ begin
     Sheet.Select(i, j, k);
 end;
 
-procedure TReclamationForm.AttachmentShow;
+procedure TReclamationForm.AttachmentsLoad;
 var
-  i,j: Integer;
+  i, j: Integer;
 begin
-  AddAttButton.Enabled:= Sheet.IsSelected;
-  AttachmentLabel.Caption:= 'Приложения к рекламации';
-  if not AddAttButton.Enabled then Exit;
-
-  i:= Sheet.SelectedNoticeIndex;
-  j:= Sheet.SelectedMotorIndex;
-  AttachmentLabel.Caption:= 'Приложения к рекламации ' +
-    MotorFullName(MotorNames[i,j], MotorNums[i,j],  MotorDates[i,j]);
-
-  if (SelectedReclamationIndex=i) and (SelectedMotorIndex=j) then Exit;
-
-  SelectedReclamationIndex:= i;
-  SelectedMotorIndex:= j;
-
-  AttachmentLoad;
-end;
-
-procedure TReclamationForm.AttachmentLoad;
-var
-  i,j: Integer;
-begin
-  i:= Sheet.SelectedNoticeIndex;
-  j:= Sheet.SelectedMotorIndex;
-  SQLite.AttachmentListLoad(1{реклам}, LogIDs[i,j], AttachmentIDs, AttachmentNames);
-  VSTAttachmentList.UnSelect;
-  VSTAttachmentList.SetColumn('Список', AttachmentNames, taLeftJustify);
-  VSTAttachmentList.Draw;
-end;
-
-procedure TReclamationForm.AttachmentSelect;
-begin
-
+  if Sheet.IsSelected then
+  begin
+    i:= Sheet.SelectedNoticeIndex;
+    j:= Sheet.SelectedMotorIndex;
+    (AttachmentForm as TAttachmentForm).AttachmentsShow(LogIDs[i,j],
+                        NoticeNums[i], NoticeDates[i],
+                        MotorNums[i,j], MotorNames[i,j], MotorDates[i,j]);
+  end
+  else
+    (AttachmentForm as TAttachmentForm).AttachmentsClear;
 end;
 
 procedure TReclamationForm.DelButtonClick(Sender: TObject);
@@ -310,20 +266,15 @@ begin
   Sheet:= TSheetReclamation.Create(LogGrid.Worksheet, LogGrid);
   Sheet.OnSelect:= @DataSelect;
 
-  SelectedReclamationIndex:= -1;
-  SelectedMotorIndex:= -1;
-
-  VSTAttachmentList:= TVSTTable.Create(VT1);
-  VSTAttachmentList.CanSelect:= True;
-  VSTAttachmentList.OnSelect:= @AttachmentSelect;
-  VSTAttachmentList.HeaderVisible:= False;
-  VSTAttachmentList.AddColumn('Список');
+  AttachmentForm:= FormOnPanelCreate(TAttachmentForm, AttachmentPanel);
+  (AttachmentForm as TAttachmentForm).Category:= 1;
+  AttachmentForm.Show;
 end;
 
 procedure TReclamationForm.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(Sheet);
-  FreeAndNil(VSTAttachmentList);
+  FreeAndNil(AttachmentForm);
 end;
 
 procedure TReclamationForm.LogGridDblClick(Sender: TObject);
@@ -505,7 +456,7 @@ end;
 procedure TReclamationForm.DataSelect;
 begin
   ButtonsEnabled;
-  //AttachmentShow;
+  AttachmentsLoad;
 end;
 
 end.

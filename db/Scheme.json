@@ -1138,7 +1138,8 @@
     "FieldsList" : [
       "ID",
       "LogID",
-      "AttachmentName"
+      "AttachmentName",
+      "AttachmentExtension"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -1194,6 +1195,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Имя файла приложения"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "AttachmentExtension" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Расширение файла приложения"
       ],
       "ExistingValues" : [
       ],
@@ -1761,7 +1786,8 @@
     "FieldsList" : [
       "ID",
       "LogID",
-      "AttachmentName"
+      "AttachmentName",
+      "AttachmentExtension"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -1817,6 +1843,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Имя файла приложения"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "AttachmentExtension" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Расширение файла приложения"
       ],
       "ExistingValues" : [
       ],
@@ -2392,7 +2442,8 @@
     "FieldsList" : [
       "ID",
       "LogID",
-      "AttachmentName"
+      "AttachmentName",
+      "AttachmentExtension"
     ],
     "ID" : {
       "FieldType" : "INTEGER",
@@ -2448,6 +2499,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Имя файла приложения"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "AttachmentExtension" : {
+      "FieldType" : "TEXT",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : true,
+      "DefaultValue" : "",
+      "Description" : [
+        "Расширение файла приложения"
       ],
       "ExistingValues" : [
       ],

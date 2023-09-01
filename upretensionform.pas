@@ -8,9 +8,11 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Buttons, StdCtrls, fpspreadsheetgrid, BCButton, DividerBevel,
 
-  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const,
+  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const, DK_CtrlUtils,
 
-  USQLite, UUtils, USheets;
+  USQLite, UUtils, USheets,
+
+  UAttachmentForm;
 
 type
 
@@ -18,6 +20,7 @@ type
 
   TPretensionForm = class(TForm)
     AddButton: TSpeedButton;
+    AttachmentPanel: TPanel;
     DelButton: TSpeedButton;
     DividerBevel1: TDividerBevel;
     DividerBevel2: TDividerBevel;
@@ -29,6 +32,7 @@ type
     LogGrid: TsWorksheetGrid;
     PDFCopyButton: TSpeedButton;
     PDFShowButton: TSpeedButton;
+    Splitter1: TSplitter;
     StatisticButton: TBCButton;
     ToolPanel: TPanel;
     ViewTypeComboBox: TComboBox;
@@ -45,6 +49,8 @@ type
     procedure PDFShowButtonClick(Sender: TObject);
     procedure ViewTypeComboBoxChange(Sender: TObject);
   private
+    AttachmentForm: TForm;
+
     Sheet: TSheetPretension;
     ZoomPercent: Integer;
     BeginDate, EndDate: TDate;
@@ -76,6 +82,7 @@ type
     procedure DataEdit;
     procedure DataDelete;
 
+    procedure AttachmentsLoad;
   public
     procedure DataLoad(const AMotorNumLike: String;
                       const ABeginDate: TDate;
@@ -127,11 +134,16 @@ begin
 
   Sheet:= TSheetPretension.Create(LogGrid.Worksheet, LogGrid);
   Sheet.OnSelect:= @DataSelect;
+
+  AttachmentForm:= FormOnPanelCreate(TAttachmentForm, AttachmentPanel);
+  (AttachmentForm as TAttachmentForm).Category:= 3;
+  AttachmentForm.Show;
 end;
 
 procedure TPretensionForm.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(Sheet);
+  FreeAndNil(AttachmentForm);
 end;
 
 procedure TPretensionForm.LogGridDblClick(Sender: TObject);
@@ -257,6 +269,7 @@ end;
 procedure TPretensionForm.DataSelect;
 begin
   ButtonsEnabled;
+  AttachmentsLoad;
 end;
 
 procedure TPretensionForm.DataEdit;
@@ -351,6 +364,22 @@ begin
   DataLoad(MotorNumLike, BeginDate, EndDate);
   if k>0 then
     Sheet.Select(i, j, k);
+end;
+
+procedure TPretensionForm.AttachmentsLoad;
+var
+  i, j: Integer;
+begin
+  if Sheet.IsSelected then
+  begin
+    i:= Sheet.SelectedNoticeIndex;
+    j:= Sheet.SelectedMotorIndex;
+    (AttachmentForm as TAttachmentForm).AttachmentsShow(LogIDs[i,j],
+                        NoticeNums[i], NoticeDates[i],
+                        MotorNums[i,j], MotorNames[i,j], MotorDates[i,j]);
+  end
+  else
+    (AttachmentForm as TAttachmentForm).AttachmentsClear;
 end;
 
 procedure TPretensionForm.DataLoad(const AMotorNumLike: String;

@@ -26,6 +26,9 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="DKVTUtils"/>
+      </Item>
+      <Item>
         <PackageName Value="virtualtreeview_package"/>
       </Item>
       <Item>
@@ -272,8 +275,17 @@
         <Filename Value="uattachmenteditform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="AttachmentEditForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UAttachmentEditForm"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uattachmentform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AttachmentForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UAttachmentForm"/>
       </Unit>
     </Units>
   </ProjectOptions>

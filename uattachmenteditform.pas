@@ -35,14 +35,13 @@ type
   private
     CanFormClose: Boolean;
 
-    OldAttachmentName, NoticeNum, MotorName, MotorNum: String;
-    NoticeDate, MotorDate: TDate;
-
-    procedure DataLoad;
   public
     Category: Byte;
     LogID: Integer;
     AttachmentID: Integer;
+    OldAttachmentName, OldAttachmentExtension: String;
+    NoticeNum, MotorName, MotorNum: String;
+    NoticeDate, MotorDate: TDate;
   end;
 
 var
@@ -57,22 +56,33 @@ implementation
 procedure TAttachmentEditForm.FormShow(Sender: TObject);
 begin
   CanFormClose:= True;
-  DataLoad;
+  AttachmentNameEdit.Text:= OldAttachmentName;
+  NotChangeFileCheckBox.Visible:= AttachmentID>0;
 end;
 
 procedure TAttachmentEditForm.OpenButtonClick(Sender: TObject);
+var
+  FileName, FileExt: String;
 begin
-  DocumentChoose(FileNameEdit);
+  FileChoose(FileNameEdit);
+  if not SEmpty(Strim(AttachmentNameEdit.Text)) then Exit;
+
+  FileName:= STrim(FileNameEdit.Text);
+  if SEmpty(FileName) then Exit;
+
+  FileExt:= ExtractFileExt(FileName);
+  FileName:= ExtractFileName(FileName);
+  AttachmentNameEdit.Text:= SCutRight(FileName, SLength(FileExt));
 end;
 
 procedure TAttachmentEditForm.SaveButtonClick(Sender: TObject);
 var
-  DestFileName, SrcFileName, AttachmentName: String;
+  S, DestFileName, SrcFileName, AttachmentName, AttachmentExtension: String;
 begin
   CanFormClose:= False;
 
   SrcFileName:= STrim(FileNameEdit.Text);
-  if (not NotChangeFileCheckBox.Checked) and SEmpty(SrcFileName) then
+  if ((not NotChangeFileCheckBox.Checked) or (AttachmentID=0)) and SEmpty(SrcFileName) then
   begin
     ShowInfo('Не указан файл приложения!');
     Exit;
@@ -82,6 +92,7 @@ begin
     ShowInfo('Указанный файл приложения' + SrcFileName + 'не найден!');
     Exit;
   end;
+  AttachmentExtension:= ExtractFileExt(SrcFileName);
 
   AttachmentName:= STrim(AttachmentNameEdit.Text);
   if SEmpty(AttachmentName) then
@@ -96,37 +107,33 @@ begin
     Exit;
   end;
 
+  DestFileName:= AttachmentFileFullNameGet(Category, AttachmentName, AttachmentExtension,
+                        NoticeDate, NoticeNum, MotorDate, MotorName, MotorNum);
+
   if AttachmentID=0 then
   begin
-    SQLite.AttachmentAdd(Category, LogID, AttachmentName);
-    if not NotChangeFileCheckBox.Checked then
-    begin
-      DestFileName:= AttachmentFileFullNameGet(Category, AttachmentName,
-                        NoticeDate, NoticeNum, MotorDate, MotorName, MotorNum);
-      //DocumentCopy(SrcFileName, DestFileName);
-    end;
+    if not DocumentCopy(SrcFileName, DestFileName, False) then Exit;
+    SQLite.AttachmentAdd(Category, LogID, AttachmentName, AttachmentExtension);
   end
   else begin
     if not SSame(AttachmentName, OldAttachmentName, False) then
     begin
-
+      S:= AttachmentFileFullNameGet(Category, OldAttachmentName, OldAttachmentExtension,
+                        NoticeDate, NoticeNum, MotorDate, MotorName, MotorNum);
+      if (not NotChangeFileCheckBox.Checked) then
+      begin
+        if not DocumentDelete(S) then Exit;
+        if not DocumentCopy(SrcFileName, DestFileName, False) then Exit;
+      end
+      else begin
+        if not DocumentRename(S, DestFileName) then Exit;
+      end;
+      SQLite.AttachmentUpdate(Category, AttachmentID, AttachmentName, AttachmentExtension);
     end;
   end;
 
-
   CanFormClose:= True;
   ModalResult:= mrOK;
-end;
-
-procedure TAttachmentEditForm.DataLoad;
-begin
-  if AttachmentID=0 then Exit;
-
-//
-//  SQLite.AttachmentInfoLoad(Category, AttachmentID, OldAttachmentName,
-//                           NoticeNum, NoticeDate, MotorName, MotorNum, MotorDate);
-
-  AttachmentNameEdit.TExt:= OldAttachmentName;
 end;
 
 procedure TAttachmentEditForm.FormCloseQuery(Sender: TObject;  var CanClose: Boolean);

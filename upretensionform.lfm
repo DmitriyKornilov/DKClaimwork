@@ -1,9 +1,9 @@
 object PretensionForm: TPretensionForm
   Left = 459
-  Height = 239
+  Height = 465
   Top = 248
   Width = 989
-  ClientHeight = 239
+  ClientHeight = 465
   ClientWidth = 989
   DesignTimePPI = 120
   OnCreate = FormCreate
@@ -1062,7 +1062,7 @@ object PretensionForm: TPretensionForm
   end
   object GridPanel: TPanel
     Left = 2
-    Height = 191
+    Height = 211
     Top = 46
     Width = 985
     Align = alClient
@@ -1072,14 +1072,14 @@ object PretensionForm: TPretensionForm
     BorderSpacing.Bottom = 2
     BevelOuter = bvNone
     BorderStyle = bsSingle
-    ClientHeight = 187
+    ClientHeight = 207
     ClientWidth = 981
     Color = clWindow
     ParentColor = False
     TabOrder = 1
     object LogGrid: TsWorksheetGrid
       Left = 0
-      Height = 163
+      Height = 183
       Top = 0
       Width = 981
       AutoExpand = []
@@ -1118,7 +1118,7 @@ object PretensionForm: TPretensionForm
     object ZoomPanel: TPanel
       Left = 0
       Height = 22
-      Top = 165
+      Top = 185
       Width = 981
       Align = alBottom
       BevelOuter = bvNone
@@ -1129,11 +1129,30 @@ object PretensionForm: TPretensionForm
     object ZoomBevel: TBevel
       Left = 0
       Height = 2
-      Top = 163
+      Top = 183
       Width = 981
       Align = alBottom
       Shape = bsBottomLine
       Style = bsRaised
     end
+  end
+  object AttachmentPanel: TPanel
+    Left = 0
+    Height = 200
+    Top = 265
+    Width = 989
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+  end
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 6
+    Top = 259
+    Width = 989
+    Align = alBottom
+    ResizeAnchor = akBottom
+    ResizeStyle = rsLine
   end
 end

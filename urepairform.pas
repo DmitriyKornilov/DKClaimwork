@@ -6,11 +6,13 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Buttons, StdCtrls, DividerBevel,
+  Buttons, StdCtrls, DividerBevel, fpspreadsheetgrid, BCButton,
 
-  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const,
+  DK_Zoom, DK_Vector, DK_Matrix, DK_StrUtils, DK_Dialogs, DK_Const, DK_CtrlUtils,
 
-  USQLite, UUtils, USheets, fpspreadsheetgrid, BCButton;
+  USQLite, UUtils, USheets,
+
+  UAttachmentForm;
 
 type
 
@@ -27,8 +29,10 @@ type
     Label1: TLabel;
     ListTypePanel: TPanel;
     LogGrid: TsWorksheetGrid;
+    AttachmentPanel: TPanel;
     PDFCopyButton: TSpeedButton;
     PDFShowButton: TSpeedButton;
+    Splitter1: TSplitter;
     StatisticButton: TBCButton;
     ToolPanel: TPanel;
     ViewTypeComboBox: TComboBox;
@@ -45,6 +49,8 @@ type
     procedure PDFShowButtonClick(Sender: TObject);
     procedure ViewTypeComboBoxChange(Sender: TObject);
   private
+    AttachmentForm: TForm;
+
     Sheet: TSheetRepair;
     ZoomPercent: Integer;
     BeginDate, EndDate: TDate;
@@ -79,6 +85,8 @@ type
     procedure DataSelect;
     procedure DataEdit;
     procedure DataDelete;
+
+    procedure AttachmentsLoad;
   public
     procedure DataLoad(const AMotorNumLike: String;
                       const ABeginDate: TDate;
@@ -101,6 +109,11 @@ begin
 
   Sheet:= TSheetRepair.Create(LogGrid.Worksheet, LogGrid);
   Sheet.OnSelect:= @DataSelect;
+
+  AttachmentForm:= FormOnPanelCreate(TAttachmentForm, AttachmentPanel);
+  (AttachmentForm as TAttachmentForm).Category:= 2;
+  AttachmentForm.Show;
+
 end;
 
 procedure TRepairForm.AddButtonClick(Sender: TObject);
@@ -136,6 +149,7 @@ end;
 procedure TRepairForm.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(Sheet);
+  FreeAndNil(AttachmentForm);
 end;
 
 procedure TRepairForm.LogGridDblClick(Sender: TObject);
@@ -264,6 +278,7 @@ end;
 procedure TRepairForm.DataSelect;
 begin
   ButtonsEnabled;
+  AttachmentsLoad;
 end;
 
 procedure TRepairForm.DataEdit;
@@ -358,6 +373,22 @@ begin
   if k<>1 then
     Sheet.Select(i, j, k);
 
+end;
+
+procedure TRepairForm.AttachmentsLoad;
+var
+  i, j: Integer;
+begin
+  if Sheet.IsSelected then
+  begin
+    i:= Sheet.SelectedNoticeIndex;
+    j:= Sheet.SelectedMotorIndex;
+    (AttachmentForm as TAttachmentForm).AttachmentsShow(LogIDs[i,j],
+                        NoticeNums[i], NoticeDates[i],
+                        MotorNums[i,j], MotorNames[i,j], MotorDates[i,j]);
+  end
+  else
+    (AttachmentForm as TAttachmentForm).AttachmentsClear;
 end;
 
 procedure TRepairForm.DataLoad(const AMotorNumLike: String;

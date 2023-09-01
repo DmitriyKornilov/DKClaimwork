@@ -1,9 +1,9 @@
 object RepairForm: TRepairForm
   Left = 457
-  Height = 244
+  Height = 404
   Top = 267
   Width = 1019
-  ClientHeight = 244
+  ClientHeight = 404
   ClientWidth = 1019
   DesignTimePPI = 120
   OnCreate = FormCreate
@@ -1063,7 +1063,7 @@ object RepairForm: TRepairForm
   end
   object GridPanel: TPanel
     Left = 2
-    Height = 196
+    Height = 150
     Top = 46
     Width = 1015
     Align = alClient
@@ -1073,14 +1073,14 @@ object RepairForm: TRepairForm
     BorderSpacing.Bottom = 2
     BevelOuter = bvNone
     BorderStyle = bsSingle
-    ClientHeight = 192
+    ClientHeight = 146
     ClientWidth = 1011
     Color = clWindow
     ParentColor = False
     TabOrder = 1
     object LogGrid: TsWorksheetGrid
       Left = 0
-      Height = 168
+      Height = 122
       Top = 0
       Width = 1011
       AutoExpand = []
@@ -1119,7 +1119,7 @@ object RepairForm: TRepairForm
     object ZoomPanel: TPanel
       Left = 0
       Height = 22
-      Top = 170
+      Top = 124
       Width = 1011
       Align = alBottom
       BevelOuter = bvNone
@@ -1130,11 +1130,30 @@ object RepairForm: TRepairForm
     object ZoomBevel: TBevel
       Left = 0
       Height = 2
-      Top = 168
+      Top = 122
       Width = 1011
       Align = alBottom
       Shape = bsBottomLine
       Style = bsRaised
     end
+  end
+  object AttachmentPanel: TPanel
+    Left = 0
+    Height = 200
+    Top = 204
+    Width = 1019
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+  end
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 6
+    Top = 198
+    Width = 1019
+    Align = alBottom
+    ResizeAnchor = akBottom
+    ResizeStyle = rsLine
   end
 end
