@@ -1661,7 +1661,6 @@ begin
       FileName:= FileName + AFileExtension;
     D.FileName:= FileName;
     if not D.Execute then Exit;
-    FileName:= SFileNameCheck(D.FileName, SYMBOL_HYPHEN);
     if not SFind(FileName, AFileExtension, False) then
       FileName:= FileName + AFileExtension;
     Result:= CopyFile(ASrcFileName, FileName,
@@ -1675,14 +1674,22 @@ function DocumentCopy(const ASrcFileName, ADestFileName: String;
                       const ASaveDialog: Boolean = True): Boolean;
 var
   D: TSaveDialog;
+  FileName: String;
 begin
   if ASaveDialog then
   begin
     D:= TSaveDialog.Create(nil);
     try
-      D.FileName:= ADestFileName;
+      D.Filter:= 'Файл PDF|*.pdf';
+      FileName:= ADestFileName;
+      if not SFind(ADestFileName, '.pdf', False) then
+        FileName:= FileName + '.pdf';
+      D.FileName:= FileName;
       if not D.Execute then Exit;
-      Result:= CopyFile(ASrcFileName, D.FileName,
+      FileName:= D.FileName;
+      if not SFind(FileName, '.pdf', False) then
+        FileName:= FileName + '.pdf';
+      Result:= CopyFile(ASrcFileName, FileName,
                 [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
     finally
       FreeAndNil(D);
