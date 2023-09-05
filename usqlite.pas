@@ -2767,6 +2767,7 @@ begin
     'INNER JOIN REPAIRS t4 ON (t1.RepairID=t4.RepairID) ' +
     'INNER JOIN RECLAMATIONMOTORS t5 ON (t1.RecLogID=t5.LogID) ' +
     'INNER JOIN USERS t6 ON (t4.UserID=t6.UserID) ' +
+    'INNER JOIN RECLAMATIONS t7 ON (t5.ReclamationID=t7.ReclamationID) ' +
     'WHERE ' +
       '(t1.RepairID>0) ';
 
@@ -2774,7 +2775,9 @@ begin
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
     if (ABeginDate>0) and (AEndDate>0) then
-      S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
+    //запросы о ремонте за период + рекламации за период, если принято решение о возврате
+      S:= S + 'AND ((t4.NoticeFromUserDate BETWEEN :BD AND :ED) OR ( (t7.NoticeFromUserDate BETWEEN :BD AND :ED) AND (t4.NoticeFromUserDate=0) ) ) ';
+
     if AViewIndex>0 then
       S:= S + ' AND (t1.Status = :Status) ';
   end;
