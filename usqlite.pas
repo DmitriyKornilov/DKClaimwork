@@ -221,7 +221,7 @@ type
     //претензии
     procedure PretensionListLoad(const AMotorNumLike: String;
                 const ABeginDate, AEndDate: TDate;
-                const AViewIndex: Integer;
+                const AViewIndex, AMileageIndex: Integer;
                 out APretensionIDs, AStatuses: TIntVector;
                 out AUserNames, AUserTitles, ANotes: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
@@ -2990,7 +2990,7 @@ end;
 
 procedure TSQLite.PretensionListLoad(const AMotorNumLike: String;
                 const ABeginDate, AEndDate: TDate;
-                const AViewIndex: Integer;
+                const AViewIndex, AMileageIndex: Integer;
                 out APretensionIDs, AStatuses: TIntVector;
                 out AUserNames, AUserTitles, ANotes: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
@@ -3050,6 +3050,13 @@ begin
       S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
     if AViewIndex>0 then
       S:= S + ' AND (t4.Status = :Status) ';
+    if AMileageIndex>0 then
+    begin
+      case AMileageIndex of
+      1: S:= S + ' AND (t5.Mileage < 175000) ';
+      2: S:= S + ' AND (t5.Mileage >= 175000) ';
+      end;
+    end;
   end;
   S:= S +
     'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';

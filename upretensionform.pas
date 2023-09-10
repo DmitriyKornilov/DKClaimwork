@@ -36,6 +36,7 @@ type
     StatisticButton: TBCButton;
     ToolPanel: TPanel;
     ViewTypeComboBox: TComboBox;
+    MileageTypeComboBox: TComboBox;
     ZoomBevel: TBevel;
     ZoomPanel: TPanel;
     procedure AddButtonClick(Sender: TObject);
@@ -45,6 +46,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure LogGridDblClick(Sender: TObject);
+    procedure MileageTypeComboBoxChange(Sender: TObject);
     procedure PDFCopyButtonClick(Sender: TObject);
     procedure PDFShowButtonClick(Sender: TObject);
     procedure ViewTypeComboBoxChange(Sender: TObject);
@@ -149,6 +151,11 @@ end;
 procedure TPretensionForm.LogGridDblClick(Sender: TObject);
 begin
   if EditButton.Enabled then DataEdit;
+end;
+
+procedure TPretensionForm.MileageTypeComboBoxChange(Sender: TObject);
+begin
+  DataLoad(MotorNumLike, BeginDate, EndDate);
 end;
 
 procedure TPretensionForm.PDFCopyButtonClick(Sender: TObject);
@@ -397,7 +404,7 @@ begin
   Sheet.Unselect;
 
   SQLite.PretensionListLoad(AMotorNumLike, ABeginDate, AEndDate,
-                ViewTypeComboBox.ItemIndex,
+                ViewTypeComboBox.ItemIndex, MileageTypeComboBox.ItemIndex,
                 PretensionIDs, Statuses, UserNames, UserTitles, Notes,
                 NoticeDates, NoticeNums,
                 MoneyValues, SendValues, GetValues, SendDates, GetDates,

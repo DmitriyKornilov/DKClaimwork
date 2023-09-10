@@ -1,10 +1,10 @@
 object PretensionForm: TPretensionForm
-  Left = 459
+  Left = 359
   Height = 465
-  Top = 248
-  Width = 989
+  Top = 186
+  Width = 1274
   ClientHeight = 465
-  ClientWidth = 989
+  ClientWidth = 1274
   DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -13,7 +13,7 @@ object PretensionForm: TPretensionForm
     Left = 2
     Height = 42
     Top = 2
-    Width = 985
+    Width = 1270
     Align = alTop
     AutoSize = True
     BorderSpacing.Left = 2
@@ -22,7 +22,7 @@ object PretensionForm: TPretensionForm
     BevelOuter = bvNone
     BorderStyle = bsSingle
     ClientHeight = 38
-    ClientWidth = 981
+    ClientWidth = 1266
     ParentFont = False
     TabOrder = 0
     object EditButton: TSpeedButton
@@ -486,12 +486,12 @@ object PretensionForm: TPretensionForm
       Left = 220
       Height = 38
       Top = 0
-      Width = 498
+      Width = 774
       Align = alLeft
       AutoSize = True
       BevelOuter = bvNone
       ClientHeight = 38
-      ClientWidth = 498
+      ClientWidth = 774
       TabOrder = 0
       object Label1: TLabel
         AnchorSideLeft.Control = ListTypePanel
@@ -529,9 +529,32 @@ object PretensionForm: TPretensionForm
         TabOrder = 0
         Text = 'на этапе согласования компенсации'
       end
+      object MileageTypeComboBox: TComboBox
+        AnchorSideLeft.Control = ViewTypeComboBox
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = ListTypePanel
+        AnchorSideTop.Side = asrCenter
+        Left = 504
+        Height = 28
+        Top = 5
+        Width = 270
+        BorderSpacing.Left = 6
+        DropDownCount = 10
+        ItemHeight = 20
+        ItemIndex = 0
+        Items.Strings = (
+          'с любым пробегом локомотива'
+          'с пробегом менее 175 тыс. км'
+          'с пробегом 175 тыс. км и более'
+        )
+        OnChange = MileageTypeComboBoxChange
+        Style = csDropDownList
+        TabOrder = 1
+        Text = 'с любым пробегом локомотива'
+      end
     end
     object DividerBevel2: TDividerBevel
-      Left = 718
+      Left = 994
       Height = 38
       Top = 0
       Width = 20
@@ -542,7 +565,7 @@ object PretensionForm: TPretensionForm
     end
     object ExportButton: TBCButton
       Cursor = crHandPoint
-      Left = 740
+      Left = 1016
       Height = 36
       Top = 1
       Width = 108
@@ -653,7 +676,7 @@ object PretensionForm: TPretensionForm
     end
     object StatisticButton: TBCButton
       Cursor = crHandPoint
-      Left = 850
+      Left = 1126
       Height = 36
       Top = 1
       Width = 87
@@ -1064,7 +1087,7 @@ object PretensionForm: TPretensionForm
     Left = 2
     Height = 211
     Top = 46
-    Width = 985
+    Width = 1270
     Align = alClient
     BorderSpacing.Left = 2
     BorderSpacing.Top = 2
@@ -1073,7 +1096,7 @@ object PretensionForm: TPretensionForm
     BevelOuter = bvNone
     BorderStyle = bsSingle
     ClientHeight = 207
-    ClientWidth = 981
+    ClientWidth = 1266
     Color = clWindow
     ParentColor = False
     TabOrder = 1
@@ -1081,7 +1104,7 @@ object PretensionForm: TPretensionForm
       Left = 0
       Height = 183
       Top = 0
-      Width = 981
+      Width = 1266
       AutoExpand = []
       DisplayFixedColRow = False
       FrozenBorderPen.Style = psClear
@@ -1119,7 +1142,7 @@ object PretensionForm: TPretensionForm
       Left = 0
       Height = 22
       Top = 185
-      Width = 981
+      Width = 1266
       Align = alBottom
       BevelOuter = bvNone
       Color = clWindow
@@ -1130,7 +1153,7 @@ object PretensionForm: TPretensionForm
       Left = 0
       Height = 2
       Top = 183
-      Width = 981
+      Width = 1266
       Align = alBottom
       Shape = bsBottomLine
       Style = bsRaised
@@ -1140,7 +1163,7 @@ object PretensionForm: TPretensionForm
     Left = 0
     Height = 200
     Top = 265
-    Width = 989
+    Width = 1274
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
@@ -1150,7 +1173,7 @@ object PretensionForm: TPretensionForm
     Left = 0
     Height = 6
     Top = 259
-    Width = 989
+    Width = 1274
     Align = alBottom
     ResizeAnchor = akBottom
     ResizeStyle = rsLine

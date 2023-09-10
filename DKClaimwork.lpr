@@ -18,7 +18,8 @@ uses
   UPretensionForm, UReclamationEditForm, UMileageEditForm, URepairEditForm,
   UPretensionEditForm, UPretensionLetterForm, UPretensionLetterStandardForm,
   UAttachmentEditForm, UAttachmentForm
-  { you can add units after this };
+  { you can add units after this }
+  , DK_Const, SysUtils;
 
 {$R *.res}
 
@@ -26,6 +27,10 @@ begin
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
   Application.Initialize;
+  DefaultFormatSettings:= DefaultFormatSettingsRus;
+  {$IFDEF WINDOWS}
+  Application.{%H-}UpdateFormatSettings:= False;
+  {$ENDIF}
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.
