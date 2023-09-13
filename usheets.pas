@@ -64,6 +64,10 @@ type
     function ColumnWidths: TIntVector; virtual;
     procedure DrawHeader; virtual;
     procedure DrawLine(const ANoticeIndex: Integer); virtual;
+
+    procedure DrawMileage(const ARow, ACol, AMileage: Integer);
+    procedure DrawDate(const ARow1, ACol1, ARow2, ACol2: Integer; const ADate: TDate);
+    procedure DrawMoney(const ARow1, ACol1, ARow2, ACol2: Integer; const AMoney: Int64);
   public
     constructor Create(const AWorksheet: TsWorksheet; const AGrid: TsWorksheetGrid = nil);
     destructor  Destroy; override;
@@ -122,6 +126,7 @@ type
     FToBuilders: TStrMatrix;
     FFromBuilders: TStrMatrix;
     FToUsers: TStrMatrix;
+    FMileages: TIntMatrix;
     function ColumnWidths: TIntVector; override;
     procedure DrawHeader; override;
     procedure DrawLine(const ANoticeIndex: Integer); override;
@@ -129,7 +134,8 @@ type
     procedure Update(const AUsers, ANotices: TStrVector;
                      const AToBuilders, AFromBuilders, AToUsers,
                            ANotes, AStatuses, AMotors: TStrMatrix;
-                     const ABeginDates, AEndDates: TDateMatrix);
+                     const ABeginDates, AEndDates: TDateMatrix;
+                     const AMileages: TIntMatrix);
   end;
 
   { TSheetPretension }
@@ -146,6 +152,7 @@ type
     FToBuilders: TStrVector;
     FFromBuilders: TStrVector;
     FToUsers: TStrVector;
+    FMileages: TIntMatrix;
     function ColumnWidths: TIntVector; override;
     procedure DrawHeader; override;
     procedure DrawLine(const ANoticeIndex: Integer); override;
@@ -154,7 +161,8 @@ type
                            AToBuilders, AFromBuilders, AToUsers, ANotes, AStatuses: TStrVector;
                      const AMotors: TStrMatrix;
                      const AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                     const ASendDates, AGetDates: TDateVector);
+                     const ASendDates, AGetDates: TDateVector;
+                     const AMileages: TIntMatrix);
   end;
 
 
@@ -170,26 +178,27 @@ var
 begin
   V1:= inherited ColumnWidths;
   V2:= VCreateInt([
-    {03} 80,                  // сумма
-    {04} USER_COLUMN_WIDTH,   // отправитель уведомления (потребитель)
-    {05} LETTER_COLUMN_WIDTH, // письмо от потребителя
-    {06} LETTER_COLUMN_WIDTH, // письмо производителю
-    {07} LETTER_COLUMN_WIDTH, // ответ от производителя
-    {08} LETTER_COLUMN_WIDTH, // ответ потребителю
-    {09} 100,                 // дата компенсации потребителю
-    {10} 100,                 // сумма компенсации потребителю
-    {11} 110,                 // дата возмещения производителем
-    {12} 110,                 // сумма возмещения производителем
-    {13} NOTE_COLUMN_WIDTH,   // примечание
-    {14} STATUS_COLUMN_WIDTH  // статус
+    {03} 80,                  // пробег
+    {04} 80,                  // сумма
+    {05} USER_COLUMN_WIDTH,   // отправитель уведомления (потребитель)
+    {06} LETTER_COLUMN_WIDTH, // письмо от потребителя
+    {07} LETTER_COLUMN_WIDTH, // письмо производителю
+    {08} LETTER_COLUMN_WIDTH, // ответ от производителя
+    {09} LETTER_COLUMN_WIDTH, // ответ потребителю
+    {10} 100,                 // дата компенсации потребителю
+    {11} 100,                 // сумма компенсации потребителю
+    {12} 110,                 // дата возмещения производителем
+    {13} 110,                 // сумма возмещения производителем
+    {14} NOTE_COLUMN_WIDTH,   // примечание
+    {15} STATUS_COLUMN_WIDTH  // статус
   ]);
   Result:= VAdd(V1, V2);
 
   {indexes                0  1  2  3  4   5          }
-  FSelCols1:= VCreateInt([3, 6, 7, 8, 9,  13, 1]);
-  FSelCols2:= VCreateInt([5, 6, 7, 8, 12, 13, 2]);
-  FMainCol1:= 3;
-  FMainCol2:= 5;
+  FSelCols1:= VCreateInt([4, 7, 8, 9, 10, 14, 1]);
+  FSelCols2:= VCreateInt([6, 7, 8, 9, 13, 14, 2]);
+  FMainCol1:= 4;
+  FMainCol2:= 6;
   FMainColIndex:= 0;
   FFullSelectColIndexes:= VCreateInt([FMainColIndex, 1, 2, 3, 4, 5]);
 end;
@@ -197,23 +206,24 @@ end;
 procedure TSheetPretension.DrawHeader;
 begin
   inherited DrawHeader;
-  FWriter.WriteText(1,  3, 'Сумма к возмещению', cbtOuter, True, True);
-  FWriter.WriteText(1,  4, 'Потребитель', cbtOuter, True, True);
-  FWriter.WriteText(1,  5, LETTER_NAMES[10], cbtOuter, True, True);
-  FWriter.WriteText(1,  6, LETTER_NAMES[11], cbtOuter, True, True);
-  FWriter.WriteText(1,  7, LETTER_NAMES[12], cbtOuter, True, True);
-  FWriter.WriteText(1,  8, LETTER_NAMES[13], cbtOuter, True, True);
-  FWriter.WriteText(1,  9, 'Дата компенсации Потребителю', cbtOuter, True, True);
-  FWriter.WriteText(1, 10, 'Сумма компенсации Потребителю', cbtOuter, True, True);
-  FWriter.WriteText(1, 11, 'Дата возмещения Производителем', cbtOuter, True, True);
-  FWriter.WriteText(1, 12, 'Сумма возмещения Производителем', cbtOuter, True, True);
-  FWriter.WriteText(1, 13, 'Примечание по претензии', cbtOuter, True, True);
-  FWriter.WriteText(1, 14, 'Статус претензионной работы', cbtOuter, True, True);
+  FWriter.WriteText(1,  3, 'Пробег локомотива, км', cbtOuter, True, True);
+  FWriter.WriteText(1,  4, 'Сумма к возмещению', cbtOuter, True, True);
+  FWriter.WriteText(1,  5, 'Потребитель', cbtOuter, True, True);
+  FWriter.WriteText(1,  6, LETTER_NAMES[10], cbtOuter, True, True);
+  FWriter.WriteText(1,  7, LETTER_NAMES[11], cbtOuter, True, True);
+  FWriter.WriteText(1,  8, LETTER_NAMES[12], cbtOuter, True, True);
+  FWriter.WriteText(1,  9, LETTER_NAMES[13], cbtOuter, True, True);
+  FWriter.WriteText(1, 10, 'Дата компенсации Потребителю', cbtOuter, True, True);
+  FWriter.WriteText(1, 11, 'Сумма компенсации Потребителю', cbtOuter, True, True);
+  FWriter.WriteText(1, 12, 'Дата возмещения Производителем', cbtOuter, True, True);
+  FWriter.WriteText(1, 13, 'Сумма возмещения Производителем', cbtOuter, True, True);
+  FWriter.WriteText(1, 14, 'Примечание по претензии', cbtOuter, True, True);
+  FWriter.WriteText(1, 15, 'Статус претензионной работы', cbtOuter, True, True);
 end;
 
 procedure TSheetPretension.DrawLine(const ANoticeIndex: Integer);
 var
-  i, R1, R2: Integer;
+  i, j, R1, R2: Integer;
 begin
   if not IsLineExists(ANoticeIndex) then Exit;
 
@@ -227,49 +237,43 @@ begin
   FWriter.SetAlignment(haCenter, vaCenter);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=FMainColIndex);
-  FWriter.WriteNumber(R1, 3, R2, 3, FMoneyValues[i]/100, cbtOuter, '#,##0.00');
-  FWriter.WriteText(R1, 4, R2, 4, FUsers[i], cbtOuter, True, True);
-  FWriter.WriteText(R1, 5, R2, 5, FNotices[i], cbtOuter, True, True);
+  FWriter.WriteNumber(R1, 4, R2, 4, FMoneyValues[i]/100, cbtOuter, '#,##0.00');
+  FWriter.WriteText(R1, 5, R2, 5, FUsers[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 6, R2, 6, FNotices[i], cbtOuter, True, True);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=1);
-  FWriter.WriteText(R1, 6, R2, 6, FToBuilders[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 7, R2, 7, FToBuilders[i], cbtOuter, True, True);
   SetBackground(ANoticeIndex, FSelectedColIndex=2);
-  FWriter.WriteText(R1, 7, R2, 7, FFromBuilders[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 8, R2, 8, FFromBuilders[i], cbtOuter, True, True);
   SetBackground(ANoticeIndex, FSelectedColIndex=3);
-  FWriter.WriteText(R1, 8, R2, 8, FToUsers[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 9, R2, 9, FToUsers[i], cbtOuter, True, True);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=4);
-  if FSendDates[i]>0 then
-    FWriter.WriteDate(R1, 9, R2, 9, FSendDates[i], cbtOuter)
-  else
-    FWriter.WriteText(R1, 9, R2, 9, EmptyStr, cbtOuter);
-  if FSendValues[i]>0 then
-    FWriter.WriteNumber(R1, 10, R2, 10, FSendValues[i]/100, cbtOuter, '#,##0.00')
-  else
-    FWriter.WriteText(R1, 10, R2, 10, EmptyStr, cbtOuter);
-  if FGetDates[i]>0 then
-    FWriter.WriteDate(R1, 11, R2, 11, FGetDates[i], cbtOuter)
-  else
-    FWriter.WriteText(R1, 11, R2, 11, EmptyStr, cbtOuter);
-  if FGetValues[i]>0 then
-    FWriter.WriteNumber(R1, 12, R2, 12, FGetValues[i]/100, cbtOuter, '#,##0.00')
-  else
-    FWriter.WriteText(R1, 12, R2, 12, EmptyStr, cbtOuter);
+  DrawDate(R1, 10, R2, 10, FSendDates[i]);
+  DrawMoney(R1, 11, R2, 11, FSendValues[i]);
+  DrawDate(R1, 12, R2, 12, FGetDates[i]);
+  DrawMoney(R1, 13, R2, 13, FGetValues[i]);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=5);
   FWriter.SetAlignment(haLeft, vaCenter);
-  FWriter.WriteText(R1, 13, R2, 13, FNotes[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 14, R2, 14, FNotes[i], cbtOuter, True, True);
 
   FWriter.SetBackgroundClear;
   FWriter.SetAlignment(haCenter, vaCenter);
-  FWriter.WriteText(R1, 14, R2, 14, FStatuses[i], cbtOuter);
+  FWriter.WriteText(R1, 15, R2, 15, FStatuses[i], cbtOuter);
+  for j:= 0 to High(FMotors[i]) do
+  begin
+    R1:= FSelRows1[i] + j;
+    DrawMileage(R1, 3, FMileages[i,j]);
+  end;
 end;
 
 procedure TSheetPretension.Update(const AUsers, ANotices,
                            AToBuilders, AFromBuilders, AToUsers, ANotes, AStatuses: TStrVector;
                      const AMotors: TStrMatrix;
                      const AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                     const ASendDates, AGetDates: TDateVector);
+                     const ASendDates, AGetDates: TDateVector;
+                     const AMileages: TIntMatrix);
 begin
   inherited Update(AUsers, ANotices, AMotors);
 
@@ -283,6 +287,7 @@ begin
   FToBuilders:= AToBuilders;
   FFromBuilders:= AFromBuilders;
   FToUsers:= AToUsers;
+  FMileages:= AMileages;
 end;
 
 { TSheetRepair }
@@ -293,23 +298,24 @@ var
 begin
   V1:= inherited ColumnWidths;
   V2:= VCreateInt([
-    {03} USER_COLUMN_WIDTH,   // отправитель запроса (потребитель)
-    {04} LETTER_COLUMN_WIDTH, // письмо от потребителя
-    {05} LETTER_COLUMN_WIDTH, // письмо производителю
-    {06} LETTER_COLUMN_WIDTH, // ответ от производителя
-    {07} LETTER_COLUMN_WIDTH, // ответ потребителю
-    {08} 80,                  // дата прибытия в ремонт
-    {09} 80,                  // дата убытия в ремонт
-    {10} NOTE_COLUMN_WIDTH,   // примечание
-    {11} STATUS_COLUMN_WIDTH  // статус
+    {03} 80,   // пробег
+    {04} USER_COLUMN_WIDTH,   // отправитель запроса (потребитель)
+    {05} LETTER_COLUMN_WIDTH, // письмо от потребителя
+    {06} LETTER_COLUMN_WIDTH, // письмо производителю
+    {07} LETTER_COLUMN_WIDTH, // ответ от производителя
+    {08} LETTER_COLUMN_WIDTH, // ответ потребителю
+    {09} 80,                  // дата прибытия в ремонт
+    {10} 80,                  // дата убытия в ремонт
+    {11} NOTE_COLUMN_WIDTH,   // примечание
+    {12} STATUS_COLUMN_WIDTH  // статус
   ]);
   Result:= VAdd(V1, V2);
 
-  {indexes                0  1  2  3  4  5     }
-  FSelCols1:= VCreateInt([3, 5, 6, 7, 8, 10, 1]);
-  FSelCols2:= VCreateInt([4, 5, 6, 7, 9, 10, 2]);
-  FMainCol1:= 3;
-  FMainCol2:= 4;
+  {indexes                0  1  2  3  4   5     }
+  FSelCols1:= VCreateInt([4, 6, 7, 8, 9,  11, 1]);
+  FSelCols2:= VCreateInt([5, 6, 7, 8, 10, 11, 2]);
+  FMainCol1:= 4;
+  FMainCol2:= 5;
   FMainColIndex:= 0;
   FFullSelectColIndexes:= VCreateInt([FMainColIndex]);
 end;
@@ -317,15 +323,16 @@ end;
 procedure TSheetRepair.DrawHeader;
 begin
   inherited DrawHeader;
-  FWriter.WriteText(1,  3, 'Потребитель', cbtOuter, True, True);
-  FWriter.WriteText(1,  4, LETTER_NAMES[6], cbtOuter, True, True);
-  FWriter.WriteText(1,  5, LETTER_NAMES[7], cbtOuter, True, True);
-  FWriter.WriteText(1,  6, LETTER_NAMES[8], cbtOuter, True, True);
-  FWriter.WriteText(1,  7, LETTER_NAMES[9], cbtOuter, True, True);
-  FWriter.WriteText(1,  8, 'Дата прибытия в ремонт', cbtOuter, True, True);
-  FWriter.WriteText(1,  9, 'Дата отправки из ремонта', cbtOuter, True, True);
-  FWriter.WriteText(1, 10, 'Примечание по ходу ремонта', cbtOuter, True, True);
-  FWriter.WriteText(1, 11, 'Статус ремонта', cbtOuter, True, True);
+  FWriter.WriteText(1,  3, 'Пробег локомотива, км', cbtOuter, True, True);
+  FWriter.WriteText(1,  4, 'Потребитель', cbtOuter, True, True);
+  FWriter.WriteText(1,  5, LETTER_NAMES[6], cbtOuter, True, True);
+  FWriter.WriteText(1,  6, LETTER_NAMES[7], cbtOuter, True, True);
+  FWriter.WriteText(1,  7, LETTER_NAMES[8], cbtOuter, True, True);
+  FWriter.WriteText(1,  8, LETTER_NAMES[9], cbtOuter, True, True);
+  FWriter.WriteText(1,  9, 'Дата прибытия в ремонт', cbtOuter, True, True);
+  FWriter.WriteText(1, 10, 'Дата отправки из ремонта', cbtOuter, True, True);
+  FWriter.WriteText(1, 11, 'Примечание по ходу ремонта', cbtOuter, True, True);
+  FWriter.WriteText(1, 12, 'Статус ремонта', cbtOuter, True, True);
 end;
 
 procedure TSheetRepair.DrawLine(const ANoticeIndex: Integer);
@@ -344,40 +351,37 @@ begin
   FWriter.SetAlignment(haCenter, vaCenter);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=FMainColIndex);
-  FWriter.WriteText(R1, 3, R2, 3, FUsers[i], cbtOuter, True, True);
-  FWriter.WriteText(R1, 4, R2, 4, FNotices[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 4, R2, 4, FUsers[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 5, R2, 5, FNotices[i], cbtOuter, True, True);
 
   for j:= 0 to High(FMotors[i]) do
   begin
     R1:= FSelRows1[i] + j;
     FWriter.SetAlignment(haCenter, vaCenter);
-    SetBackground(ANoticeIndex, (FSelectedColIndex=1) and (FSelectedMotorIndex=j));
-    FWriter.WriteText(R1, 5, FToBuilders[i,j], cbtOuter, True, True);
-    SetBackground(ANoticeIndex, (FSelectedColIndex=2) and (FSelectedMotorIndex=j));
-    FWriter.WriteText(R1, 6, FFromBuilders[i,j], cbtOuter, True, True);
-    SetBackground(ANoticeIndex, (FSelectedColIndex=3) and (FSelectedMotorIndex=j));
-    FWriter.WriteText(R1, 7, FToUsers[i,j], cbtOuter, True, True);
-    SetBackground(ANoticeIndex, (FSelectedColIndex=4) and (FSelectedMotorIndex=j));
-    if FBeginDates[i,j]>0 then
-      FWriter.WriteDate(R1, 8, FBeginDates[i,j], cbtOuter)
-    else
-      FWriter.WriteText(R1, 8, EmptyStr, cbtOuter);
-    if FEndDates[i,j]>0 then
-      FWriter.WriteDate(R1, 9, FEndDates[i,j], cbtOuter)
-    else
-      FWriter.WriteText(R1, 9, EmptyStr, cbtOuter);
     FWriter.SetBackgroundClear;
-    FWriter.WriteText(R1, 11, FStatuses[i,j], cbtOuter);
+    DrawMileage(R1, 3, FMileages[i,j]);
+    SetBackground(ANoticeIndex, (FSelectedColIndex=1) and (FSelectedMotorIndex=j));
+    FWriter.WriteText(R1, 6, FToBuilders[i,j], cbtOuter, True, True);
+    SetBackground(ANoticeIndex, (FSelectedColIndex=2) and (FSelectedMotorIndex=j));
+    FWriter.WriteText(R1, 7, FFromBuilders[i,j], cbtOuter, True, True);
+    SetBackground(ANoticeIndex, (FSelectedColIndex=3) and (FSelectedMotorIndex=j));
+    FWriter.WriteText(R1, 8, FToUsers[i,j], cbtOuter, True, True);
+    SetBackground(ANoticeIndex, (FSelectedColIndex=4) and (FSelectedMotorIndex=j));
+    DrawDate(R1, 9, R1, 9, FBeginDates[i,j]);
+    DrawDate(R1, 10, R1, 10, FEndDates[i,j]);
+    FWriter.SetBackgroundClear;
+    FWriter.WriteText(R1, 12, FStatuses[i,j], cbtOuter);
     FWriter.SetAlignment(haLeft, vaCenter);
     SetBackground(ANoticeIndex, (FSelectedColIndex=5) and (FSelectedMotorIndex=j));
-    FWriter.WriteText(R1, 10, FNotes[i,j], cbtOuter, True, True);
+    FWriter.WriteText(R1, 11, FNotes[i,j], cbtOuter, True, True);
   end;
 end;
 
 procedure TSheetRepair.Update(const AUsers, ANotices: TStrVector;
                      const AToBuilders, AFromBuilders, AToUsers,
                            ANotes, AStatuses, AMotors: TStrMatrix;
-                     const ABeginDates, AEndDates: TDateMatrix);
+                     const ABeginDates, AEndDates: TDateMatrix;
+                     const AMileages: TIntMatrix);
 begin
   inherited Update(AUsers, ANotices, AMotors);
 
@@ -388,6 +392,7 @@ begin
   FToBuilders:= AToBuilders;
   FFromBuilders:= AFromBuilders;
   FToUsers:= AToUsers;
+  FMileages:= AMileages;
 end;
 
 { TSheetReclamation }
@@ -462,10 +467,7 @@ begin
     R1:= FSelRows1[i] + j;
     FWriter.SetAlignment(haCenter, vaCenter);
     SetBackground(ANoticeIndex, (FSelectedColIndex=0) and (FSelectedMotorIndex=j));
-    if FMileages[i,j]>=0 then
-      FWriter.WriteNumber(R1, 3, FMileages[i,j], cbtOuter, '#,##0')
-    else
-      FWriter.WriteText(R1, 3, EmptyStr, cbtOuter);
+    DrawMileage(R1, 3, FMileages[i,j]);
     SetBackground(ANoticeIndex, (FSelectedColIndex=2) and (FSelectedMotorIndex=j));
     FWriter.WriteText(R1, 7, FToBuilders[i,j], cbtOuter, True, True);
     SetBackground(ANoticeIndex, (FSelectedColIndex=3) and (FSelectedMotorIndex=j));
@@ -501,8 +503,6 @@ begin
   FFromBuilders:= AFromBuilders;
   FToUsers:= AToUsers;
 end;
-
-
 
 { TSheetCustom }
 
@@ -671,6 +671,30 @@ begin
     FWriter.SetAlignment(haLeft, vaCenter);
     FWriter.WriteText(R, 2, FMotors[i,j], cbtOuter, True, True);
   end;
+end;
+
+procedure TSheetCustom.DrawMileage(const ARow, ACol, AMileage: Integer);
+begin
+  if AMileage>=0 then
+    FWriter.WriteNumber(ARow, ACol, AMileage, cbtOuter, '#,##0')
+  else
+    FWriter.WriteText(ARow, ACol, EmptyStr, cbtOuter);
+end;
+
+procedure TSheetCustom.DrawDate(const ARow1, ACol1, ARow2, ACol2: Integer; const ADate: TDate);
+begin
+  if ADate>0 then
+    FWriter.WriteDate(ARow1, ACol1, ARow2, ACol2, ADate, cbtOuter)
+  else
+    FWriter.WriteText(ARow1, ACol1, ARow2, ACol2, EmptyStr, cbtOuter);
+end;
+
+procedure TSheetCustom.DrawMoney(const ARow1, ACol1, ARow2, ACol2: Integer; const AMoney: Int64);
+begin
+  if AMoney>0 then
+    FWriter.WriteNumber(ARow1, ACol1, ARow2, ACol2, AMoney/100, cbtOuter, '#,##0.00')
+  else
+    FWriter.WriteText(ARow1, ACol1, ARow2, ACol2, EmptyStr, cbtOuter);
 end;
 
 constructor TSheetCustom.Create(const AWorksheet: TsWorksheet; const AGrid: TsWorksheetGrid = nil);

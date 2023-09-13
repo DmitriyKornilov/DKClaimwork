@@ -30,6 +30,7 @@ type
     ListTypePanel: TPanel;
     LogGrid: TsWorksheetGrid;
     AttachmentPanel: TPanel;
+    MileageTypeComboBox: TComboBox;
     PDFCopyButton: TSpeedButton;
     PDFShowButton: TSpeedButton;
     Splitter1: TSplitter;
@@ -45,6 +46,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure LogGridDblClick(Sender: TObject);
+    procedure MileageTypeComboBoxChange(Sender: TObject);
     procedure PDFCopyButtonClick(Sender: TObject);
     procedure PDFShowButtonClick(Sender: TObject);
     procedure ViewTypeComboBoxChange(Sender: TObject);
@@ -70,7 +72,7 @@ type
     ToUserNums: TStrMatrix;
     BeginDates: TDateMatrix;
     EndDates: TDateMatrix;
-    ReclamationIDs, LogIDs, Statuses: TIntMatrix;
+    ReclamationIDs, LogIDs, Mileages, Statuses: TIntMatrix;
     Notes, MotorNames, MotorNums: TStrMatrix;
     MotorDates: TDateMatrix;
 
@@ -155,6 +157,11 @@ end;
 procedure TRepairForm.LogGridDblClick(Sender: TObject);
 begin
   if EditButton.Enabled then DataEdit;
+end;
+
+procedure TRepairForm.MileageTypeComboBoxChange(Sender: TObject);
+begin
+  DataLoad(MotorNumLike, BeginDate, EndDate);
 end;
 
 procedure TRepairForm.PDFCopyButtonClick(Sender: TObject);
@@ -407,12 +414,12 @@ begin
   Sheet.Unselect;
 
   SQLite.RepairListLoad(AMotorNumLike, BeginDate, EndDate,
-                ViewTypeComboBox.ItemIndex,
+                ViewTypeComboBox.ItemIndex, MileageTypeComboBox.ItemIndex,
                 RepairIDs, UserNames, UserTitles,
                 NoticeDates, NoticeNums, ToBuilderDates, ToBuilderNums,
                 FromBuilderDates, FromBuilderNums, ToUserDates, ToUserNums,
                 BeginDates, EndDates, ReclamationIDs,
-                LogIDs, Statuses, Notes, MotorNames, MotorNums, MotorDates);
+                LogIDs, Mileages, Statuses, Notes, MotorNames, MotorNums, MotorDates);
 
   Users:= VCut(UserTitles);  //UserNames
   Notices:= VLetterFullName(NoticeDates, NoticeNums);
@@ -425,7 +432,7 @@ begin
   Motors:= MMotorFullName(MotorNames, MotorNums, MotorDates);
 
   Sheet.Update(Users, Notices, ToBuilders, FromBuilders, ToUsers,
-               Notes, StrStatuses, Motors, BeginDates, EndDates);
+               Notes, StrStatuses, Motors, BeginDates, EndDates, Mileages);
   Sheet.Draw;
 end;
 

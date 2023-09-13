@@ -68,7 +68,7 @@ type
     Notes: TStrVector;
     Statuses: TIntVector;
 
-    ReclamationIDs, LogIDs: TIntMatrix;
+    ReclamationIDs, LogIDs, Mileages: TIntMatrix;
     MotorNames, MotorNums: TStrMatrix;
     MotorDates: TDateMatrix;
 
@@ -410,7 +410,7 @@ begin
                 MoneyValues, SendValues, GetValues, SendDates, GetDates,
                 ToBuilderDates, ToBuilderNums,
                 FromBuilderDates, FromBuilderNums, ToUserDates, ToUserNums,
-                ReclamationIDs, LogIDs, MotorNames, MotorNums, MotorDates);
+                ReclamationIDs, LogIDs, Mileages, MotorNames, MotorNums, MotorDates);
 
   Users:= VCut(UserTitles);  //UserNames
   Notices:= VLetterFullName(NoticeDates, NoticeNums);
@@ -423,7 +423,7 @@ begin
   Motors:= MMotorFullName(MotorNames, MotorNums, MotorDates);
 
   Sheet.Update(Users, Notices, ToBuilders, FromBuilders, ToUsers, Notes, StrStatuses,
-               Motors, MoneyValues, SendValues, GetValues, SendDates, GetDates);
+               Motors, MoneyValues, SendValues, GetValues, SendDates, GetDates, Mileages);
   Sheet.Draw;
 end;
 

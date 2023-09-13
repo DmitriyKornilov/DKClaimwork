@@ -177,7 +177,7 @@ type
     //ремонты
     procedure RepairListLoad(const AMotorNumLike: String;
                 const ABeginDate, AEndDate: TDate;
-                const AViewIndex: Integer;
+                const AViewIndex, AMileageIndex: Integer;
                 out ARepairIDs: TIntVector;
                 out AUserNames, AUserTitles: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
@@ -185,7 +185,7 @@ type
                 out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
                 out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
                 out ARepairBeginDates, ARepairEndDates: TDateMatrix;
-                out AReclamationIDs, ALogIDs, AStatuses: TIntMatrix;
+                out AReclamationIDs, ALogIDs, AMileages, AStatuses: TIntMatrix;
                 out ANotes, AMotorNames, AMotorNums: TStrMatrix;
                 out AMotorDates: TDateMatrix);
     procedure RepairInfoLoad(const ARepairID: Integer;
@@ -230,7 +230,7 @@ type
                 out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
                 out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
                 out AToUserDates: TDateVector; out AToUserNums: TStrVector;
-                out AReclamationIDs, ALogIDs: TIntMatrix;
+                out AReclamationIDs, ALogIDs, AMileages: TIntMatrix;
                 out AMotorNames, AMotorNums: TStrMatrix;
                 out AMotorDates: TDateMatrix);
     function PretensionMaxID: Integer;
@@ -625,7 +625,8 @@ begin
   if not SEmpty(AMotorNumLike) then
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
-    if (ABeginDate>0) and (AEndDate>0) then
+    if (AViewIndex<>1) and  //расслед
+       (ABeginDate>0) and (AEndDate>0) then
       S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
     if AViewIndex>0 then
       S:= S + ' AND (t1.Status = :Status) ';
@@ -2717,7 +2718,7 @@ end;
 
 procedure TSQLite.RepairListLoad(const AMotorNumLike: String;
                 const ABeginDate, AEndDate: TDate;
-                const AViewIndex: Integer;
+                const AViewIndex, AMileageIndex: Integer;
                 out ARepairIDs: TIntVector;
                 out AUserNames, AUserTitles: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
@@ -2725,7 +2726,7 @@ procedure TSQLite.RepairListLoad(const AMotorNumLike: String;
                 out AFromBuilderDates: TDateMatrix; out AFromBuilderNums: TStrMatrix;
                 out AToUserDates: TDateMatrix; out AToUserNums: TStrMatrix;
                 out ARepairBeginDates, ARepairEndDates: TDateMatrix;
-                out AReclamationIDs, ALogIDs, AStatuses: TIntMatrix;
+                out AReclamationIDs, ALogIDs, AMileages, AStatuses: TIntMatrix;
                 out ANotes, AMotorNames, AMotorNums: TStrMatrix;
                 out AMotorDates: TDateMatrix);
 var
@@ -2747,6 +2748,7 @@ begin
   ARepairEndDates:= nil;
   AReclamationIDs:= nil;
   ALogIDs:= nil;
+  AMileages:= nil;
   AStatuses:= nil;
   ANotes:= nil;
   AMotorNames:= nil;
@@ -2758,7 +2760,7 @@ begin
       't1.*, '+
       't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
       't4.NoticeFromUserDate, t4.NoticeFromUserNum, ' +
-      't5.ReclamationID, ' +
+      't5.ReclamationID, t5.Mileage, ' +
       't6.UserNameI, t6.UserTitle ' +
     'FROM ' +
       'REPAIRMOTORS t1 ' +
@@ -2774,12 +2776,20 @@ begin
   if not SEmpty(AMotorNumLike) then
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
-    if (ABeginDate>0) and (AEndDate>0) then
-    //запросы о ремонте за период + рекламации за период, если принято решение о возврате
+    if (AViewIndex in [0,4,5]) and //все, отремонтированные, с отказом
+       (ABeginDate>0) and (AEndDate>0) then
+      //запросы о ремонте за период + рекламации за период, если принято решение о возврате
       S:= S + 'AND ((t4.NoticeFromUserDate BETWEEN :BD AND :ED) OR ( (t7.NoticeFromUserDate BETWEEN :BD AND :ED) AND (t4.NoticeFromUserDate=0) ) ) ';
 
     if AViewIndex>0 then
       S:= S + ' AND (t1.Status = :Status) ';
+    if AMileageIndex>0 then
+    begin
+      case AMileageIndex of
+      1: S:= S + ' AND (t5.Mileage < 175000) ';
+      2: S:= S + ' AND (t5.Mileage >= 175000) ';
+      end;
+    end;
   end;
   S:= S +
     'ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum';
@@ -2815,6 +2825,7 @@ begin
         MAppend(ARepairBeginDates, VCreateDate([QFieldDT('BeginDate')]));
         MAppend(ARepairEndDates, VCreateDate([QFieldDT('EndDate')]));
         MAppend(ANotes, VCreateStr([QFieldStr('Note')]));
+        MAppend(AMileages, VCreateInt([QFieldInt('Mileage')]));
         MAppend(AStatuses, VCreateInt([QFieldInt('Status')]));
         MAppend(AReclamationIDs, VCreateInt([QFieldInt('ReclamationID')]));
         MAppend(ALogIDs, VCreateInt([QFieldInt('LogID')]));
@@ -2834,6 +2845,7 @@ begin
         VAppend(ARepairBeginDates[n], QFieldDT('BeginDate'));
         VAppend(ARepairEndDates[n], QFieldDT('EndDate'));
         VAppend(ANotes[n], QFieldStr('Note'));
+        VAppend(AMileages[n], QFieldInt('Mileage'));
         VAppend(AStatuses[n], QFieldInt('Status'));
         VAppend(AReclamationIDs[n], QFieldInt('ReclamationID'));
         VAppend(ALogIDs[n], QFieldInt('LogID'));
@@ -2999,7 +3011,7 @@ procedure TSQLite.PretensionListLoad(const AMotorNumLike: String;
                 out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
                 out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
                 out AToUserDates: TDateVector; out AToUserNums: TStrVector;
-                out AReclamationIDs, ALogIDs: TIntMatrix;
+                out AReclamationIDs, ALogIDs, AMileages: TIntMatrix;
                 out AMotorNames, AMotorNums: TStrMatrix;
                 out AMotorDates: TDateMatrix);
 var
@@ -3026,6 +3038,7 @@ begin
   AToUserNums:= nil;
   AReclamationIDs:= nil;
   ALogIDs:= nil;
+  AMileages:= nil;
   AMotorNames:= nil;
   AMotorNums:= nil;
   AMotorDates:= nil;
@@ -3046,7 +3059,8 @@ begin
   if not SEmpty(AMotorNumLike) then
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) '   //отбор только по номеру двигателя
   else begin
-    if (ABeginDate>0) and (AEndDate>0) then
+    if (AViewIndex in [0,3,4]) and //все, завершено, отказано
+       (ABeginDate>0) and (AEndDate>0) then
       S:= S + 'AND (t4.NoticeFromUserDate BETWEEN :BD AND :ED) ';
     if AViewIndex>0 then
       S:= S + ' AND (t4.Status = :Status) ';
@@ -3086,7 +3100,7 @@ begin
       't1.*, '+
       't2.MotorNum, t2.MotorDate, t3.MotorName, ' +
       't4.*, ' +
-      't5.ReclamationID, ' +
+      't5.ReclamationID, t5.Mileage, ' +
       't6.UserNameI, t6.UserTitle ' +
     'FROM ' +
       'PRETENSIONMOTORS t1 ' +
@@ -3134,6 +3148,7 @@ begin
 
         MAppend(AReclamationIDs, VCreateInt([QFieldInt('ReclamationID')]));
         MAppend(ALogIDs, VCreateInt([QFieldInt('LogID')]));
+        MAppend(AMileages, VCreateInt([QFieldInt('Mileage')]));
         MAppend(AMotorNames, VCreateStr([QFieldStr('MotorName')]));
         MAppend(AMotorNums, VCreateStr([QFieldStr('MotorNum')]));
         MAppend(AMotorDates, VCreateDate([QFieldDT('MotorDate')]));
@@ -3143,6 +3158,7 @@ begin
         n:= High(AMotorNames);
         VAppend(AReclamationIDs[n], QFieldInt('ReclamationID'));
         VAppend(ALogIDs[n], QFieldInt('LogID'));
+        VAppend(AMileages[n], QFieldInt('Mileage'));
         VAppend(AMotorNames[n], QFieldStr('MotorName'));
         VAppend(AMotorNums[n], QFieldStr('MotorNum'));
         VAppend(AMotorDates[n], QFieldDT('MotorDate'));
