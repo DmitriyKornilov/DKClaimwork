@@ -21,11 +21,14 @@ type
     CancelButton: TSpeedButton;
     DividerBevel1: TDividerBevel;
     DT2: TDateTimePicker;
+    DT3: TDateTimePicker;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
     MoneyGetNotNeedCheckBox: TCheckBox;
+    MoneyGetInvCheckBox: TCheckBox;
     MoneySendEdit: TCurrencyEdit;
     MoneyGetEdit: TCurrencyEdit;
     SaveButton: TSpeedButton;
@@ -35,6 +38,7 @@ type
     procedure CancelButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure MoneyGetCheckBoxChange(Sender: TObject);
+    procedure MoneyGetInvCheckBoxChange(Sender: TObject);
     procedure MoneyGetNotNeedCheckBoxChange(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure MoneySendCheckBoxChange(Sender: TObject);
@@ -42,6 +46,7 @@ type
     CanFormClose: Boolean;
     MoneyValue: Int64;
     procedure DataLoad;
+    procedure MoneyGetInvControlsEnabled;
     procedure MoneyGetControlsEnabled;
     procedure MoneySendControlsEnabled;
   public
@@ -69,6 +74,12 @@ begin
   DataLoad;
 end;
 
+procedure TMoneyDatesEditForm.MoneyGetInvControlsEnabled;
+begin
+  Label5.Enabled:= MoneyGetInvCheckBox.Checked;
+  DT3.Enabled:= Label5.Enabled;
+end;
+
 procedure TMoneyDatesEditForm.MoneyGetControlsEnabled;
 begin
   Label3.Enabled:= MoneyGetCheckBox.Checked;
@@ -90,11 +101,20 @@ begin
   MoneyGetControlsEnabled;
 end;
 
+procedure TMoneyDatesEditForm.MoneyGetInvCheckBoxChange(Sender: TObject);
+begin
+  MoneyGetInvControlsEnabled;
+end;
+
 procedure TMoneyDatesEditForm.MoneyGetNotNeedCheckBoxChange(Sender: TObject);
 begin
-  if not MoneyGetNotNeedCheckBox.Checked then
+  if MoneyGetNotNeedCheckBox.Checked then
+  begin
     MoneyGetCheckBox.Checked:= False;
+    MoneyGetInvCheckBox.Checked:= False;
+  end;
   MoneyGetCheckBox.Enabled:= not MoneyGetNotNeedCheckBox.Checked;
+  MoneyGetInvCheckBox.Enabled:= not MoneyGetNotNeedCheckBox.Checked;
 end;
 
 procedure TMoneyDatesEditForm.MoneySendCheckBoxChange(Sender: TObject);
@@ -105,7 +125,7 @@ end;
 procedure TMoneyDatesEditForm.SaveButtonClick(Sender: TObject);
 var
   SendValue, GetValue: Int64;
-  SendDate, GetDate: TDate;
+  SendDate, GetInvDate, GetDate: TDate;
   Status: Integer;
 begin
   CanFormClose:= False;
@@ -113,6 +133,7 @@ begin
   SendValue:= 0;
   GetValue:= 0;
   SendDate:= 0;
+  GetInvDate:= 0;
   GetDate:= 0;
   Status:= 2;   //возмещение
 
@@ -138,12 +159,15 @@ begin
     GetDate:= DT1.Date;
   end;
 
+  if MoneyGetInvCheckBox.Checked then
+    GetInvDate:= DT3.Date;
+
   if (MoneyGetNotNeedCheckBox.Checked and (SendValue=MoneyValue)) or
      ((SendValue=MoneyValue) and (GetValue=MoneyValue)) then
     Status:= 3;  //завершено
 
   SQLite.PretensionMoneyDatesUpdate(PretensionID, Status,
-                                    SendValue, GetValue, SendDate, GetDate);
+                                    SendValue, GetValue, SendDate, GetInvDate, GetDate);
 
   CanFormClose:= True;
   ModalResult:= mrOK;
@@ -154,16 +178,17 @@ var
   S: String;
   i: Integer;
   SendValue, GetValue: Int64;
-  SendDate, GetDate: TDate;
+  SendDate, GetInvDate, GetDate: TDate;
 begin
   DT1.Date:= Date;
   DT2.Date:= Date;
+  DT3.Date:= Date;
 
   SQLite.PretensionInfoLoad(PretensionID, i, MoneyValue, S, SendDate{tmp});
   MoneySendEdit.Text:= PriceIntToStr(MoneyValue);
   MoneyGetEdit.Text:= PriceIntToStr(MoneyValue);
 
-  SQLite.PretensionMoneyDatesLoad(PretensionID, SendValue, GetValue, SendDate, GetDate);
+  SQLite.PretensionMoneyDatesLoad(PretensionID, SendValue, GetValue, SendDate, GetInvDate, GetDate);
 
   MoneySendCheckBox.Checked:= SendDate>0;
   if SendDate>0 then
@@ -171,6 +196,9 @@ begin
     DT1.Date:= SendDate;
     MoneySendEdit.Text:= PriceIntToStr(SendValue);
   end;
+  MoneyGetInvCheckBox.Checked:= GetInvDate>0;
+  if GetInvDate>0 then
+    DT3.Date:= GetInvDate;
   MoneyGetCheckBox.Checked:= GetDate>0;
   if GetDate>0 then
   begin
@@ -179,7 +207,10 @@ begin
   end;
   MoneySendControlsEnabled;
   MoneyGetControlsEnabled;
+  MoneyGetInvControlsEnabled;
 end;
+
+
 
 end.
 

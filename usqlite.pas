@@ -226,7 +226,7 @@ type
                 out AUserNames, AUserTitles, ANotes: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
                 out AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                out ASendDates, AGetDates: TDateVector;
+                out ASendDates, AGetInvDates, AGetDates: TDateVector;
                 out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
                 out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
                 out AToUserDates: TDateVector; out AToUserNums: TStrVector;
@@ -257,10 +257,10 @@ type
                                      const AAddRecLogIDs, AAddMotorIDs, ADelRecLogIDs: TIntVector);
     procedure PretensionMoneyDatesLoad(const APretensionID: Integer;
                                      out ASendValue, AGetValue: Int64;
-                                     out ASendDate, AGetDate: TDate);
+                                     out ASendDate, AGetInvDate, AGetDate: TDate);
     procedure PretensionMoneyDatesUpdate(const APretensionID, AStatus: Integer;
                                    const ASendValue, AGetValue: Int64;
-                                   const ASendDate, AGetDate: TDate);
+                                   const ASendDate, AGetInvDate, AGetDate: TDate);
     procedure PretensionMoneyDatesDelete(const APretensionID: Integer);
     function PretensionStatusByLogIDLoad(const ALogID: Integer): Integer;
     function PretensionStatusLoad(const APretensionID: Integer): Integer;
@@ -1885,17 +1885,18 @@ end;
 
 procedure TSQLite.PretensionMoneyDatesLoad(const APretensionID: Integer;
                                      out ASendValue, AGetValue: Int64;
-                                     out ASendDate, AGetDate: TDate);
+                                     out ASendDate, AGetInvDate, AGetDate: TDate);
 begin
   ASendValue:= 0;
   ASendDate:= 0;
+  AGetInvDate:= 0;
   AGetValue:= 0;
   AGetDate:= 0;
 
   QSetQuery(FQuery);
   QSetSQL(
     'SELECT ' +
-      'MoneySendDate, MoneySendValue, MoneyGetDate, MoneyGetValue ' +
+      'MoneySendDate, MoneySendValue, MoneyGetInvDate, MoneyGetDate, MoneyGetValue ' +
     'FROM ' +
       'PRETENSIONS ' +
     'WHERE ' +
@@ -1908,6 +1909,7 @@ begin
     QFirst;
     ASendDate:= QFieldDT('MoneySendDate');
     ASendValue:= QFieldInt64('MoneySendValue');
+    AGetInvDate:= QFieldDT('MoneyGetInvDate');
     AGetDate:= QFieldDT('MoneyGetDate');
     AGetValue:= QFieldInt64('MoneyGetValue');
   end;
@@ -1916,7 +1918,7 @@ end;
 
 procedure TSQLite.PretensionMoneyDatesUpdate(const APretensionID, AStatus: Integer;
                                    const ASendValue, AGetValue: Int64;
-                                   const ASendDate, AGetDate: TDate);
+                                   const ASendDate, AGetInvDate, AGetDate: TDate);
 var
   S: String;
 begin
@@ -1924,10 +1926,11 @@ begin
     'UPDATE ' +
       'PRETENSIONS ' +
     'SET ' +
-    'MoneySendDate  = :MoneySendDate, ' +
-    'MoneySendValue = :MoneySendValue, ' +
-    'MoneyGetDate   = :MoneyGetDate, ' +
-    'MoneyGetValue  = :MoneyGetValue ';
+    'MoneySendDate   = :MoneySendDate, ' +
+    'MoneySendValue  = :MoneySendValue, ' +
+    'MoneyGetInvDate = :MoneyGetInvDate, ' +
+    'MoneyGetDate    = :MoneyGetDate, ' +
+    'MoneyGetValue   = :MoneyGetValue ';
   if AStatus>0 then
     S:= S +
       ', Status = :Status ';
@@ -1941,6 +1944,7 @@ begin
     QParamInt('PretensionID', APretensionID);
     QParamDT('MoneySendDate', ASendDate, ASendDate>0);
     QParamInt64('MoneySendValue', ASendValue, ASendValue>0);
+    QParamDT('MoneyGetInvDate', AGetInvDate, AGetInvDate>0);
     QParamDT('MoneyGetDate', AGetDate, AGetDate>0);
     QParamInt64('MoneyGetValue', AGetValue, AGetValue>0);
     QParamInt('Status', AStatus);
@@ -1953,7 +1957,7 @@ end;
 
 procedure TSQLite.PretensionMoneyDatesDelete(const APretensionID: Integer);
 begin
-  PretensionMoneyDatesUpdate(APretensionID, 2{согласовано}, 0, 0, 0, 0);
+  PretensionMoneyDatesUpdate(APretensionID, 2{согласовано}, 0, 0, 0, 0, 0);
 end;
 
 function TSQLite.PretensionStatusByLogIDLoad(const ALogID: Integer): Integer;
@@ -3007,7 +3011,7 @@ procedure TSQLite.PretensionListLoad(const AMotorNumLike: String;
                 out AUserNames, AUserTitles, ANotes: TStrVector;
                 out ANoticeDates: TDateVector; out ANoticeNums: TStrVector;
                 out AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                out ASendDates, AGetDates: TDateVector;
+                out ASendDates, AGetInvDates, AGetDates: TDateVector;
                 out AToBuilderDates: TDateVector; out AToBuilderNums: TStrVector;
                 out AFromBuilderDates: TDateVector; out AFromBuilderNums: TStrVector;
                 out AToUserDates: TDateVector; out AToUserNums: TStrVector;
@@ -3029,6 +3033,7 @@ begin
   ASendValues:= nil;
   AGetValues:= nil;
   ASendDates:= nil;
+  AGetInvDates:= nil;
   AGetDates:= nil;
   AToBuilderDates:= nil;
   AToBuilderNums:= nil;
@@ -3144,6 +3149,7 @@ begin
         VAppend(ASendValues, QFieldInt64('MoneySendValue'));
         VAppend(AGetValues, QFieldInt64('MoneyGetValue'));
         VAppend(ASendDates, QFieldDT('MoneySendDate'));
+        VAppend(AGetInvDates, QFieldDT('MoneyGetInvDate'));
         VAppend(AGetDates, QFieldDT('MoneyGetDate'));
 
         MAppend(AReclamationIDs, VCreateInt([QFieldInt('ReclamationID')]));

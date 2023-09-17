@@ -146,6 +146,7 @@ type
     FSendValues: TInt64Vector;
     FSendDates: TDateVector;
     FGetValues: TInt64Vector;
+    FGetInvDates: TDateVector;
     FGetDates: TDateVector;
     FStatuses: TStrVector;
     FNotes: TStrVector;
@@ -161,7 +162,7 @@ type
                            AToBuilders, AFromBuilders, AToUsers, ANotes, AStatuses: TStrVector;
                      const AMotors: TStrMatrix;
                      const AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                     const ASendDates, AGetDates: TDateVector;
+                     const ASendDates, AGetInvDates, AGetDates: TDateVector;
                      const AMileages: TIntMatrix);
   end;
 
@@ -187,16 +188,17 @@ begin
     {09} LETTER_COLUMN_WIDTH, // ответ потребителю
     {10} 100,                 // дата компенсации потребителю
     {11} 100,                 // сумма компенсации потребителю
-    {12} 110,                 // дата возмещения производителем
-    {13} 110,                 // сумма возмещения производителем
-    {14} NOTE_COLUMN_WIDTH,   // примечание
-    {15} STATUS_COLUMN_WIDTH  // статус
+    {12} 100,                 // дата выставления счета производителю
+    {13} 110,                 // дата возмещения производителем
+    {14} 110,                 // сумма возмещения производителем
+    {15} NOTE_COLUMN_WIDTH,   // примечание
+    {16} STATUS_COLUMN_WIDTH  // статус
   ]);
   Result:= VAdd(V1, V2);
 
   {indexes                0  1  2  3  4   5          }
-  FSelCols1:= VCreateInt([4, 7, 8, 9, 10, 14, 1]);
-  FSelCols2:= VCreateInt([6, 7, 8, 9, 13, 14, 2]);
+  FSelCols1:= VCreateInt([4, 7, 8, 9, 10, 15, 1]);
+  FSelCols2:= VCreateInt([6, 7, 8, 9, 14, 15, 2]);
   FMainCol1:= 4;
   FMainCol2:= 6;
   FMainColIndex:= 0;
@@ -215,10 +217,11 @@ begin
   FWriter.WriteText(1,  9, LETTER_NAMES[13], cbtOuter, True, True);
   FWriter.WriteText(1, 10, 'Дата компенсации Потребителю', cbtOuter, True, True);
   FWriter.WriteText(1, 11, 'Сумма компенсации Потребителю', cbtOuter, True, True);
-  FWriter.WriteText(1, 12, 'Дата возмещения Производителем', cbtOuter, True, True);
-  FWriter.WriteText(1, 13, 'Сумма возмещения Производителем', cbtOuter, True, True);
-  FWriter.WriteText(1, 14, 'Примечание по претензии', cbtOuter, True, True);
-  FWriter.WriteText(1, 15, 'Статус претензионной работы', cbtOuter, True, True);
+  FWriter.WriteText(1, 12, 'Дата выставления счета Производителю', cbtOuter, True, True);
+  FWriter.WriteText(1, 13, 'Дата возмещения Производителем', cbtOuter, True, True);
+  FWriter.WriteText(1, 14, 'Сумма возмещения Производителем', cbtOuter, True, True);
+  FWriter.WriteText(1, 15, 'Примечание по претензии', cbtOuter, True, True);
+  FWriter.WriteText(1, 16, 'Статус претензионной работы', cbtOuter, True, True);
 end;
 
 procedure TSheetPretension.DrawLine(const ANoticeIndex: Integer);
@@ -251,16 +254,17 @@ begin
   SetBackground(ANoticeIndex, FSelectedColIndex=4);
   DrawDate(R1, 10, R2, 10, FSendDates[i]);
   DrawMoney(R1, 11, R2, 11, FSendValues[i]);
-  DrawDate(R1, 12, R2, 12, FGetDates[i]);
-  DrawMoney(R1, 13, R2, 13, FGetValues[i]);
+  DrawDate(R1, 12, R2, 12, FGetInvDates[i]);
+  DrawDate(R1, 13, R2, 13, FGetDates[i]);
+  DrawMoney(R1, 14, R2, 14, FGetValues[i]);
 
   SetBackground(ANoticeIndex, FSelectedColIndex=5);
   FWriter.SetAlignment(haLeft, vaCenter);
-  FWriter.WriteText(R1, 14, R2, 14, FNotes[i], cbtOuter, True, True);
+  FWriter.WriteText(R1, 15, R2, 15, FNotes[i], cbtOuter, True, True);
 
   FWriter.SetBackgroundClear;
   FWriter.SetAlignment(haCenter, vaCenter);
-  FWriter.WriteText(R1, 15, R2, 15, FStatuses[i], cbtOuter);
+  FWriter.WriteText(R1, 16, R2, 16, FStatuses[i], cbtOuter);
   for j:= 0 to High(FMotors[i]) do
   begin
     R1:= FSelRows1[i] + j;
@@ -272,7 +276,7 @@ procedure TSheetPretension.Update(const AUsers, ANotices,
                            AToBuilders, AFromBuilders, AToUsers, ANotes, AStatuses: TStrVector;
                      const AMotors: TStrMatrix;
                      const AMoneyValues, ASendValues, AGetValues: TInt64Vector;
-                     const ASendDates, AGetDates: TDateVector;
+                     const ASendDates, AGetInvDates, AGetDates: TDateVector;
                      const AMileages: TIntMatrix);
 begin
   inherited Update(AUsers, ANotices, AMotors);
@@ -280,6 +284,7 @@ begin
   FMoneyValues:= AMoneyValues;
   FSendValues:= ASendValues;
   FGetValues:= AGetValues;
+  FGetInvDates:= AGetInvDates;
   FSendDates:= ASendDates;
   FGetDates:= AGetDates;
   FNotes:= ANotes;

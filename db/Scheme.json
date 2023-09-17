@@ -1365,6 +1365,7 @@
       "AnswerToUserNum",
       "MoneySendDate",
       "MoneySendValue",
+      "MoneyGetInvDate",
       "MoneyGetDate",
       "MoneyGetValue",
       "Status",
@@ -1664,6 +1665,30 @@
       "DefaultValue" : "",
       "Description" : [
         "Сумма компенсации потребителю"
+      ],
+      "ExistingValues" : [
+      ],
+      "ReferenceTo" : {
+        "TableName" : "",
+        "FieldName" : "",
+        "OnDelete" : 4,
+        "OnUpdate" : 4
+      },
+      "ReferenceFrom" : {
+        "TableNames" : [
+        ],
+        "FieldNames" : [
+        ]
+      }
+    },
+    "MoneyGetInvDate" : {
+      "FieldType" : "DATETIME",
+      "PrimaryKey" : false,
+      "Status" : false,
+      "NotNull" : false,
+      "DefaultValue" : "",
+      "Description" : [
+        "Дата выставления счета производителю"
       ],
       "ExistingValues" : [
       ],

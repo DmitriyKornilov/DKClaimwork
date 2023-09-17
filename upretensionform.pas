@@ -64,7 +64,7 @@ type
     NoticeDates, ToBuilderDates, FromBuilderDates, ToUserDates: TDateVector;
     NoticeNums, ToBuilderNums, FromBuilderNums, ToUserNums: TStrVector;
     MoneyValues, SendValues, GetValues: TInt64Vector;
-    SendDates, GetDates: TDateVector;
+    SendDates, GetInvDates, GetDates: TDateVector;
     Notes: TStrVector;
     Statuses: TIntVector;
 
@@ -407,7 +407,7 @@ begin
                 ViewTypeComboBox.ItemIndex, MileageTypeComboBox.ItemIndex,
                 PretensionIDs, Statuses, UserNames, UserTitles, Notes,
                 NoticeDates, NoticeNums,
-                MoneyValues, SendValues, GetValues, SendDates, GetDates,
+                MoneyValues, SendValues, GetValues, SendDates, GetInvDates, GetDates,
                 ToBuilderDates, ToBuilderNums,
                 FromBuilderDates, FromBuilderNums, ToUserDates, ToUserNums,
                 ReclamationIDs, LogIDs, Mileages, MotorNames, MotorNums, MotorDates);
@@ -423,7 +423,7 @@ begin
   Motors:= MMotorFullName(MotorNames, MotorNums, MotorDates);
 
   Sheet.Update(Users, Notices, ToBuilders, FromBuilders, ToUsers, Notes, StrStatuses,
-               Motors, MoneyValues, SendValues, GetValues, SendDates, GetDates, Mileages);
+               Motors, MoneyValues, SendValues, GetValues, SendDates, GetInvDates, GetDates, Mileages);
   Sheet.Draw;
 end;
 

@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS PRETENSIONS (
     AnswerToUserNum       TEXT    ,
     MoneySendDate         DATETIME,
     MoneySendValue        INTEGER ,
+    MoneyGetInvDate       DATETIME,
     MoneyGetDate          DATETIME,
     MoneyGetValue         INTEGER ,
     Status                INTEGER  NOT NULL DEFAULT 0,
