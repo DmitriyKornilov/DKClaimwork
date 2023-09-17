@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus,
   Buttons, StdCtrls, EditBtn, BCButton, DividerBevel, DateTimePicker,
 
-  DK_LCLStrRus, DK_HeapTrace, DK_Const, DK_Vector, DK_CtrlUtils,
+  DK_LCLStrRus, {DK_HeapTrace,} DK_Const, DK_Vector, DK_CtrlUtils,
   DK_StrUtils, DK_DateUtils,
 
   USQLite, UUtils,
@@ -139,7 +139,7 @@ implementation
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  HeapTraceOutputFile('trace.trc');
+  //HeapTraceOutputFile('trace.trc');
 
   //for normal form maximizing
   Height:= 300;
