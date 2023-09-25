@@ -1011,7 +1011,7 @@ begin
   if not SEmpty(AMotorNumLike) then
     S:= S + 'AND (UPPER(t2.MotorNum) LIKE :NumberLike) ';
 
-  S:= S + ' ORDER BY t2.MotorNum, t2.MotorDate, t3.MotorName ';
+  S:= S + ' ORDER BY t4.NoticeFromUserDate, t4.NoticeFromUserNum, t2.MotorNum, t2.MotorDate, t3.MotorName ';
 
 
   QSetQuery(FQuery);
@@ -2145,6 +2145,7 @@ begin
     'WHERE ' +
       SqlIN('t1','LogID', Length(ALogIDs)) +
     'ORDER BY '+
+      't4.' + SqlEsc(NoticeDateField) + ', t4.' + SqlEsc(NoticeNumField) + ', ' +
       't2.MotorNum, t2.MotorDate, t3.MotorName ';
 
   QSetQuery(FQuery);

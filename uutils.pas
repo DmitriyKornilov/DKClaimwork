@@ -1661,6 +1661,7 @@ begin
       FileName:= FileName + AFileExtension;
     D.FileName:= FileName;
     if not D.Execute then Exit;
+    FileName:= D.FileName;
     if not SFind(FileName, AFileExtension, False) then
       FileName:= FileName + AFileExtension;
     Result:= CopyFile(ASrcFileName, FileName,
