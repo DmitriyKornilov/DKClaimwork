@@ -409,7 +409,7 @@ procedure TSQLite.MotorIDsAndNamesLoad(AComboBox: TComboBox;
                                    out AIDs: TIntVector;
                                    const AKeyValueNotZero: Boolean = True);
 begin
-  LoadIDsAndNames(AComboBox, AIDs,
+  KeyPickLoad(AComboBox, AIDs,
                   'MOTORNAMES', 'MotorNameID', 'MotorName', 'MotorNameID',
                   AKeyValueNotZero, 'ВСЕ НАИМЕНОВАНИЯ');
 end;
@@ -418,7 +418,7 @@ procedure TSQLite.LocationIDsAndNamesLoad(AComboBox: TComboBox;
                                    out AIDs: TIntVector;
                                    const AKeyValueNotZero: Boolean = True);
 begin
-  LoadIDsAndNames(AComboBox, AIDs,
+  KeyPickLoad(AComboBox, AIDs,
                   'LOCATIONS', 'LocationID', 'LocationName', 'LocationName',
                   AKeyValueNotZero, 'ВСЕ НАИМЕНОВАНИЯ');
 end;
@@ -427,7 +427,7 @@ procedure TSQLite.UserIDsAndNamesLoad(AComboBox: TComboBox;
                                    out AIDs: TIntVector;
                                    const AKeyValueNotZero: Boolean = True);
 begin
-  LoadIDsAndNames(AComboBox, AIDs,
+  KeyPickLoad(AComboBox, AIDs,
                   'USERS', 'UserID', 'UserNameI', 'UserNameI',
                   AKeyValueNotZero, 'ВСЕ НАИМЕНОВАНИЯ');
 end;
